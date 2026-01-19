@@ -1,0 +1,103 @@
+name: abs-core-cli
+version: "0.1.0"
+description: "Reference CLI for ABS Core Runtime - The fastest way to adopt Governance-as-Code."
+bin: "abs"
+
+globals:
+  - name: --verbose
+    alias: -v
+    type: boolean
+    description: "Enable debug logs"
+  - name: --json
+    type: boolean
+    description: "Output results as JSON (essential for CI/CD pipes)"
+
+commands:
+  # -----------------------------------------------------------------------------
+  # 1. RUNTIME HOSTING
+  # -----------------------------------------------------------------------------
+  - name: serve
+    summary: "Starts the ABS Core runtime server locally."
+    description: |
+      Initializes the HTTP API and the background Policy Engine.
+      Default mode uses SQLite (local) and Mock Provider (zero cost).
+    flags:
+      - name: --port
+        alias: -p
+        default: 3000
+        description: "Port to listen on"
+      - name: --provider
+        default: "mock"
+        options: ["mock", "openai", "gemini", "anthropic"]
+        description: "LLM Provider for reasoning steps"
+      - name: --db
+        default: "./abs_core.db"
+        description: "Path to SQLite database"
+    examples:
+      - "abs serve"
+      - "abs serve --port 8080 --provider openai"
+
+  # -----------------------------------------------------------------------------
+  # 2. SIMULATION & TESTING (The 'Lab Mode')
+  # -----------------------------------------------------------------------------
+  - name: simulate
+    summary: "Simulates an event passing through the Policy Gate."
+    description: |
+      Sends a payload to the runtime (in-memory or via API) and returns the 
+      Governance Decision. Perfect for robust testing without creating side-effects.
+    args:
+      - name: event_type
+        required: true
+        description: "The event signature (e.g. 'ticket.created')"
+    flags:
+      - name: --payload
+        alias: -d
+        description: "JSON string payload"
+      - name: --file
+        alias: -f
+        description: "Path to JSON file containing the payload"
+      - name: --dry-run
+        type: boolean
+        default: true
+        description: "If true, does not persist logs permanently (ephemeral lab mode)"
+    output_schema:
+      decision: "ALLOW | DENY"
+      reason: "String explanation"
+      policy_id: "String"
+      latency_ms: "Number"
+    examples:
+      - "abs simulate ticket.created --file ./events/scenario_A.json"
+      - 'abs simulate payment.processed -d ''{"amount": 1000}'''
+
+  # -----------------------------------------------------------------------------
+  # 3. OBSERVABILITY
+  # -----------------------------------------------------------------------------
+  - name: logs
+    summary: "Inspects the immutable Decision Log."
+    description: |
+      Queries the local (or connected) database for decision trails.
+      Essential for 'Why did this happen?' debugging.
+    flags:
+      - name: --limit
+        default: 10
+      - name: --status
+        options: ["ALL", "ALLOW", "DENY"]
+      - name: --correlation-id
+        description: "Trace specific request chain"
+    examples:
+      - "abs logs --status DENY"
+      - "abs logs --limit 1 --json"
+
+  # -----------------------------------------------------------------------------
+  # 4. POLICY MANAGEMENT (Dev Experience)
+  # -----------------------------------------------------------------------------
+  - name: policies
+    summary: "Manage and test governance policies."
+    subcommands:
+      - name: check
+        summary: "Static analysis of policy files."
+      - name: test
+        summary: "Run policies against fixture data."
+        flags:
+          - name: --fixtures
+            default: "./tests/fixtures"

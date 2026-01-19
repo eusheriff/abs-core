@@ -43,33 +43,52 @@ graph LR
 
 Note: The **Decision Log** happens *strictly before* Execution. If the DB insert fails, the action is never attempted.
 
-## Quick Start (Zero Config)
-Runs in mock mode by default. No API keys required.
+## Quick Start (CLI Lab)
+The fastest way to test the governance loop. No API keys required (runs in mock mode).
 
-### 1. Install & Run
+### 1. Install & Simulate
 ```bash
-git clone https://github.com/oconnector/abs-core.git
-cd abs-core
+# Install dependencies
 npm install
+
+# Start the runtime (in terminal 1)
 npm run dev
-# Server running at http://localhost:3000
+
+# Simulate an event (in terminal 2)
+# This sends a payload through the Policy Gate -> Decision Log -> Execution
+npm run abs -- simulate ticket.created -d '{"text": "Urgent refund needed"}'
 ```
 
-### 2. Simulate Event
+### Installation in Other Projects
+
+You can use the CLI directly in other projects without publishing to npm:
+
+**Option 1: Run via npx (No Install)**
 ```bash
-curl -X POST http://localhost:3000/v1/events \
-  -H "Content-Type: application/json" \
-  -d '{
-    "event_id": "evt_001",
-    "event_type": "ticket.created",
-    "occurred_at": "2026-01-19T14:00:00Z",
-    "tenant_id": "demo",
-    "payload": { "text": "I need enterprise support immediately." }
-  }'
+npx github:eusheriff/abs-core simulate ticket.created -d '{"text": "Hello"}'
 ```
 
-The system will use the `MockProvider` and `SimplePolicyEngine`.
-Check the console to see: `🛡️ Policy: ALLOW (notify_sales)`.
+**Option 2: Install as Dependency**
+```bash
+npm install -g github:eusheriff/abs-core
+# Then run anywhere:
+abs --help
+```
+
+### 2. Inspect the Decision Log
+```bash
+# See why a decision was made
+npm run abs -- logs --limit 1
+```
+
+You should see:
+```text
+┌──────────────────────────────────────┬────────────────┬──────────┬───────────┬──────────────────────┐
+│ ID                                   │ Event          │ Decision │ Latency   │ Time                 │
+├──────────────────────────────────────┼────────────────┼──────────┼───────────┼──────────────────────┤
+│ 8bbe99ee-6412-4b19-b7e8-096837567d26 │ ticket.created │ allow    │ 45ms      │ 2026-01-19T17...     │
+└──────────────────────────────────────┴────────────────┴──────────┴───────────┴──────────────────────┘
+```
 
 ---
 

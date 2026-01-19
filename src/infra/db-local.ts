@@ -1,4 +1,4 @@
-import Database from 'better-sqlite3';
+import type Database from 'better-sqlite3';
 import path from 'path';
 import { DatabaseAdapter } from './db-adapter';
 
@@ -14,7 +14,10 @@ export class LocalDBAdapter implements DatabaseAdapter {
         if (this.db) return;
         const fullPath = path.resolve(process.cwd(), this.dbPath);
         console.log(`📦 Initializing Local DB at ${fullPath}`);
-        this.db = new Database(fullPath); // Sync instantiation
+        
+        // Lazy load to avoid crash if not needed (e.g. CLI client mode)
+        const { default: DatabaseConstructor } = await import('better-sqlite3');
+        this.db = new DatabaseConstructor(fullPath); // Sync instantiation
         return Promise.resolve();
     }
 

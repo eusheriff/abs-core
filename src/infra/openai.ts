@@ -1,10 +1,7 @@
 import OpenAI from 'openai';
 import { DecisionProposal } from '../core/schemas';
+import { DecisionProvider } from '../core/types';
 
-// Interface for any decision provider
-export interface DecisionProvider {
-  propose(context: any, currentState: string): Promise<Partial<DecisionProposal>>;
-}
 
 export class OpenAIDecisionProvider implements DecisionProvider {
   private client: OpenAI | null = null;

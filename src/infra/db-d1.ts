@@ -3,7 +3,7 @@ import { DatabaseAdapter } from './db-adapter';
 // Cloudflare D1 Type Definition Stub
 interface D1Database {
     prepare(query: string): D1PreparedStatement;
-    exec(query: string): Promise<void>;
+    exec(query: string): Promise<any>;
 }
 interface D1PreparedStatement {
     bind(...values: any[]): D1PreparedStatement;
@@ -24,7 +24,7 @@ export class D1Adapter implements DatabaseAdapter {
     }
 
     async exec(query: string): Promise<void> {
-        return this.db.exec(query);
+        await this.db.exec(query);
     }
 
     async run(query: string, ...params: any[]): Promise<{ success: boolean }> {

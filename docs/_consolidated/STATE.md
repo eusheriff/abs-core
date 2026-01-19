@@ -12,6 +12,7 @@
 | **Maintainer** | OConnector Technology |
 | **Autor** | Rodrigo Gomes |
 | **Início** | 2026-01-19 |
+| **Deploy** | [Live URL](https://abs-core.dev-oconnector.workers.dev) |
 
 ## Visão
 
@@ -36,5 +37,6 @@ Priorizamos a confiabilidade da decisão sobre a inteligência do modelo. Autono
 ## Decisões Fixas
 
 - **License**: Apache 2.0
+- **Strategy**: CLI-First (Developer Adoption & CI/CD proof).
 - **Policy**: Invariante (Hard Gate).
 - **Posicionamento**: Engenharia > Marketing.

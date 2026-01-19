@@ -2,27 +2,31 @@
 
 > Registro de mudanças, comandos e validações.
 
-## 2026-01-19 — Sessão 3.6: Cloudflare D1 Global Deploy
+## 2026-01-19 — Sessão 3.7: Identity & Philosophy (Pipeline Execution)
 
 ### Contexto
-- Escalabilidade global exigida pelo usuário.
-- Node.js (better-sqlite3) incompatível com Edge Workers.
+- Necessidade de diferenciar o projeto de satélites/linguagens (ABS collision).
+- Necessidade de blindar contra feature creep e diluição conceitual.
 
-### Ações Realizadas
-- [x] **Architecture**: Migração para "Dual-Runtime Adapter".
-  - Local: `LocalDBAdapter` (better-sqlite3).
-  - Cloud: `D1Adapter` (Cloudflare D1).
-- [x] **Refactor**: Todas as chamadas de banco agora são assíncronas (`await`).
-- [x] **Cloudflare**: 
-  - Banco D1 `abs-core-db` criado.
-  - Schema migrado.
-  - Deploy realizado com sucesso.
+### Ações Realizadas (Pipeline)
+- [x] **Philosophy**: Criado `PROJECT_PHILOSOPHY.md`.
+  - Definido "Code > Model".
+  - Bloqueio explícito de "Bypass Policy".
+- [x] **Project Identity**: `PROJECT_PHILOSOPHY.md` e `GLOSSARY.md` criados.
+- [x] **CLI-First**: Implementado `abs` CLI com comandos `serve`, `simulate`, `logs`.
+  - Refatorado `server.ts`, `db-local.ts` (lazy load), `events.ts` (fix `db.run`).
+  - Spec definida em `docs/specs/CLI_RUNTIME_v1.yaml`.
+  - `README.md` atualizado com o novo workflow.
+  - Desambiguação de "ABS" (Autonomous Business Systems).
+- [x] **Positioning**: Atualizado `README.md`.
+  - Definição: "Reference Runtime".
+  - Links para Filosofia e Glossário.
 
 ### Estado Final
-- **Local**: `npm run dev` (SQLite) ✅
-- **Global**: `https://abs-core.dev-oconnector.workers.dev` (D1) ✅
-- **URL Dashboard**: `https://abs-core.dev-oconnector.workers.dev/dashboard`
+- **Identidade**: Sólida.
+- **Risco de Diluição**: Mitigado via documentação "constitucional".
+- **Repo**: Sincronizado com GitHub.
 
 ### Próximos Passos (User)
-- Acessar link global.
-- Testar envio de evento via cURL contra URL global.
+- Postar no LinkedIn os 3 artigos (Drafts).
+- Aguardar feedback da comunidade (Issues "filosóficas").

@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { DecisionProvider } from './openai'; // Reusing interface
+import { DecisionProvider } from '../core/types';
 import { DecisionProposal } from '../core/schemas';
 
 export class GeminiDecisionProvider implements DecisionProvider {

@@ -61,6 +61,7 @@ events.post('/', async (c) => {
     // Only ask LLM if we are not in a final state
     let proposal = null;
     if (currentState !== 'WON' && currentState !== 'LOST') {
+       const provider = getProvider();
        proposal = await provider.propose(event.payload, currentState);
     }
 
@@ -86,12 +87,17 @@ events.post('/', async (c) => {
         })
     };
 
-    const stmt = db.prepare(`
+    await db.run(`
         INSERT INTO decision_logs (decision_id, tenant_id, event_id, correlation_id, timestamp, full_log_json)
-        VALUES (@decision_id, @tenant_id, @event_id, @correlation_id, @timestamp, @full_log_json)
-    `);
-    
-    stmt.run(logEntry);
+        VALUES (?, ?, ?, ?, ?, ?)
+    `, 
+        logEntry.decision_id, 
+        logEntry.tenant_id, 
+        logEntry.event_id, 
+        logEntry.correlation_id, 
+        logEntry.timestamp, 
+        logEntry.full_log_json
+    );
 
     // 6. Response
     return c.json({

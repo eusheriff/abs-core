@@ -39,24 +39,23 @@ app.route('/v1/events', eventsRouter);
 
 export default {
   fetch: async (request: Request, env: Bindings, ctx: ExecutionContext) => {
-    // Inject D1 Adapter per request (env is available here)
-    setDB(new D1Adapter(env.DB));
-    
-    // Pass env to process.env (Mocking for shared logic if needed, 
-    // though Hono usually passes it via c.env)
-    // We might need to adjust providers to look at c.env instead of process.env
-    // For now, let's rely on Hono context passing or global injection
-    
-    // Quick Hack: Polyfill process.env for the shared logic that relies on it
-    // CAUTION: This is strictly for the shared code compatibility
-    (globalThis as any).process = { 
-        env: { 
-            ...env, 
-            ...process?.env,
-            EXECUTION_WEBHOOK_URL: 'https://example.com/webhook' // Mock for now
-        } 
-    };
+    try {
+        // Inject D1 Adapter per request
+        setDB(new D1Adapter(env.DB));
+        
+        // Polyfill process.env for shared logic
+        const currentEnv = process?.env || {};
+        (globalThis as any).process = { 
+            env: { 
+                ...currentEnv,
+                ...env, 
+                EXECUTION_WEBHOOK_URL: 'mock-webhook'
+            } 
+        };
 
-    return app.fetch(request, env, ctx);
+        return await app.fetch(request, env, ctx);
+    } catch (err: any) {
+        return new Response(`Worker Error: ${err.message}\n${err.stack}`, { status: 500 });
+    }
   }
 };

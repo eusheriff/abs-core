@@ -1,13 +1,11 @@
-import { DecisionProvider } from '../core/types';
-import { DecisionProposal } from '../core/schemas';
-
-export class MockDecisionProvider implements DecisionProvider {
-    async propose(event: any, currentState: string): Promise<Partial<DecisionProposal>> {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MockDecisionProvider = void 0;
+class MockDecisionProvider {
+    async propose(event, currentState) {
         console.log('🤖 MockProvider: Generating deterministic proposal...');
-        
         // Deterministic logic for QuickStart demo
         const isSales = event.payload?.text?.toLowerCase().includes('enterprise');
-        
         return {
             recommended_action: isSales ? 'notify_sales' : 'log_info',
             confidence: 0.95,
@@ -19,3 +17,4 @@ export class MockDecisionProvider implements DecisionProvider {
         };
     }
 }
+exports.MockDecisionProvider = MockDecisionProvider;
