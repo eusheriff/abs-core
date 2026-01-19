@@ -27,6 +27,16 @@
 - **Risco de Diluição**: Mitigado via documentação "constitucional".
 - **Repo**: Sincronizado com GitHub.
 
+### Ações Realizadas (Pipeline)
+- [x] **Monorepo Refactor**: Reestruturado para `packages/{core,scan,cli}`.
+- [x] **ABS Scan MVP**: Implementado scanner estático (regras 001, 002).
+- [x] **Unified CLI**: Criado comando `abs` que orquestra `scan` e `serve`.
+- [x] **Architecture**: Atualizado `ARCHITECTURE.md` e definidos Contratos de Logs.
+
+### Estado Final
+- **Estrutura**: Pronta para escalar (Core vs Scan).
+- **Scanner**: Detecta violações de governança em código legado.
+
 ### Próximos Passos (User)
-- Postar no LinkedIn os 3 artigos (Drafts).
-- Aguardar feedback da comunidade (Issues "filosóficas").
+- Testar `abs scan` em repositórios reais.
+- Expandir regras de detecção.

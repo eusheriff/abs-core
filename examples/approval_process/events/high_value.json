@@ -1,0 +1,4 @@
+{
+  "text": "Enterprise Refund request for Order #999 amount $1000",
+  "meta": { "amount": 1000, "segment": "enterprise" }
+}

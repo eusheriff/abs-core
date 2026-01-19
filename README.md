@@ -5,6 +5,9 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Audit-PASSED-green)](docs/AUDIT_MASTER_v0.5.md)
 
+> **ABS Core is not an agent framework.**
+> It is a governed runtime that prevents probabilistic models from executing unbounded actions.
+
 **abs-core** is an open-source **reference runtime** designed to govern autonomous business decisions.
 It acts as a safety middleware between your LLM (Reasoning) and your Execution Layer (Actions).
 

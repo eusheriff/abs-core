@@ -8,7 +8,7 @@
 |-------|-------|
 | **Nome** | oconnector-abs-core |
 | **Estratégia** | Open Core (Apache-2.0 + componentes comerciais) |
-| **Estágio** | v0.5.0 Audited Release (OSS Ready) |
+| **Estágio** | v0.5.0 Monorepo + Scan MVP |
 | **Maintainer** | OConnector Technology |
 | **Autor** | Rodrigo Gomes |
 | **Início** | 2026-01-19 |
@@ -21,10 +21,9 @@ Priorizamos a confiabilidade da decisão sobre a inteligência do modelo. Autono
 
 ## Estado Atual
 
-- **Fase**: v0.5-audited (Stable).
-- **Docs**: README limpo, Security Posture definida.
-- **Runtime**: QuickStart Mock Default (Zero Config).
-- **Integrity**: Policy Gate Ativo.
+- **Fase**: v0.5 (Monorepo Refactor).
+- **Modules**: Core (Runtime), Scan (Static Analysis), CLI (Unified).
+- **Scanner**: MVP com detecção de execução direta e logs ausentes.
 
 ## Roadmap
 
