@@ -8,7 +8,7 @@
 |-------|-------|
 | **Nome** | oconnector-abs-core |
 | **Estratégia** | Open Core (Apache-2.0 + componentes comerciais) |
-| **Estágio** | v0.3.1 Stable (Multi-Provider Support) |
+| **Estágio** | v0.3.2 Stable (Multi-Key Gemini) |
 | **Maintainer** | OConnector Technology |
 | **Autor** | Rodrigo Gomes |
 | **Início** | 2026-01-19 |
@@ -20,8 +20,8 @@ Priorizamos a confiabilidade da decisão sobre a inteligência do modelo. Autono
 
 ## Estado Atual
 
-- **Fase**: v0.3.1 Concluída.
-- **Status**: API suporta OpenAI (`OPENAI_API_KEY`) e Google Gemini (`GEMINI_API_KEY`). Seleção via `LLM_PROVIDER`.
+- **Fase**: v0.3.2 Concluída.
+- **Status**: Suporte a Load Balancing aleatório de chaves Gemini para evitar rate limits.
 - **Bloqueios**: Nenhum.
 
 ## Roadmap
@@ -32,17 +32,18 @@ Priorizamos a confiabilidade da decisão sobre a inteligência do modelo. Autono
 | v0.2 | Framework mínimo de orquestração (Runtime) | ✅ Concluído |
 | v0.3 | Integração (API, SQLite, OpenAI) | ✅ Concluído |
 | v0.3.1 | Suporte a Google Gemini | ✅ Concluído |
+| v0.3.2 | Multi-Key Load Balancing (Gemini) | ✅ Concluído |
 | v1.0 | Padrão de mercado para ABS Core | ⏳ Planejado |
 
 ## Próximos Passos (Evolução)
 
-1. [ ] Testes E2E com providers reais (Opcional - custo $$$)
-2. [ ] Dashboard simples para visualizar `decision_logs`
-3. [ ] Implementar sistema de Policy real (OPA)
+1. [ ] Dashboard de Monitoramento (v0.4)
+2. [ ] Webhook Egress Adapter (para executar decisões)
+3. [ ] Testes de Carga
 
 ## Decisões Fixas
 
 - Framework API: Hono
 - DB: SQLite
-- Providers: OpenAI, Gemini
+- Providers: OpenAI, Gemini (Multi-key)
 - Config: dotenv

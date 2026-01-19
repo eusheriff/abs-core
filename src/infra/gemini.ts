@@ -34,6 +34,7 @@ export class GeminiDecisionProvider implements DecisionProvider {
     const genAI = this.getClient();
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
+    const prompt = `
       You are the Decision Engine of an Autonomous Business System.
       Current State: ${currentState}
       Context: ${JSON.stringify(context)}
