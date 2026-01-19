@@ -1,97 +1,81 @@
-# ABS Core 🛡️
+# ABS Core
 > **Autonomous Business System (Runtime)**
->
-> *Autonomia com responsabilidade. Decisões de IA governadas por políticas auditáveis.*
+> `v0.5-audited`
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Audit-PASSED-green)](docs/AUDIT_MASTER_v0.5.md)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178c6)](https://www.typescriptlang.org/)
 
-**abs-core** é um runtime open-source projetado para orquestrar processos de negócio autônomos com **segurança e governança** em primeiro lugar. Ele atua como um "middleware de responsabilidade" entre seu modelo de IA (LLM) e suas execuções (APIs/Webhooks).
+**abs-core** is an open-source runtime designed to govern autonomous business decisions.
+It acts as a safety middleware between your LLM (Reasoning) and your Execution Layer (Actions).
 
----
+## What is ABS?
+*   A runtime that enforces **Decision Integrity**.
+*   The LLM **Proposes** actions.
+*   The Policy Engine **Decides** (Allow/Deny).
+*   The System **Logs** (Immutable Audit Trail).
+*   Only then, the System **Executes**.
 
-## 🛑 O Problema
-Ligar um LLM diretamente em uma API de execução (`LLM -> Tool Call -> Action`) é perigoso.
-- **Alucinações** viram bugs em produção.
-- **Prompt Injection** vira vazamento de dados.
-- **Falta de Logs** estruturados torna impossível auditar "por que a IA fez isso?".
+## Non-Goals
+To avoid confusion, this project is explicitly:
+*   **NOT** a General Purpose Agent Framework (like AutoGPT).
+*   **NOT** a Chatbot Framework.
+*   **NOT** Robotic Process Automation (RPA).
+*   **NOT** a promise of "Full Autonomy" without supervision.
 
-## ✅ A Solução
-O ABS Core impõe um ciclo de vida estrito para cada decisão:
+## Architecture (The Governance Loop)
 
 ```mermaid
 graph LR
-    A[Event] --> B(LLM Provider)
+    A[Event] --> B(LLM Proposal)
     B --> C{Policy Gate}
-    C -- DENY --> D[Log Only]
-    C -- ALLOW --> E[Execute Action]
-    E --> F[Audit Log]
+    C -- DENY --> D[Stop & Log]
+    C -- ALLOW --> E[Decision Log]
+    E --> F[Execute Action]
+    F --> G[Execution Log]
 ```
 
-1.  **Event**: Entrada de dados.
-2.  **Proposal**: LLM sugere uma ação (mas não executa).
-3.  **Policy**: Código determinístico valida a sugestão (Invariantes).
-4.  **Log**: Decisão gravada imutavelmente.
-5.  **Execute**: Webhook/Adapter disparado apenas se aprovado.
+Note: The **Decision Log** happens *strictly before* Execution. If the DB insert fails, the action is never attempted.
 
----
+## Quick Start (Zero Config)
+Runs in mock mode by default. No API keys required.
 
-## 🚀 Quick Start (5 min)
-
-### 1. Clone & Install
+### 1. Install & Run
 ```bash
 git clone https://github.com/oconnector/abs-core.git
 cd abs-core
 npm install
-```
-
-### 2. Configure
-```bash
-cp .env.example .env
-# Adicione sua OPENAI_API_KEY ou configure LLM_PROVIDER=gemini
-```
-
-### 3. Run Dev Server
-```bash
 npm run dev
 # Server running at http://localhost:3000
 ```
 
-### 4. Simule um Evento
+### 2. Simulate Event
 ```bash
-# Enviar um evento de 'mensagem recebida'
 curl -X POST http://localhost:3000/v1/events \
   -H "Content-Type: application/json" \
   -d '{
-    "event_id": "evt_123",
-    "event_type": "message.received",
-    "payload": { "text": "Quero comprar o plano Enterprise agora!" },
+    "event_id": "evt_001",
+    "event_type": "ticket.created",
+    "occurred_at": "2026-01-19T14:00:00Z",
     "tenant_id": "demo",
-    "timestamp": "2026-01-19T10:00:00Z"
+    "payload": { "text": "I need enterprise support immediately." }
   }'
 ```
 
-### 5. Check Dashboard
-Acesse `http://localhost:3000/dashboard` para ver a decisão logada e o status de execução.
+The system will use the `MockProvider` and `SimplePolicyEngine`.
+Check the console to see: `🛡️ Policy: ALLOW (notify_sales)`.
 
 ---
 
-## 🏛️ Governança & Segurança
+## Security Posture
+We follow the **OWASP Top 10 for LLM Applications**.
+*   **LLM01 (Prompt Injection)**: Inputs are sanitized and strictly delimited.
+*   **LLM08 (Excessive Agency)**: Actions are whitelisted in the Policy Engine.
 
-Este projeto segue princípios rígidos de **Decision Integrity**:
-- [INVARIANTS.md](INVARIANTS.md): Regras inegociáveis do runtime.
-- [SECURITY.md](SECURITY.md): Postura contra OWASP LLM Top 10.
-- [AUDIT_MASTER.md](docs/AUDIT_MASTER_v0.5.md): Relatório da última auditoria técnica.
+See [SECURITY.md](SECURITY.md) for full details.
 
-## 🤝 Contribuição
+## Governance
+This runtime enforces invariants that cannot be bypassed by the LLM.
+See [INVARIANTS.md](INVARIANTS.md).
 
-PRs são bem-vindos, mas devem respeitar os Invariantes de Integridade.
-Leia [CONTRIBUTING.md](CONTRIBUTING.md) antes de começar.
-
-## 📜 Licença
-
-Apache 2.0 - Veja [LICENSE](LICENSE) para detalhes.
-
----
-*Construído com TypeScript, Hono, SQLite e Zod.*
+## License
+Apache 2.0

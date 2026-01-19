@@ -8,7 +8,7 @@
 |-------|-------|
 | **Nome** | oconnector-abs-core |
 | **Estratégia** | Open Core (Apache-2.0 + componentes comerciais) |
-| **Estágio** | v0.5.0 Audited (Decision Integrity Compliant) |
+| **Estágio** | v1.0.0 Release Candidate (OSS Launch Ready) |
 | **Maintainer** | OConnector Technology |
 | **Autor** | Rodrigo Gomes |
 | **Início** | 2026-01-19 |
@@ -20,35 +20,27 @@ Priorizamos a confiabilidade da decisão sobre a inteligência do modelo. Autono
 
 ## Estado Atual
 
-- **Fase**: v0.5.0 Master Audit Compliant.
-- **Status**: Sistema Seguro. Policy Gate Ativo.
-- **Invariantes**: "Execução requer Policy=ALLOW" garantido por código.
-- **Bloqueios**: Nenhum.
+- **Fase**: v1.0.0 Ready for Launch.
+- **Docs**: README, LICENSE, SECURITY, INVARIANTS criados.
+- **Social**: Drafts de LinkedIn prontos em `docs/launch/`.
+- **Tech**: Sistema estável, auditado (v0.5 Master Audit) e com Policy Gate ativo.
 
 ## Roadmap
 
 | Versão | Goal | Status |
 |--------|------|--------|
-| v0.1 | Publicar especificações e contratos base | ✅ Concluído |
-| v0.2 | Framework mínimo de orquestração (Runtime) | ✅ Concluído |
-| v0.3 | Integração (API, SQLite, OpenAI) | ✅ Concluído |
-| v0.3.1 | Suporte a Google Gemini | ✅ Concluído |
-| v0.3.2 | Multi-Key Load Balancing (Gemini) | ✅ Concluído |
-| v0.4 | Dashboard de Observabilidade | ✅ Concluído |
-| v0.5 | Camada de Execução (Webhooks) | ✅ Concluído |
 | v0.5+ | Master Audit (Integrity & Security) | ✅ Concluído |
-| v0.6 | Hardening & AuthZ | ⏳ Planejado |
+| v1.0 | **OSS Launch (GitHub + LinkedIn)** | ✅ Pronto |
+| v1.1 | Community Feedback Loop | ⏳ Aguardando |
 
-## Próximos Passos (Evolução)
+## Próximos Passos (Pós-Launch)
 
-1. [ ] Testes de Regressão Automatizados
-2. [ ] AuthZ no Dashboard
-3. [ ] Cloudflare D1 Migration
+1. [ ] Publicar no GitHub (git push).
+2. [ ] Postar L1 no LinkedIn.
+3. [ ] Monitorar Issues/PRs.
 
 ## Decisões Fixas
 
-- Framework API: Hono
-- UI: Hono HTML (Server-Side)
-- DB: SQLite (com schema migration)
-- Providers: OpenAI, Gemini (Multi-key)
-- **Governance**: Hard-coded Policy Gate (v0.5)
+- **License**: Apache 2.0
+- **Governance**: Policy Gate Obrigatório.
+- **Communication**: "No Hype". Foco em Engenharia.

@@ -2,22 +2,32 @@ import { Hono } from 'hono';
 import { v4 as uuidv4 } from 'uuid';
 import { EventEnvelopeSchema } from '../../core/schemas';
 import { getDB } from '../../infra/db';
-import { OpenAIDecisionProvider, DecisionProvider } from '../../infra/openai';
+import { OpenAIDecisionProvider } from '../../infra/openai';
 import { GeminiDecisionProvider } from '../../infra/gemini';
+import { MockDecisionProvider } from '../../infra/mock';
 import { leadLifecycleMachine } from '../../core/machine';
 import { createActor } from 'xstate';
 
 const events = new Hono();
 
 // Provider Factory
-const getProvider = (): DecisionProvider => {
-  if (process.env.LLM_PROVIDER === 'gemini') {
-    const keys = (process.env.GEMINI_KEYS || process.env.GEMINI_API_KEY || '').split(',');
-    console.log('🤖 Using Gemini Provider (Multi-Key Support)');
-    return new GeminiDecisionProvider(keys);
+const getProvider = () => {
+  const type = process.env.LLM_PROVIDER || 'mock'; // Default to mock for zero-config start
+  
+  if (type === 'gemini') {
+      const keys = (process.env.GEMINI_KEYS || process.env.GEMINI_API_KEY || '').split(',').filter(Boolean);
+      console.log('🤖 Using Gemini Provider (Multi-Key Support)');
+      return new GeminiDecisionProvider(keys);
   }
-  console.log('🤖 Using OpenAI Provider');
-  return new OpenAIDecisionProvider(process.env.OPENAI_API_KEY || 'sk-placeholder');
+  
+  if (type === 'openai') {
+      console.log('🤖 Using OpenAI Provider');
+      return new OpenAIDecisionProvider(process.env.OPENAI_API_KEY || 'sk-placeholder');
+  }
+
+  // Fallback / Default
+  console.log('⚠️ Using Mock Decision Provider (No LLM keys configured)');
+  return new MockDecisionProvider();
 };
 
 const provider = getProvider();
