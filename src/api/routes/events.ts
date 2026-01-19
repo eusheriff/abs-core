@@ -12,8 +12,9 @@ const events = new Hono();
 // Provider Factory
 const getProvider = (): DecisionProvider => {
   if (process.env.LLM_PROVIDER === 'gemini') {
-    console.log('🤖 Using Gemini Provider');
-    return new GeminiDecisionProvider(process.env.GEMINI_API_KEY || '');
+    const keys = (process.env.GEMINI_KEYS || process.env.GEMINI_API_KEY || '').split(',');
+    console.log('🤖 Using Gemini Provider (Multi-Key Support)');
+    return new GeminiDecisionProvider(keys);
   }
   console.log('🤖 Using OpenAI Provider');
   return new OpenAIDecisionProvider(process.env.OPENAI_API_KEY || 'sk-placeholder');

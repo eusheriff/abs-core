@@ -4,34 +4,22 @@
 
 ---
 
-## 2026-01-19 — Sessão 3.1: Gemini Integration
+## 2026-01-19 — Sessão 3.2: Multi-Key Load Balancing
 
 ### Contexto
-- Adicionar suporte ao Google Gemini como alternativa à OpenAI.
+- Evitar Rate Limits no Gemini usando múltiplas chaves.
 
 ### Ações Realizadas
-- [x] Deps: Adicionado `@google/generative-ai`.
-- [x] Infra: Criado `src/infra/gemini.ts`.
-- [x] API: Atualizado `events.ts` para factory de provider (`LLM_PROVIDER`).
-- [x] Config: Atualizado `.env.example`.
+- [x] Infra: Atualizado `src/infra/gemini.ts` para aceitar `string[]` e rotacionar (`Math.random()`).
+- [x] API: Atualizado factory em `events.ts` para ler `GEMINI_KEYS` (CSV).
+- [x] Config: `.env.example` reflete suporte a múltiplas chaves.
 
-### Comandos para Teste (Gemini)
+### Configuração Necessária (User)
 
-1. **Atualize seu .env**:
+No seu `.env`:
+
 ```env
 LLM_PROVIDER=gemini
-GEMINI_API_KEY=AIza... (sua chave)
-```
-
-2. **Reinstale e Rode**:
-```bash
-npm install
-npm run start
-```
-
-3. **Curl**:
-```bash
-curl -X POST http://localhost:3000/v1/events \
-  -H "Content-Type: application/json" \
-  -d @examples/lead_qualification_demo/events/1_message_received.json
+# Cole suas 6 chaves separadas APENAS por vírgula (sem espaços é melhor)
+GEMINI_KEYS=AIza1...,AIza2...,AIza3...,AIza4...,AIza5...,AIza6...
 ```

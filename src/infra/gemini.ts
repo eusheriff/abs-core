@@ -3,16 +3,37 @@ import { DecisionProvider } from './openai'; // Reusing interface
 import { DecisionProposal } from '../core/schemas';
 
 export class GeminiDecisionProvider implements DecisionProvider {
-  private genAI: GoogleGenerativeAI;
-  private model: any;
+  private apiKeys: string[];
 
-  constructor(apiKey: string) {
-    this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+  constructor(apiKeys: string[]) {
+    this.apiKeys = apiKeys.filter(k => k.trim().length > 0);
+    if (this.apiKeys.length === 0) {
+        console.warn('⚠️ No Gemini keys provided. Provider will fail if called.');
+    } else {
+        console.log(`♊️ Gemini Provider initialized with ${this.apiKeys.length} keys.`);
+    }
+  }
+
+  private getClient(): GoogleGenerativeAI {
+      // Random Load Balancing
+      const randomIndex = Math.floor(Math.random() * this.apiKeys.length);
+      const selectedKey = this.apiKeys[randomIndex];
+      // console.log(`🔑 Using Key #${randomIndex + 1}`); // Debug only
+      return new GoogleGenerativeAI(selectedKey);
   }
 
   async propose(context: any, currentState: string): Promise<Partial<DecisionProposal>> {
-    const prompt = `
+    if (this.apiKeys.length === 0) {
+        return { 
+            recommended_action: 'error_no_keys', 
+            confidence: 0,
+            explanation: { summary: 'Configuration Error', rationale: 'No API keys available', evidence_refs: [] }
+        };
+    }
+
+    const genAI = this.getClient();
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+
       You are the Decision Engine of an Autonomous Business System.
       Current State: ${currentState}
       Context: ${JSON.stringify(context)}
@@ -24,7 +45,7 @@ export class GeminiDecisionProvider implements DecisionProvider {
     `;
 
     try {
-        const result = await this.model.generateContent(prompt);
+        const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
         
