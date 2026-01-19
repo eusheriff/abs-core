@@ -22,6 +22,7 @@ export const Dashboard = (props: { logs: any[] }) => {
                 <thead>
                     <tr>
                         <th style="width: 180px;">Time</th>
+                        <th>Execution</th>
                         <th style="width: 250px;">Event / Trace ID</th>
                         <th>Recommended Action</th>
                         <th style="width: 100px;">Confidence</th>
@@ -33,10 +34,19 @@ export const Dashboard = (props: { logs: any[] }) => {
                         const decision = JSON.parse(log.decision_payload);
                         const isSafe = decision.confidence > 0.7;
                         
+                        let execBadgeColor = '#8b949e'; // Pending/Grey
+                        if (log.execution_status === 'EXECUTED') execBadgeColor = '#238636'; // Green
+                        if (log.execution_status === 'FAILED') execBadgeColor = '#da3633'; // Red
+                        
                         return html`
                             <tr>
                                 <td style="color: var(--text-secondary); font-size: 13px;">
                                     ${new Date(log.created_at).toLocaleString()}
+                                </td>
+                                <td>
+                                    <span class="badge" style="background: ${execBadgeColor}; color: white; font-size: 10px;">
+                                        ${log.execution_status || 'PENDING'}
+                                    </span>
                                 </td>
                                 <td>
                                     <div style="font-weight: bold;">${log.event_type}</div>

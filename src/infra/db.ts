@@ -30,13 +30,22 @@ export const initDB = (dbPath: string = 'abs_core.db') => {
     );
   `);
 
+  // Migration v0.5: Add execution columns if not exist
+  try {
+    db.exec(`ALTER TABLE decision_logs ADD COLUMN execution_status TEXT DEFAULT 'PENDING'`);
+    db.exec(`ALTER TABLE decision_logs ADD COLUMN execution_response TEXT`);
+    console.log('📦 Schema migrated: Added execution columns');
+  } catch (e) {
+    // Columns likely exist, ignore
+  }
+
   console.log(`📦 Database initialized at ${fullPath}`);
   return db;
 };
 
 export const getDB = () => {
-  if (!db) throw new Error('Database not initialized. Call initDB() first.');
-  return db;
+    if (!db) initDB();
+    return db;
 };
 
 export const getRecentLogs = (limit: number = 50) => {
@@ -47,7 +56,8 @@ export const getRecentLogs = (limit: number = 50) => {
             timestamp as created_at, 
             event_id as trace_id,
             'decision.proposed' as event_type,
-            full_log_json as decision_payload
+            full_log_json as decision_payload,
+            execution_status
         FROM decision_logs 
         ORDER BY timestamp DESC 
         LIMIT ?

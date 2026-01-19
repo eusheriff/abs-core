@@ -8,7 +8,7 @@
 |-------|-------|
 | **Nome** | oconnector-abs-core |
 | **Estratégia** | Open Core (Apache-2.0 + componentes comerciais) |
-| **Estágio** | v0.3.2 Stable (Multi-Key Gemini) |
+| **Estágio** | v0.4.0 Stable (Observability) |
 | **Maintainer** | OConnector Technology |
 | **Autor** | Rodrigo Gomes |
 | **Início** | 2026-01-19 |
@@ -20,8 +20,8 @@ Priorizamos a confiabilidade da decisão sobre a inteligência do modelo. Autono
 
 ## Estado Atual
 
-- **Fase**: v0.3.2 Concluída.
-- **Status**: Suporte a Load Balancing aleatório de chaves Gemini para evitar rate limits.
+- **Fase**: v0.4.0 Concluída.
+- **Status**: Dashboard de Observabilidade ativo em `/dashboard`. Rotação de chaves Gemini ativa.
 - **Bloqueios**: Nenhum.
 
 ## Roadmap
@@ -33,17 +33,18 @@ Priorizamos a confiabilidade da decisão sobre a inteligência do modelo. Autono
 | v0.3 | Integração (API, SQLite, OpenAI) | ✅ Concluído |
 | v0.3.1 | Suporte a Google Gemini | ✅ Concluído |
 | v0.3.2 | Multi-Key Load Balancing (Gemini) | ✅ Concluído |
+| v0.4 | Dashboard de Observabilidade | ✅ Concluído |
 | v1.0 | Padrão de mercado para ABS Core | ⏳ Planejado |
 
 ## Próximos Passos (Evolução)
 
-1. [ ] Dashboard de Monitoramento (v0.4)
-2. [ ] Webhook Egress Adapter (para executar decisões)
-3. [ ] Testes de Carga
+1. [ ] Persistência em Nuvem (Cloudflare D1 / PostgreSQL)
+2. [ ] Autenticação no Dashboard
+3. [ ] Webhook Egress (Execução Real)
 
 ## Decisões Fixas
 
 - Framework API: Hono
+- UI: Hono HTML (Server-Side)
 - DB: SQLite
 - Providers: OpenAI, Gemini (Multi-key)
-- Config: dotenv
