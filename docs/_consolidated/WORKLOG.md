@@ -4,22 +4,23 @@
 
 ---
 
-## 2026-01-19 — Sessão 3.2: Multi-Key Load Balancing
+## 2026-01-19 — Sessão 3.3: v0.4 Observability Dashboard
 
 ### Contexto
-- Evitar Rate Limits no Gemini usando múltiplas chaves.
+- Criação de interface visual para auditar decisões.
 
 ### Ações Realizadas
-- [x] Infra: Atualizado `src/infra/gemini.ts` para aceitar `string[]` e rotacionar (`Math.random()`).
-- [x] API: Atualizado factory em `events.ts` para ler `GEMINI_KEYS` (CSV).
-- [x] Config: `.env.example` reflete suporte a múltiplas chaves.
+- [x] UI: Criado sistema de views Server-Side (`src/ui/layout.tsx`, `src/ui/dashboard.tsx`).
+- [x] API: Adicionada rota `/dashboard`.
+- [x] DB: Helper `getRecentLogs` implementado.
 
-### Configuração Necessária (User)
+### Comandos
+1. **Ver Dashboard**:
+   - Abra [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
 
-No seu `.env`:
-
-```env
-LLM_PROVIDER=gemini
-# Cole suas 6 chaves separadas APENAS por vírgula (sem espaços é melhor)
-GEMINI_KEYS=AIza1...,AIza2...,AIza3...,AIza4...,AIza5...,AIza6...
-```
+2. **Gerar Dados**:
+   ```bash
+   curl -X POST http://localhost:3000/v1/events \
+    -H "Content-Type: application/json" \
+    -d @examples/lead_qualification_demo/events/1_message_received.json
+   ```

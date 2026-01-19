@@ -38,3 +38,20 @@ export const getDB = () => {
   if (!db) throw new Error('Database not initialized. Call initDB() first.');
   return db;
 };
+
+export const getRecentLogs = (limit: number = 50) => {
+    const database = getDB();
+    const stmt = database.prepare(`
+        SELECT 
+            decision_id,
+            timestamp as created_at, 
+            event_id as trace_id,
+            'decision.proposed' as event_type,
+            full_log_json as decision_payload
+        FROM decision_logs 
+        ORDER BY timestamp DESC 
+        LIMIT ?
+    `);
+    // Mapping to match dashboard expected format
+    return stmt.all(limit);
+};

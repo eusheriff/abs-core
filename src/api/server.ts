@@ -18,8 +18,17 @@ app.use('*', cors());
 // Initialize Infra
 initDB(process.env.DATABASE_URL || 'abs_core.db');
 
+import { getRecentLogs } from '../infra/db';
+import { Dashboard } from '../ui/dashboard';
+
 // Health Check
-app.get('/health', (c) => c.json({ status: 'ok', version: '0.3.0' }));
+app.get('/health', (c) => c.json({ status: 'ok', version: '0.4.0' }));
+
+// Dashboard Route
+app.get('/dashboard', (c) => {
+    const logs = getRecentLogs(50);
+    return c.html(Dashboard({ logs }).toString());
+});
 
 // Routes
 app.route('/v1/events', eventsRouter);
