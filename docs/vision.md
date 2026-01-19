@@ -1,31 +1,36 @@
-# Visão do Produto: ABS Core
+# Vision: The Accountability Layer for AI
 
-> "Infraestrutura de negócios autônomos com governança e auditoria de decisões."
+> "The industry knows how to make AI decide. It does not know how to make AI accountable. ABS Core exists to define that missing layer."
 
-## O Problema
+## The Pivot: From Automation to Governance
 
-Empresas precisam automatizar processos de negócio (vendas, atendimento, pricing, cobrança) para escalar. As abordagens atuais falham em dois extremos:
+In the early days of Generative AI, the focus was on **capability**: "Can the AI do X?".
+Now, the focus is on **reliability**: "Can I trust the AI to do X without bankrupting me?".
 
-1.  **RPA / Automação Rígida**: Frágil, difícil de manter, incapaz de lidar com variabilidade ("burro").
-2.  **AI Agents / Chatbots**: Criativos e flexíveis, mas alucinados, imprevisíveis e perigosos para decisões críticas ("louco").
+ABS Core is built on the premise that reliability cannot be achieved by "better prompting" alone. It requires a dedicated infrastructure layer that treats **Governance** as a first-class citizen, superior to Intelligence.
 
-O mercado precisa de um **cérebro racional**: capaz de entender contexto complexo (como IA) mas governado por regras estritas e auditáveis (como software bancário).
+## Core Problem Statement
 
-## A Solução: Autonomous Business System (ABS)
+Modern AI systems can make decisions, but most lack governance, auditability, and controlled failure. When AI is embedded directly into workflows, prompts, or agents, organizations lose visibility, control, and accountability.
 
-O ABS Core não é um chatbot. É a infraestrutura backend que permite:
+**We are solving the "Black Box Execution" problem.**
 
-1.  **Observabilidade de Decisão**: Saber exatamente por que uma venda foi recusada ou um desconto oferecido.
-2.  **Autonomia Graduada**: Permitir que a IA resolva casos simples, mas exigir humano para riscos altos.
-3.  **Policy-First**: Alterar regras de negócio (margem mínima, compliance) sem mudar código ou retreinar modelos.
+## Our Solution: The ABS Runtime
 
-## Estratégia Open Core
+ABS Core is a **decision runtime**. It is not a model, not a vector DB, and not a chatbot UI.
 
-Acreditamos que **confiança não pode ser proprietária**.
+It is the piece of software that sits between your Event Bus and your API Gateway, ensuring that:
+1.  Every request to act is logged.
+2.  Every proposed action is checked against policy code.
+3.  Every high-risk action is paused for human review.
+4.  Every failure triggers a safe fallback.
 
-- A infraestrutura de *como* governar decisões deve ser **aberta** (Eventos, Logs, Policy Engine Specs).
-- O *conhecimento operacional* (Políticas Específicas, Modelos Financeiros, Conectores) é onde reside o valor comercial (**fechado**).
+## Design Philosophy
 
-## Futuro
+*   **Boring architecture beats clever prompts.** We prefer state machines over "agentic reasoning loops" for business processes.
+*   **Explicit over implicit.** State transitions must be defined, not hallucinated.
+*   **Intelligence is pluggable.** Today it's GPT-4, tomorrow it's a local Llama, next year it's a heuristic script. The governance layer stays the same.
 
-Nossa visão é que em 5 anos, **nenhuma decisão de negócio crítica será tomada sem registro em um ABS**. Humanos focarão em definir políticas e gerenciar exceções, enquanto o ABS executa o volume com precisão auditada.
+## Future Direction
+
+We envision ABS Core becoming the standard "Safety Harness" for Enterprise AI. Just as you wouldn't deploy a web server without a Firewall, you shouldn't deploy an Autonomous Agent without an ABS Core.

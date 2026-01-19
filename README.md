@@ -1,167 +1,102 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.1.0-blue" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.2.0-blue" alt="Version" />
   <img src="https://img.shields.io/badge/license-Apache--2.0-green" alt="License" />
-  <img src="https://img.shields.io/badge/status-early--public--core-orange" alt="Status" />
+  <img src="https://img.shields.io/badge/status-experimental-orange" alt="Status" />
 </p>
 
-# OConnector ABS Core
+# ABS Core: Autonomous Business Systems
 
-> **Autonomous Business Systems with Governed Decisions**
+> **A governance-first runtime for autonomous business decisions.**
 
-Infraestrutura aberta para sistemas de negócio autônomos com governança, auditabilidade e controle de risco.
+ABS Core is a neutral runtime that governs autonomous business decisions through explicit state, policies, audit trails, and human escalation. It acts as the "responsible brain" between your channels (bots, APIs) and your execution capability.
 
----
-
-## 🎯 O que é o ABS Core?
-
-O ABS Core é a **fundação técnica** para construção de sistemas que automatizam processos de negócio (vendas, atendimento, pricing, cobrança) com **decisões autônomas**, mas com:
-
-- **Governança explícita**: Políticas versionadas e auditáveis
-- **Separação decisão/execução**: IA sugere, políticas validam, sistema executa
-- **Auditoria completa**: Toda decisão é rastreável (quem, quando, por quê, com quais dados)
-- **Autonomia graduada**: Decisões de alto risco exigem humano no loop
-- **Degradação controlada**: Kill switches e fallbacks automáticos
-
-## ⚠️ O que NÃO é
-
-| ❌ NÃO é | ✅ É |
-|----------|------|
-| Um chatbot / framework de UI | Uma camada de decisão backend |
-| Um auto-agent sem controle | Um sistema com governança explícita |
-| Uma plataforma de RPA | Uma arquitetura event-driven para processos |
-| Produto pronto para produção | Especificação + implementação de referência |
+*"Autonomy without governance is risk. ABS Core prioritizes reliability of decisions over intelligence of models."*
 
 ---
 
-## 🏗️ Arquitetura
+## ⚡️ Key Features
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         CANAIS (OBot, CRM, etc)                     │
-└────────────────────────────────┬────────────────────────────────────┘
-                                 │ Eventos
-                                 ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                        EVENT INGESTION                              │
-│            Valida, normaliza, publica Event Envelope                │
-└────────────────────────────────┬────────────────────────────────────┘
-                                 │
-                                 ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                      PROCESS ORCHESTRATOR                           │
-│         State Machine + Saga • Carrega estado • Orquestra fluxo     │
-└────────────────────────────────┬────────────────────────────────────┘
-                                 │
-                    ┌────────────┴────────────┐
-                    ▼                         ▼
-┌──────────────────────────┐    ┌──────────────────────────┐
-│    DECISION SERVICE      │    │      STATE STORE         │
-│  Contexto + RAG + LLM    │    │   Persistência + Replay  │
-│  → DecisionProposal      │    └──────────────────────────┘
-└────────────┬─────────────┘
-             │
-             ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                        POLICY ENGINE                                │
-│     Regras explícitas • allow | deny | escalate • Policy Trace      │
-└────────────────────────────────┬────────────────────────────────────┘
-                                 │
-              ┌──────────────────┼──────────────────┐
-              ▼                  ▼                  ▼
-┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
-│  ACTION GATEWAY  │  │ HUMAN-IN-THE-LOOP│  │   AUDIT LOGGER   │
-│  Executa ações   │  │  Fila de aprovação│  │  Decision Logs   │
-└──────────────────┘  └──────────────────┘  └──────────────────┘
+- **Decision separated from execution**: LLMs propose actions, ABS Core validates and executes.
+- **Policies override intelligence**: Hard rules always win over probabilistic models.
+- **Immutable Audit**: Every decision generates a business-readable `DecisionLog`.
+- **Human-in-the-loop**: Native support for escalation workflows based on risk.
+- **LLM Agnostic**: Zero dependency on specific vendors; structured inputs/outputs only.
+
+---
+
+## 🏗️ Architecture
+
+ABS Core acts as a **decision runtime**:
+
+1.  **Event Ingestion**: Receives normatlized events (`EventEnvelope`).
+2.  **Process Resolution**: Loads the explicit State Machine for that process.
+3.  **Decision Proposal**: Asks an LLM or Heuristic for a recommendation.
+4.  **Policy Evaluation**: Validates the recommendation against versioned code rules.
+5.  **Execution/Escalation**: Executes side-effects or queues for human review.
+6.  **Audit**: Records the entire chain of thought and outcome.
+
+```mermaid
+flowchart LR
+    Event --> Runtime
+    Runtime -->|Context| LLM
+    LLM -->|Proposal| Runtime
+    Runtime -->|Proposal| PolicyEngine
+    PolicyEngine -->|Allow/Deny| Runtime
+    Runtime -->|Action| Executor
+    Runtime -->|Log| AuditStore
 ```
 
 ---
 
-## 📦 Estrutura do Repositório
+## 🚀 Getting Started
 
-```
-oconnector-abs-core/
-├── docs/                    # Documentação conceitual
-│   ├── vision.md            # Visão de longo prazo
-│   ├── architecture.md      # Arquitetura detalhada
-│   ├── governance.md        # Modelo de governança do projeto
-│   ├── autonomy-model.md    # Níveis de risco e autonomia
-│   └── faq.md               # Perguntas frequentes
-├── specs/                   # Especificações formais (YAML)
-│   ├── event-envelope.yaml
-│   ├── decision-proposal.yaml
-│   ├── policy-decision.yaml
-│   └── decision-log.yaml
-├── contracts/               # Contratos de API e domínio
-│   ├── events/              # Eventos por domínio
-│   ├── processes/           # State machines
-│   ├── decisions/           # Tipos de decisão
-│   └── policies/            # Estruturas de políticas
-├── core/                    # Implementação de referência (stubs)
-├── examples/                # Exemplos educacionais
-│   └── lead_qualification_demo/
-└── roadmap/                 # Evolução pública
-```
+### Prerequisites
+- Node.js 20+
 
----
-
-## 🚀 Quick Start
-
-Este repositório é uma **especificação + referência**, não um pacote instalável.
-
-### 1. Entenda os conceitos
-
-- Leia [docs/vision.md](docs/vision.md) para a motivação
-- Leia [docs/architecture.md](docs/architecture.md) para a arquitetura
-- Leia [docs/autonomy-model.md](docs/autonomy-model.md) para níveis de risco
-
-### 2. Explore as especificações
+### Installation
 
 ```bash
-# Veja os schemas
-cat specs/event-envelope.yaml
-cat specs/decision-proposal.yaml
-cat specs/decision-log.yaml
+git clone https://github.com/oconnector/abs-core.git
+cd abs-core
+npm install
+npm run build
 ```
 
-### 3. Veja um exemplo
+### Usage (CLI)
+
+Simulate a decision flow locally:
 
 ```bash
-# Fluxo completo de Lead Qualification
-ls examples/lead_qualification_demo/
+# Validate an event payload
+node dist/cli/index.js validate examples/lead_qualification_demo/events/1_message_received.json
+
+# Run the simulation (Mock Engine)
+node dist/cli/index.js simulate examples/lead_qualification_demo/events/1_message_received.json
 ```
 
 ---
 
-## 📜 Princípios Fundamentais
+## 📜 Documentation
 
-1. **IA nunca executa ações diretamente** — IA apenas sugere, o sistema valida e executa
-2. **Decisão separada de execução** — DecisionProposal → PolicyDecision → Action
-3. **Tudo é auditável** — Decision Logs imutáveis com contexto completo
-4. **Governança é requisito** — Não é opcional, não é pós-trabalho
-5. **Autonomia graduada** — Risco alto = humano obrigatório
-6. **Falhas controladas** — Kill switches e degradação automática
+- [**Manifesto**](docs/MANIFESTO.md): The philosophy behind ABS Core.
+- [**Architecture**](docs/architecture.md): Detailed component breakdown.
+- [**Governance**](docs/governance.md): How we manage the open core.
+- [**Contracts**](specs/): OpenAPI and JSON Schemas for events and decisions.
 
 ---
 
-## 🤝 Contribuindo
+## 🤝 Contributing
 
-Leia [CONTRIBUTING.md](CONTRIBUTING.md) para entender:
-- Princípios obrigatórios para contribuições
-- O que é aceito e o que não é
-- Processo de review
+We welcome contributions that align with our **Governance-First** philosophy.
 
----
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before submitting a Pull Request.
 
-## 📄 Licença
-
-Este projeto está licenciado sob [Apache License 2.0](LICENSE).
-
-O core aberto define contratos, interfaces e arquitetura. Componentes operacionais avançados (policy packs, conectores enterprise, dashboards) são mantidos em repositórios comerciais separados.
+**Important**: We do not accept PRs that hide business logic inside prompts or bypass the audit layer.
 
 ---
 
-## 🏢 Mantido por
+## 📄 License
 
-**OConnector Technology**
+Apache License 2.0. See [LICENSE](LICENSE) for details.
 
-*"Autonomia sem governança é risco. ABS Core é sobre confiança em escala."*
+Maintained by **OConnector Technology**.
