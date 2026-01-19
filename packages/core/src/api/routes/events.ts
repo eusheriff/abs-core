@@ -3,6 +3,7 @@ import { EventEnvelopeSchema } from '../../core/schemas';
 import { getDB } from '../../infra/db';
 import { EventProcessor } from '../../core/processor';
 import { requireScope } from '../middleware/auth';
+import { Integrity } from '../../core/integrity';
 
 const events = new Hono();
 
@@ -19,20 +20,34 @@ events.post('/', requireScope('events:write'), async (c) => {
     const event = validation.data;
     const db = getDB();
 
-    // 0. Event Sourcing Persistence (The "Source of Truth")
-    // Persist immediately, immutable.
-    await db.run(`
-        INSERT INTO events_store (event_id, tenant_id, event_type, payload, ingested_at, correlation_id)
-        VALUES (?, ?, ?, ?, ?, ?)
-    `,
+    // 3. Persist Event (Source of Truth) - IMMUTABLE
+    
+    // 3a. Get Previous Hash (Chain Link)
+    const [lastEvent] = await db.all<{ hash: string }>(`
+        SELECT hash FROM events_store ORDER BY rowid DESC LIMIT 1
+    `);
+    const previousHash = lastEvent?.hash || null;
+
+    // 3b. Compute New Hash (Payload + PrevHash)
+    const hash = Integrity.computeHash(JSON.stringify(event), previousHash);
+
+    // 3c. Insert with Integrity Data
+    await db.run(
+        `INSERT INTO events_store (
+            event_id, tenant_id, event_type, payload, ingested_at, correlation_id, 
+            previous_hash, hash
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         event.event_id,
         event.tenant_id,
         event.event_type,
         JSON.stringify(event.payload),
         new Date().toISOString(),
-        event.correlation_id
+        event.correlation_id,
+        previousHash,
+        hash
     );
 
+    // 4. Process (Sync or Async)
     // ---------------------------------------------------------
     // 2. Processing (Sync vs Async)
     // ---------------------------------------------------------

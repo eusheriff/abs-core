@@ -14,9 +14,11 @@ export const getDB = (): DatabaseAdapter => {
 };
 
 // Re-export specific queries logic
+// Re-export specific queries logic
 export const initSchema = async () => {
     const db = getDB();
-    // SAFE: Static DDL query,    // 2. Events Store (Immutable "Source of Truth")
+    
+    // 2. Events Store (Immutable "Source of Truth")
     await db.exec(`
       CREATE TABLE IF NOT EXISTS events_store (
         event_id TEXT PRIMARY KEY,
@@ -24,9 +26,13 @@ export const initSchema = async () => {
         event_type TEXT NOT NULL,
         payload TEXT NOT NULL,
         ingested_at TEXT NOT NULL,
-        correlation_id TEXT
+        correlation_id TEXT,
+        previous_hash TEXT,
+        hash TEXT,
+        signature TEXT
       );
-    `); // Static DDL - Safe
+      CREATE INDEX IF NOT EXISTS idx_events_hash ON events_store(hash);
+    `);
 
     // 3. Decision Log (Side-Effects / Audit)
     await db.exec(`
@@ -38,7 +44,9 @@ export const initSchema = async () => {
       timestamp TEXT NOT NULL,
       full_log_json TEXT NOT NULL,
       execution_status TEXT DEFAULT 'PENDING',
-      execution_response TEXT
+      execution_response TEXT,
+      previous_hash TEXT,
+      hash TEXT
     );
   `);
 };
