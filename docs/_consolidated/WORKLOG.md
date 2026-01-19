@@ -4,23 +4,24 @@
 
 ---
 
-## 2026-01-19 — Sessão 3.3: v0.4 Observability Dashboard
+## 2026-01-19 — Sessão 3.4: v0.5 Execution Layer
 
 ### Contexto
-- Criação de interface visual para auditar decisões.
+- Fechar o ciclo: Executar decisões automaticamente via Webhooks.
 
 ### Ações Realizadas
-- [x] UI: Criado sistema de views Server-Side (`src/ui/layout.tsx`, `src/ui/dashboard.tsx`).
-- [x] API: Adicionada rota `/dashboard`.
-- [x] DB: Helper `getRecentLogs` implementado.
+- [x] Core: Criado `WebhookExecutor`.
+- [x] DB: Migração automática para adicionar `execution_status`.
+- [x] API: Rota de eventos agora dispara a execução assíncrona.
+- [x] UI: Dashboard mostra status de execução.
 
-### Comandos
-1. **Ver Dashboard**:
-   - Abra [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
+### Instrução de Teste (Webhook)
 
-2. **Gerar Dados**:
-   ```bash
-   curl -X POST http://localhost:3000/v1/events \
-    -H "Content-Type: application/json" \
-    -d @examples/lead_qualification_demo/events/1_message_received.json
+1. Vá em [webhook.site](https://webhook.site).
+2. Copie sua URL única.
+3. Adicione no `.env`:
+   ```env
+   EXECUTION_WEBHOOK_URL=https://webhook.site/seu-uuid-aqui
    ```
+4. Reinicie (`npm run dev`) e envie um evento (`curl`).
+5. Veja o POST chegar no webhook.site!

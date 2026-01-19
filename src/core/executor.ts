@@ -51,11 +51,12 @@ export class WebhookExecutor implements Executor {
                 response: `Webhook sent to ${this.webhookUrl}`,
                 executed_at: new Date().toISOString()
             };
-        } catch (error: any) {
-            console.error('Execution Failed:', error);
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown execution error';
+            console.error('Execution Failed:', errorMessage);
             return {
                 success: false,
-                error: error.message,
+                error: errorMessage,
                 executed_at: new Date().toISOString()
             };
         }

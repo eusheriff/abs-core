@@ -34,10 +34,19 @@ export class GeminiDecisionProvider implements DecisionProvider {
     const genAI = this.getClient();
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
+    const safeContext = JSON.stringify(context).replace(/`/g, "'");
+    const safeState = currentState.replace(/`/g, "'");
+
     const prompt = `
       You are the Decision Engine of an Autonomous Business System.
-      Current State: ${currentState}
-      Context: ${JSON.stringify(context)}
+      
+      <current_state>
+      ${safeState}
+      </current_state>
+
+      <context>
+      ${safeContext}
+      </context>
       
       Suggest the next best action.
       Output strictly JSON matching the DecisionProposal schema.
