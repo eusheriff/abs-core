@@ -1,5 +1,5 @@
 {
-  "event_id": "evt_12345",
+  "event_id": "123e4567-e89b-12d3-a456-426614174000",
   "event_type": "message.received",
   "source": "obot",
   "tenant_id": "demo_corp",

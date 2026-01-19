@@ -4,39 +4,34 @@
 
 ---
 
-## 2026-01-19 — Sessão 2: Implementation Runtime v0.2
+## 2026-01-19 — Sessão 3.1: Gemini Integration
 
 ### Contexto
-- Objetivo: Tornar as specs da v0.1 executáveis.
-- Foco: TypeScript, Type Safety (Zod), State Machine (XState).
+- Adicionar suporte ao Google Gemini como alternativa à OpenAI.
 
 ### Ações Realizadas
-- [x] Configuração de projeto (`package.json`, `tsconfig.json`).
-- [x] Implementação de `src/core/schemas.ts` (Event, Proposal, Log).
-- [x] Implementação de `src/core/machine.ts` (Máquina de exemplo Lead Lifecycle).
-- [x] Criação de CLI Tool (`src/cli/index.ts`) para validação e simulação.
-- [!] `npm install` falhou (ambiente). Necessário executar manual.
+- [x] Deps: Adicionado `@google/generative-ai`.
+- [x] Infra: Criado `src/infra/gemini.ts`.
+- [x] API: Atualizado `events.ts` para factory de provider (`LLM_PROVIDER`).
+- [x] Config: Atualizado `.env.example`.
 
-### Arquivos Criados
-- `package.json`, `tsconfig.json`
-- `src/core/schemas.ts`, `src/core/machine.ts`
-- `src/cli/index.ts`
+### Comandos para Teste (Gemini)
 
-### Comandos para Execução (User)
-```bash
-# 1. Instalar dependências
-npm install
-
-# 2. Compilar
-npm run build
-
-# 3. Testar validação
-node dist/cli/index.js validate examples/lead_qualification_demo/events/1_message_received.json
-
-# 4. (Opcional) Testar simulação (requer evento compatível com a máquina)
-# Crie um arquivo 'lead_qualified.json' com { "event_type": "lead.qualified", ... }
+1. **Atualize seu .env**:
+```env
+LLM_PROVIDER=gemini
+GEMINI_API_KEY=AIza... (sua chave)
 ```
 
-### Validações Pendentes
-- [ ] Execução dos testes unitários (`npm test`).
-- [ ] Verificação E2E via CLI.
+2. **Reinstale e Rode**:
+```bash
+npm install
+npm run start
+```
+
+3. **Curl**:
+```bash
+curl -X POST http://localhost:3000/v1/events \
+  -H "Content-Type: application/json" \
+  -d @examples/lead_qualification_demo/events/1_message_received.json
+```
