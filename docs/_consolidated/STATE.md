@@ -8,7 +8,7 @@
 |-------|-------|
 | **Nome** | oconnector-abs-core |
 | **Estratégia** | Open Core (Apache-2.0 + componentes comerciais) |
-| **Estágio** | v0.5.0 Audited (Master Audit Passed) |
+| **Estágio** | v0.5.0 Audited (Decision Integrity Compliant) |
 | **Maintainer** | OConnector Technology |
 | **Autor** | Rodrigo Gomes |
 | **Início** | 2026-01-19 |
@@ -20,9 +20,9 @@ Priorizamos a confiabilidade da decisão sobre a inteligência do modelo. Autono
 
 ## Estado Atual
 
-- **Fase**: v0.5.0 Master Audit Passed (Secure).
-- **Status**: Sistema operacional com Ciclo Completo (Evento -> Decisão -> Execução -> Log).
-- **Segurança**: Vulnerabilidades críticas (Prompt Injection, Path Traversal) mitigadas.
+- **Fase**: v0.5.0 Master Audit Compliant.
+- **Status**: Sistema Seguro. Policy Gate Ativo.
+- **Invariantes**: "Execução requer Policy=ALLOW" garantido por código.
 - **Bloqueios**: Nenhum.
 
 ## Roadmap
@@ -36,19 +36,19 @@ Priorizamos a confiabilidade da decisão sobre a inteligência do modelo. Autono
 | v0.3.2 | Multi-Key Load Balancing (Gemini) | ✅ Concluído |
 | v0.4 | Dashboard de Observabilidade | ✅ Concluído |
 | v0.5 | Camada de Execução (Webhooks) | ✅ Concluído |
-| v0.5+ | Auditoria Técnica Master | ✅ Concluído |
-| v1.0 | Padrão de mercado para ABS Core | ⏳ Planejado |
+| v0.5+ | Master Audit (Integrity & Security) | ✅ Concluído |
+| v0.6 | Hardening & AuthZ | ⏳ Planejado |
 
 ## Próximos Passos (Evolução)
 
-1. [ ] Cloudflare D1 (Trocar SQLite)
+1. [ ] Testes de Regressão Automatizados
 2. [ ] AuthZ no Dashboard
-3. [ ] Rate Limiting
+3. [ ] Cloudflare D1 Migration
 
 ## Decisões Fixas
 
 - Framework API: Hono
 - UI: Hono HTML (Server-Side)
-- DB: SQLite
+- DB: SQLite (com schema migration)
 - Providers: OpenAI, Gemini (Multi-key)
-- Security: OWASP LLM Hardened
+- **Governance**: Hard-coded Policy Gate (v0.5)

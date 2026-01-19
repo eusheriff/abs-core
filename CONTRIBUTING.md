@@ -1,47 +1,43 @@
 # Contributing to ABS Core
 
-Obrigado pelo interesse em contribuir com o OConnector ABS Core!
+Thank you for your interest in contributing!
+We are building a **governance-first** runtime, and quality/safety is our top priority.
 
-Este projeto é um esforço para **definir o padrão técnico** da automação de negócios com *governança e responsabilidade*.
+## Handrails 🛡️
 
-## 🚨 Princípios Imutáveis para Contribuições
+Before submitting a PR, please read [INVARIANTS.md](../INVARIANTS.md).
+Any Code Change that violates these invariants will be rejected:
+1.  Bypassing the Policy Gate.
+2.  Executing actions without logging.
+3.  Removing Type Safety (no `any`).
 
-Qualquer PR que viole estes princípios será rejeitado:
+## Development Flow
 
-1.  **Separação Decisão vs. Execução**: Nunca misture lógica de "o que fazer" com "como fazer". O Decision Service propõe, o Policy Engine valida, o Action Gateway executa.
-2.  **IA como Sugestão**: Modelos de IA (LLMs) nunca devem ter permissão de `execute` direto. Eles apenas geram `DecisionProposal`.
-3.  **Auditabilidade**: Toda mudança de estado ou decisão deve produzir um `DecisionLog` ou `EventEnvelope`. Não existem "ações invisíveis".
-4.  **Falha Segura**: Sistemas devem ser projetados para falhar de forma controlada (fail-safe) e não catastrófica. Kill-switches são obrigatórios.
+1.  **Fork & Clone**:
+    ```bash
+    git clone ...
+    npm install
+    npm run dev
+    ```
 
-## O que aceitamos?
+2.  **Make Changes**:
+    - If adding a Feature: Create a `feat/` branch.
+    - If fixing a Bug: Create a `fix/` branch.
+    - If refactoring: Create a `chore/` or `refactor/` branch.
 
-- ✅ Correções e melhorias no core aberto (interfaces, schemas, stubs).
-- ✅ Novos exemplos educacionais e demos (toy domains).
-- ✅ Melhorias de documentação (tradução, clareza, diagramas).
-- ✅ Discussões sobre arquitetura e especificações.
+3.  **Test**:
+    - We currently value manual verification via `abs simulate` or `curl`.
+    - Ensure `npm run dev` starts without errors.
+    - Ensure no Lint warnings are introduced.
 
-## O que NÃO aceitamos?
+## Pull Request Process
 
-- ❌ Código de políticas comerciais reais (ex: regras reais de crédito de um banco).
-- ❌ Heurísticas de negócio sensíveis.
-- ❌ Integrações enterprise proprietárias (code proprietário).
-- ❌ "Prompts mágicos" que tentam resolver governança via engenharia de prompt apenas.
+1.  Describe **Why** you are making the change.
+2.  Describe **How** it affects the Decision Integrity.
+3.  Link related Issues.
+4.  Wait for the Maintainer review.
 
-## Processo de Pull Request
+## Code of Conduct
 
-1.  **Issue First**: Abra uma issue discutindo a mudança antes de codar.
-2.  **Fork & Branch**: Trabalhe em seu fork.
-3.  **Testes e Docs**: Se mudar schema, atualize exemplos. Se mudar código, adicione testes.
-4.  **Description**: Explique o impacto na governança.
-5.  **Review**: Aguarde review do Core Team.
-
-## Style Guide
-
-- **Specs**: YAML + JSON Schema.
-- **Docs**: Markdown (GitHub Flavored).
-- **Architecture**: Mermaid JS para diagramas.
-- **Code (Future)**: TypeScript, seguindo eslint/prettier do projeto.
-
----
-
-*"Construa como se fosse operar o negócio crítico de alguém. Porque você vai."*
+Be invalidly kind. We are professionals building professional tools.
+Respect, patience, and technical rigor are expected.
