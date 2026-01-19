@@ -8,7 +8,7 @@
 |-------|-------|
 | **Nome** | oconnector-abs-core |
 | **Estratégia** | Open Core (Apache-2.0 + componentes comerciais) |
-| **Estágio** | v1.0.0 Release Candidate (OSS Launch Ready) |
+| **Estágio** | v0.5.0 Audited Release (OSS Ready) |
 | **Maintainer** | OConnector Technology |
 | **Autor** | Rodrigo Gomes |
 | **Início** | 2026-01-19 |
@@ -20,27 +20,21 @@ Priorizamos a confiabilidade da decisão sobre a inteligência do modelo. Autono
 
 ## Estado Atual
 
-- **Fase**: v1.0.0 Ready for Launch.
-- **Docs**: README, LICENSE, SECURITY, INVARIANTS criados.
-- **Social**: Drafts de LinkedIn prontos em `docs/launch/`.
-- **Tech**: Sistema estável, auditado (v0.5 Master Audit) e com Policy Gate ativo.
+- **Fase**: v0.5-audited (Stable).
+- **Docs**: README limpo, Security Posture definida.
+- **Runtime**: QuickStart Mock Default (Zero Config).
+- **Integrity**: Policy Gate Ativo.
 
 ## Roadmap
 
 | Versão | Goal | Status |
 |--------|------|--------|
-| v0.5+ | Master Audit (Integrity & Security) | ✅ Concluído |
-| v1.0 | **OSS Launch (GitHub + LinkedIn)** | ✅ Pronto |
-| v1.1 | Community Feedback Loop | ⏳ Aguardando |
-
-## Próximos Passos (Pós-Launch)
-
-1. [ ] Publicar no GitHub (git push).
-2. [ ] Postar L1 no LinkedIn.
-3. [ ] Monitorar Issues/PRs.
+| v0.5 | Master Audit (Integrity & Security) | ✅ Concluído |
+| v0.5-oss | **Public Launch (GitHub + LinkedIn)** | ✅ Pronto |
+| v0.6 | AuthZ & Multi-Policy | ⏳ Planejado |
 
 ## Decisões Fixas
 
 - **License**: Apache 2.0
-- **Governance**: Policy Gate Obrigatório.
-- **Communication**: "No Hype". Foco em Engenharia.
+- **Policy**: Invariante (Hard Gate).
+- **Posicionamento**: Engenharia > Marketing.

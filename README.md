@@ -8,8 +8,12 @@
 **abs-core** is an open-source runtime designed to govern autonomous business decisions.
 It acts as a safety middleware between your LLM (Reasoning) and your Execution Layer (Actions).
 
+### Why it exists
+> **LLMs are probabilistic. Business execution must not be.**
+> ABS Core bridges that gap.
+
 ## What is ABS?
-*   A runtime that enforces **Decision Integrity**.
+*   A runtime that enforces **Decision Integrity** for autonomous business processes.
 *   The LLM **Proposes** actions.
 *   The Policy Engine **Decides** (Allow/Deny).
 *   The System **Logs** (Immutable Audit Trail).

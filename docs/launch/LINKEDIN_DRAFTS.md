@@ -14,7 +14,7 @@ This works until an unexpected output triggers a database modification you didn'
 In traditional software, we have validations. But with LLMs, the logic is probabilistic.
 If your system cannot prove *why* a decision was made and *who* authorized it (Policy vs Model), it is not ready for critical paths.
 
-I'm open-sourcing the runtime we use to solve this. It's not magic. It's middleware.
+I'm open-sourcing a **reference runtime** to solve this. It's not magic. It's middleware.
 How do you handle "Decision Integrity" in your agents today?
 
 #Governance #AI #Engineering

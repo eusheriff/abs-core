@@ -2,26 +2,24 @@
 
 > Registro de mudanças, comandos e validações.
 
----
-
-## 2026-01-19 — Sessão 3.4: v0.5 Execution Layer
+## 2026-01-19 — Sessão 3.5: OSS Launch Prep (v0.5 Audited)
 
 ### Contexto
-- Fechar o ciclo: Executar decisões automaticamente via Webhooks.
+- Transformação do projeto em repositório Open Source público profissional.
+- Auditoria de segurança e integridade (Master Audit).
 
 ### Ações Realizadas
-- [x] Core: Criado `WebhookExecutor`.
-- [x] DB: Migração automática para adicionar `execution_status`.
-- [x] API: Rota de eventos agora dispara a execução assíncrona.
-- [x] UI: Dashboard mostra status de execução.
+- [x] **Audit**: Correção de vulnerabilidades críticas (Prompt Injection, Path Traversal).
+- [x] **Integrity**: Implementação do `SimplePolicyEngine` (Hard Gate).
+- [x] **Launch Kit**: README.md refinado (sem emojis excessivos), Mock Provider default, LinkedIn Drafts.
+- [x] **Governance**: Documentos adicionados (`INVARIANTS.md`, `SECURITY.md`, `LICENSE`, `NON_GOALS.md`).
 
-### Instrução de Teste (Webhook)
+### Estado Final
+- **Versão**: v0.5-audited
+- **Status**: Pronto para `git push` e divulgação.
+- **Diferencial**: "The Code > The Model".
 
-1. Vá em [webhook.site](https://webhook.site).
-2. Copie sua URL única.
-3. Adicione no `.env`:
-   ```env
-   EXECUTION_WEBHOOK_URL=https://webhook.site/seu-uuid-aqui
-   ```
-4. Reinicie (`npm run dev`) e envie um evento (`curl`).
-5. Veja o POST chegar no webhook.site!
+### Próximos Passos (User)
+1. Rodar `git remote add origin ...`
+2. Rodar `git push -u origin main`
+3. Copiar e colar Post 1 no LinkedIn.
