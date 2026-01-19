@@ -1,0 +1,33 @@
+decision_id:
+  type: string
+  format: uuid
+  description: Reference to the executed decision.
+
+policy_decision:
+  type: string
+  enum: [allow, deny, escalate]
+  description: The final verdict of the Policy Engine.
+
+policy_trace:
+  type: object
+  properties:
+    policy_pack_version:
+      type: string
+      description: Version of the ruleset applied.
+    matched_rules:
+      type: array
+      items:
+        type: string
+      description: IDs of rules that were evaluated and passed.
+    violated_rules:
+      type: array
+      items:
+        type: string
+      description: IDs of rules that caused a DENY or ESCALATE.
+    computed_fields:
+      type: object
+      description: Derived values calculated during policy eval (e.g., margin %, risk_score).
+
+required_human_review:
+  type: boolean
+  description: True if the decision was forwarded to a HITL queue.

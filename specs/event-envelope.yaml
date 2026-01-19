@@ -1,0 +1,43 @@
+event_id:
+  type: string
+  format: uuid
+  description: Unique identifier for this specific event occurrence.
+
+event_type:
+  type: string
+  description: Domain-specific event name (e.g., lead.created, message.received).
+
+source:
+  type: string
+  description: System or component that originated the event (e.g., obot, crm).
+
+tenant_id:
+  type: string
+  description: Multi-tenancy isolation identifier.
+
+correlation_id:
+  type: string
+  description: ID to link related events (e.g., conversation_id, process_id).
+
+occurred_at:
+  type: string
+  format: date-time
+  description: ISO-8601 timestamp of when the event happened.
+
+payload:
+  type: object
+  description: The raw data of the event. Structure depends on event_type.
+
+metadata:
+  type: object
+  properties:
+    channel:
+      type: string
+      description: Communication channel (whatsapp, web, email).
+    actor:
+      type: string
+      description: User ID or System ID who triggered the action.
+    risk_hint:
+      type: string
+      enum: [low, medium, high]
+      description: Preliminary risk assessment by the source (optional).

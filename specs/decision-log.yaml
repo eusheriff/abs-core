@@ -1,0 +1,48 @@
+decision_id:
+  type: string
+  format: uuid
+  description: Unique ID for this audit record.
+
+tenant_id:
+  type: string
+
+correlation_id:
+  type: string
+
+event_id:
+  type: string
+  format: uuid
+  description: The input event that triggered this decision cycle.
+
+timestamp:
+  type: string
+  format: date-time
+
+inputs_snapshot:
+  type: object
+  description: Partial snapshot of state/context available at decision time (for replay).
+
+decision_proposal:
+  type: object
+  description: Full copy of the DecisionProposal (what the IA suggested).
+
+policy_decision:
+  type: object
+  description: Full copy of the PolicyDecision (what the rules said).
+
+final_action:
+  type: string
+  description: The actual action taken (or 'skipped' if denied).
+
+execution_result:
+  type: string
+  enum: [success, fail, skipped, pending_review]
+  description: Outcome of the Action Gateway execution.
+
+expected_outcome:
+  type: object
+  description: Hypothesis of what should happen (e.g., "customer accepts proposal").
+
+observed_outcome:
+  type: object
+  description: (Async update) What actually happened later.

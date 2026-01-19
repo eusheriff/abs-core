@@ -1,0 +1,37 @@
+# Lead Lifecycle State Machine
+
+initial_state: NEW
+
+states:
+  - NEW
+  - QUALIFIED
+  - IN_CONTACT
+  - PROPOSAL_SENT
+  - WON
+  - LOST
+  - ESCALATED
+
+transitions:
+  - from: NEW
+    to: QUALIFIED
+    trigger: lead.qualified
+
+  - from: QUALIFIED
+    to: IN_CONTACT
+    trigger: message.sent
+
+  - from: IN_CONTACT
+    to: PROPOSAL_SENT
+    trigger: proposal.generated
+
+  - from: PROPOSAL_SENT
+    to: WON
+    trigger: payment.confirmed
+
+  - from: PROPOSAL_SENT
+    to: LOST
+    trigger: customer.rejected warning
+
+  - from: "*"
+    to: ESCALATED
+    trigger: policy.escalate

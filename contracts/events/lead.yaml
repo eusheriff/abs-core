@@ -1,0 +1,33 @@
+# Lead Lifecycle Events
+
+events:
+  - name: lead.created
+    payload:
+      lead_id: string
+      name: string
+      email: string
+      phone: string
+      source: string
+
+  - name: lead.qualified
+    payload:
+      lead_id: string
+      score: number
+      segment: string
+
+  - name: lead.proposal_sent
+    payload:
+      lead_id: string
+      proposal_id: string
+      value: number
+      currency: string
+
+  - name: lead.won
+    payload:
+      lead_id: string
+      contract_value: number
+
+  - name: lead.lost
+    payload:
+      lead_id: string
+      reason: string

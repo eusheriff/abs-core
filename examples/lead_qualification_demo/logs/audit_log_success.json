@@ -1,0 +1,16 @@
+{
+  "decision_id": "dec_final_001",
+  "tenant_id": "demo_corp",
+  "event_id": "evt_12345",
+  "timestamp": "2026-01-19T10:00:05Z",
+  "decision_proposal": { ... },
+  "policy_decision": {
+    "policy_decision": "allow",
+    "policy_trace": {
+      "matched_rules": ["min_margin_ok", "auth_product_list"],
+      "violated_rules": []
+    }
+  },
+  "final_action": "send_proposal",
+  "execution_result": "success"
+}

@@ -1,0 +1,17 @@
+{
+  "proposal_id": "prop_abc987",
+  "process_id": "proc_555",
+  "current_state": "QUALIFIED",
+  "recommended_action": "send_proposal",
+  "action_params": {
+    "product_id": "consulting_enterprise",
+    "price": 15000
+  },
+  "explanation": {
+    "summary": "Cliente tem >500 funcs, perfil Enterprise.",
+    "rationale": "Baseado na resposta anterior, o cliente se enquadra no tier Enterprise.",
+    "evidence_refs": ["doc_pricing_v2"]
+  },
+  "confidence": 0.95,
+  "risk_level": "medium"
+}

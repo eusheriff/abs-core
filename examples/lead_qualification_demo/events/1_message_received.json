@@ -1,0 +1,12 @@
+{
+  "event_id": "evt_12345",
+  "event_type": "message.received",
+  "source": "obot",
+  "tenant_id": "demo_corp",
+  "correlation_id": "user_987",
+  "occurred_at": "2026-01-19T10:00:00Z",
+  "payload": {
+    "text": "Olá, quanto custa a consultoria?",
+    "user_phone": "+551199999999"
+  }
+}
