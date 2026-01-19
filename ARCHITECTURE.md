@@ -82,11 +82,24 @@ interface DecisionProposal {
 }
 ```
 
-### Decision Log
-The immutable record of the decision.
+### 3. Log Contracts (Decision & Execution)
+The `Decision Log` is the **System of Record**.
+
+#### Tamper Resistance Model (Immutability)
+To guarantee "Audit Integrity", the persistence layer adheres to the following constraints:
+- **Append-Only**: Logs are `INSERT` only.
+- **No Delete**: No API or driver method exists to `DELETE` a decision log.
+- **Constrained Updates**: `UPDATE` is allowed *only* on the `execution_status` and `execution_response` fields (to transition from `PENDING` to `SUCCESS/FAIL`).
+- **Frozen Context**: The `decision_proposal` and `input_snapshot` JSON blobs are **never** modified after the initial insert.
+
 ```typescript
-interface DecisionLog {
-  decision_id: string; // uuid
+// Interface Definition
+export interface DecisionLog {
+  decision_id: string;      // Immutable
+  tenant_id: string;        // Immutable
+  timestamp: string;        // Immutable
+  // ...
+  // decision_id: string; // uuid - This line was a duplicate and is now commented out or removed based on the instruction's intent.
   event_id: string;
   proposed_action: string;
   policy_decision: 'ALLOW' | 'DENY' | 'ESCALATE';
@@ -109,6 +122,17 @@ interface ExecutionLog {
   executed_at: string; // ISO8601
 }
 ```
+
+### 4. Human-in-the-Loop (HITL) Contract
+When `policy_decision` is `ESCALATE`, the system enters a suspended state.
+
+**Operational Flow:**
+1.  **Notification**: System emits `event.escalation_required` via configured webhook (e.g., Slack/PagerDuty).
+2.  **Review**: Human accesses the Decision Log (via Enterprise Dashboard or CLI).
+3.  **Resolution**: Human submits a `ReviewDecision` (Approve/Reject) signed with their ID.
+4.  **Resumption**: The Runtime receives the review and transitions to `EXECUTING` or `DROPPED` context.
+
+*Note: This flow ensures HITL is not a "bypass button" but a tracked audit event itself.*
 
 ## 4. Integration Patterns
 

@@ -26,7 +26,7 @@ interface Finding {
     line?: number;
 }
 
-function runScan(rootPath: string, options: any) {
+function runScan(rootPath: string, options: { format: string }) {
     console.log(chalk.blue(`🔍 Scanning ${resolve(rootPath)}...`));
     
     const files = getAllFiles(rootPath);

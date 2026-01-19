@@ -1,8 +1,8 @@
 import { DecisionProposal } from './schemas';
 
 export interface ExecutionResult {
-    success: boolean;
-    response?: any;
+    isSuccess: boolean;
+    response?: unknown;
     error?: string;
     executed_at: string;
 }
@@ -24,7 +24,7 @@ export class WebhookExecutor implements Executor {
         // For v0.5 demo, we allow it if action is NOT 'escalate_to_human'
         if (decision.recommended_action === 'escalate_to_human') {
             return {
-                success: false,
+                isSuccess: false,
                 response: 'Skipped: Human escalation required',
                 executed_at: new Date().toISOString()
             };
@@ -47,7 +47,7 @@ export class WebhookExecutor implements Executor {
             }
 
             return {
-                success: true,
+                isSuccess: true,
                 response: `Webhook sent to ${this.webhookUrl}`,
                 executed_at: new Date().toISOString()
             };
@@ -55,7 +55,7 @@ export class WebhookExecutor implements Executor {
             const errorMessage = error instanceof Error ? error.message : 'Unknown execution error';
             console.error('Execution Failed:', errorMessage);
             return {
-                success: false,
+                isSuccess: false,
                 error: errorMessage,
                 executed_at: new Date().toISOString()
             };

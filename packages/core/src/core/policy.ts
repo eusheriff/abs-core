@@ -1,10 +1,5 @@
 import { DecisionProposal } from './schemas';
-
-export type PolicyResult = 'ALLOW' | 'DENY' | 'MANUAL_REVIEW';
-
-export interface PolicyEngine {
-    evaluate(proposal: DecisionProposal, context: any): PolicyResult;
-}
+import { PolicyEngine, PolicyResult } from './interfaces';
 
 export class SimplePolicyEngine implements PolicyEngine {
     evaluate(proposal: DecisionProposal, context: any): PolicyResult {

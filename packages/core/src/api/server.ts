@@ -30,6 +30,8 @@ app.get('/dashboard', async (c) => {
 
 // Routes
 app.route('/v1/events', eventsRouter);
+import { adminRouter } from './routes/admin';
+app.route('/admin', adminRouter);
 
 // Export app for testing/CLI
 export { app };

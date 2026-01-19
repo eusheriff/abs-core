@@ -27,9 +27,10 @@ export class D1Adapter implements DatabaseAdapter {
         await this.db.exec(query);
     }
 
-    async run(query: string, ...params: any[]): Promise<{ success: boolean }> {
+    async run(query: string, ...params: any[]): Promise<{ isSuccess: boolean }> {
         const stmt = this.db.prepare(query).bind(...params);
-        return await stmt.run();
+        const result = await stmt.run();
+        return { isSuccess: result.success };
     }
 
     async all<T = any>(query: string, ...params: any[]): Promise<T[]> {

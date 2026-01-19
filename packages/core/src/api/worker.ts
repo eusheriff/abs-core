@@ -37,6 +37,9 @@ app.get('/dashboard', async (c) => {
 // Events API
 app.route('/v1/events', eventsRouter);
 
+import { adminRouter } from './routes/admin';
+app.route('/admin', adminRouter);
+
 export default {
   fetch: async (request: Request, env: Bindings, ctx: ExecutionContext) => {
     try {
@@ -54,8 +57,9 @@ export default {
         };
 
         return await app.fetch(request, env, ctx);
-    } catch (err: any) {
-        return new Response(`Worker Error: ${err.message}\n${err.stack}`, { status: 500 });
+    } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown Worker Error';
+        return new Response(`Worker Error: ${errorMessage}\n${(err as Error).stack || ''}`, { status: 500 });
     }
   }
 };

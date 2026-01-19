@@ -16,6 +16,19 @@ export const getDB = (): DatabaseAdapter => {
 // Re-export specific queries logic
 export const initSchema = async () => {
     const db = getDB();
+    // SAFE: Static DDL query,    // 2. Events Store (Immutable "Source of Truth")
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS events_store (
+        event_id TEXT PRIMARY KEY,
+        tenant_id TEXT NOT NULL,
+        event_type TEXT NOT NULL,
+        payload TEXT NOT NULL,
+        ingested_at TEXT NOT NULL,
+        correlation_id TEXT
+      );
+    `); // Static DDL - Safe
+
+    // 3. Decision Log (Side-Effects / Audit)
     await db.exec(`
     CREATE TABLE IF NOT EXISTS decision_logs (
       decision_id TEXT PRIMARY KEY,

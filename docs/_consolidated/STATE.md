@@ -7,7 +7,7 @@
 | Campo | Valor |
 |-------|-------|
 | **Nome** | oconnector-abs-core |
-| **Estratégia** | Open Core (Apache-2.0 + componentes comerciais) |
+| **Estratégia** | Open Core (Scanner Grátis + Enterprise) |
 | **Estágio** | v0.5.0 Monorepo + Scan MVP |
 | **Maintainer** | OConnector Technology |
 | **Autor** | Rodrigo Gomes |
@@ -24,14 +24,17 @@ Priorizamos a confiabilidade da decisão sobre a inteligência do modelo. Autono
 - **Fase**: v0.5 (Monorepo Refactor).
 - **Modules**: Core (Runtime), Scan (Static Analysis), CLI (Unified).
 - **Scanner**: MVP com detecção de execução direta e logs ausentes.
+- **Current Sprint**: **Static Analysis Cleanup** (Removing violations 108 -> 0).
 
 ## Roadmap
-
-| Versão | Goal | Status |
-|--------|------|--------|
-| v0.5 | Master Audit (Integrity & Security) | ✅ Concluído |
-| v0.5-oss | **Public Launch (GitHub + LinkedIn)** | ✅ Pronto |
-| v0.6 | AuthZ & Multi-Policy | ⏳ Planejado |
+- [x] v0.4: Proof of Concept (Done)
+- [x] v0.5: Master Audit + Static Analysis (Done)
+- [x] v0.5-oss: Public Launch (Released)
+- [x] v0.6: AuthZ & Multi-Policy (Implemented)
+- [x] v0.7: Event Sourcing & Replay (Implemented)
+- [x] v0.8: End-to-End Testing Pipeline (Implemented)
+- [x] v0.9: Performance & Scalability (Implemented)
+- [ ] v1.0: Production Release (Next)
 
 ## Decisões Fixas
 

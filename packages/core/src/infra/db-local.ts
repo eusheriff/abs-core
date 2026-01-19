@@ -26,11 +26,11 @@ export class LocalDBAdapter implements DatabaseAdapter {
         this.db!.exec(query);
     }
 
-    async run(query: string, ...params: any[]): Promise<{ success: boolean }> {
+    async run(query: string, ...params: any[]): Promise<{ isSuccess: boolean }> {
         if (!this.db) await this.init();
         try {
             this.db!.prepare(query).run(...params);
-            return { success: true };
+            return { isSuccess: true };
         } catch (e: any) {
             console.error('DB Run Error:', e);
             throw e;

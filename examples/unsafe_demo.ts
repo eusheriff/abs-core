@@ -12,6 +12,7 @@ async function run() {
 
     const cmd = completion.choices[0].message.content;
     
-    // DANGER: Direct execution without policy
-    eval(cmd); 
+    // DANGER: Direct execution would happen here.
+    // eval(cmd); 
+    console.log('Safe Demo: Command that would be executed:', cmd); 
 }

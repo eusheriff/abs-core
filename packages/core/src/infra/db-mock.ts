@@ -13,7 +13,7 @@ export class MockDBAdapter implements DatabaseAdapter {
         return Promise.resolve();
     }
 
-    async run(query: string, ...params: any[]): Promise<{ success: boolean }> {
+    async run(query: string, ...params: any[]): Promise<{ isSuccess: boolean }> {
         if (query.includes('INSERT INTO decision_logs')) {
              // Mock the insert structure
              // params: decision_id, tenant_id, event_id, correlation_id, timestamp, full_log_json
