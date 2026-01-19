@@ -1,12 +1,13 @@
 import { html } from 'hono/html';
 
-export const Layout = (props: { title: string; children: any }) => html`
+export const Layout = (props: { title: string; children: any; head?: any }) => html`
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${props.title} - ABS Core</title>
+    ${props.head}
     <style>
         :root {
             --bg-color: #0d1117;

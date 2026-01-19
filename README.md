@@ -5,8 +5,11 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Audit-PASSED-green)](docs/AUDIT_MASTER_v0.5.md)
 
-**abs-core** is an open-source runtime designed to govern autonomous business decisions.
+**abs-core** is an open-source **reference runtime** designed to govern autonomous business decisions.
 It acts as a safety middleware between your LLM (Reasoning) and your Execution Layer (Actions).
+
+🔎 *Confused by the acronym? See [Disambiguation](GLOSSARY.md).*  
+📜 *Read our [Project Philosophy](PROJECT_PHILOSOPHY.md).*
 
 ### Why it exists
 > **LLMs are probabilistic. Business execution must not be.**

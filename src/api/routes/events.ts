@@ -10,27 +10,30 @@ import { createActor } from 'xstate';
 
 const events = new Hono();
 
-// Provider Factory
+// Provider Factory (Lazy)
+let providerInstance: any; // Type generic to avoid import cycles or complex types for now
+
 const getProvider = () => {
-  const type = process.env.LLM_PROVIDER || 'mock'; // Default to mock for zero-config start
+  if (providerInstance) return providerInstance;
+
+  // process.env is polyfilled in worker.ts entrypoint for Cloudflare
+  // In Node.js it works natively.
+  const type = process.env.LLM_PROVIDER || 'mock';
   
   if (type === 'gemini') {
       const keys = (process.env.GEMINI_KEYS || process.env.GEMINI_API_KEY || '').split(',').filter(Boolean);
       console.log('🤖 Using Gemini Provider (Multi-Key Support)');
-      return new GeminiDecisionProvider(keys);
+      return (providerInstance = new GeminiDecisionProvider(keys));
   }
   
   if (type === 'openai') {
       console.log('🤖 Using OpenAI Provider');
-      return new OpenAIDecisionProvider(process.env.OPENAI_API_KEY || 'sk-placeholder');
+      return (providerInstance = new OpenAIDecisionProvider(process.env.OPENAI_API_KEY || 'sk-placeholder'));
   }
 
-  // Fallback / Default
-  console.log('⚠️ Using Mock Decision Provider (No LLM keys configured)');
-  return new MockDecisionProvider();
+  console.log('⚠️ Using Mock Decision Provider');
+  return (providerInstance = new MockDecisionProvider());
 };
-
-const provider = getProvider();
 
 events.post('/', async (c) => {
   try {

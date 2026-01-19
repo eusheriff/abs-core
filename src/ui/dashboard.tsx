@@ -4,6 +4,7 @@ import { Layout } from './layout';
 export const Dashboard = (props: { logs: any[] }) => {
     return Layout({
         title: 'Observability',
+        head: html`<meta http-equiv="refresh" content="2">`, // Simple Auto-Refresh
         children: html`
             <header>
                 <div>

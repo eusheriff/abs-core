@@ -2,24 +2,27 @@
 
 > Registro de mudanças, comandos e validações.
 
-## 2026-01-19 — Sessão 3.5: OSS Launch Prep (v0.5 Audited)
+## 2026-01-19 — Sessão 3.6: Cloudflare D1 Global Deploy
 
 ### Contexto
-- Transformação do projeto em repositório Open Source público profissional.
-- Auditoria de segurança e integridade (Master Audit).
+- Escalabilidade global exigida pelo usuário.
+- Node.js (better-sqlite3) incompatível com Edge Workers.
 
 ### Ações Realizadas
-- [x] **Audit**: Correção de vulnerabilidades críticas (Prompt Injection, Path Traversal).
-- [x] **Integrity**: Implementação do `SimplePolicyEngine` (Hard Gate).
-- [x] **Launch Kit**: README.md refinado (sem emojis excessivos), Mock Provider default, LinkedIn Drafts.
-- [x] **Governance**: Documentos adicionados (`INVARIANTS.md`, `SECURITY.md`, `LICENSE`, `NON_GOALS.md`).
+- [x] **Architecture**: Migração para "Dual-Runtime Adapter".
+  - Local: `LocalDBAdapter` (better-sqlite3).
+  - Cloud: `D1Adapter` (Cloudflare D1).
+- [x] **Refactor**: Todas as chamadas de banco agora são assíncronas (`await`).
+- [x] **Cloudflare**: 
+  - Banco D1 `abs-core-db` criado.
+  - Schema migrado.
+  - Deploy realizado com sucesso.
 
 ### Estado Final
-- **Versão**: v0.5-audited
-- **Status**: Pronto para `git push` e divulgação.
-- **Diferencial**: "The Code > The Model".
+- **Local**: `npm run dev` (SQLite) ✅
+- **Global**: `https://abs-core.dev-oconnector.workers.dev` (D1) ✅
+- **URL Dashboard**: `https://abs-core.dev-oconnector.workers.dev/dashboard`
 
 ### Próximos Passos (User)
-1. Rodar `git remote add origin ...`
-2. Rodar `git push -u origin main`
-3. Copiar e colar Post 1 no LinkedIn.
+- Acessar link global.
+- Testar envio de evento via cURL contra URL global.

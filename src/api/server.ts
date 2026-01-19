@@ -15,8 +15,16 @@ const app = new Hono();
 app.use('*', logger());
 app.use('*', cors());
 
-// Initialize Infra
-initDB(process.env.DATABASE_URL || 'abs_core.db');
+// Initialize Infra (Local Node.js Mode)
+import { setDB, initSchema } from '../infra/db';
+import { LocalDBAdapter } from '../infra/db-local';
+
+// Inject Local Adapter
+setDB(new LocalDBAdapter(process.env.DATABASE_URL || 'abs_core.db'));
+
+initSchema().then(() => {
+    console.log('✅ Local DB Schema Initialized');
+});
 
 import { getRecentLogs } from '../infra/db';
 import { Dashboard } from '../ui/dashboard';
@@ -25,8 +33,8 @@ import { Dashboard } from '../ui/dashboard';
 app.get('/health', (c) => c.json({ status: 'ok', version: '0.4.0' }));
 
 // Dashboard Route
-app.get('/dashboard', (c) => {
-    const logs = getRecentLogs(50);
+app.get('/dashboard', async (c) => {
+    const logs = await getRecentLogs(50);
     return c.html(Dashboard({ logs }).toString());
 });
 
