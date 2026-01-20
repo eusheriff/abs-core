@@ -24,6 +24,7 @@
   - **Fixes**: Corrected invalid event IDs in tests and ensured consistent status codes.
   - **SaaS**: Cloudflare Worker (`worker.ts`)
   - **On-Premise**: Docker Container (`Dockerfile` / `server.ts`)
+  - **SDK**: `@abs/scan` (Lightweight Node.js Client - Roadmap Phase 5)
 - **Database**: 
   - **SaaS**: Cloudflare D1
   - **On-Premise**: SQLite (Volume persistente)

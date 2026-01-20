@@ -4,6 +4,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![CI](https://github.com/eusheriff/abs-core/actions/workflows/ci.yml/badge.svg)](https://github.com/eusheriff/abs-core/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/Tests-Passing-success)](packages/core/test)
 [![Security](https://img.shields.io/badge/Security-TruffleHog%20%2B%20Trivy-green)](https://github.com/eusheriff/abs-core/actions)
 
 > **ABS Core is not an agent framework.**

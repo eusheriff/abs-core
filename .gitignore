@@ -35,3 +35,6 @@ packages/core/wrangler.toml
 # Internal docs (not for public consumption)
 docs/_consolidated/
 docs/AUDIT_*.md
+*.pem
+*.key
+*.key.pub
