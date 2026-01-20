@@ -216,6 +216,169 @@ export async function createMCPServer(db: DatabaseAdapter, config?: ProcessorCon
         }
     );
 
+    // ===========================================
+    // CODE SAFETY TOOLS (for Coding Agents)
+    // ===========================================
+
+    const CheckFileEditSchema = z.object({
+        file_path: z.string().describe('Absolute path of the file to edit'),
+        operation: z.enum(['create', 'modify', 'delete']).describe('Type of file operation'),
+        content_preview: z.string().optional().describe('Preview of content (first 500 chars)'),
+        line_count: z.number().optional().describe('Number of lines affected')
+    });
+
+    const CheckCommandSchema = z.object({
+        command: z.string().describe('Terminal command to execute'),
+        cwd: z.string().optional().describe('Working directory')
+    });
+
+    // Tool: abs_check_file_edit
+    server.tool(
+        'abs_check_file_edit',
+        'Check if a file edit operation is allowed by governance policies. Use before modifying files.',
+        CheckFileEditSchema.shape,
+        async (args) => {
+            const { CODE_SAFETY_POLICIES } = await import('../policies/library/code_safety');
+            
+            const event = {
+                event_type: 'agent.file_edit',
+                event_id: crypto.randomUUID(),
+                timestamp: new Date().toISOString(),
+                tenant_id: 'default',
+                payload: {
+                    file_path: args.file_path,
+                    operation: args.operation,
+                    content_preview: args.content_preview,
+                    line_count: args.line_count
+                }
+            };
+
+            const mockProposal = {
+                proposal_id: crypto.randomUUID(),
+                process_id: 'code-agent',
+                current_state: 'EDITING',
+                recommended_action: `${args.operation}_file`,
+                action_params: { path: args.file_path },
+                explanation: { summary: 'File edit operation', rationale: '', evidence_refs: [] },
+                confidence: 1.0,
+                risk_level: 'low' as const
+            };
+
+            try {
+                let finalDecision = 'ALLOW';
+                let denyReason = '';
+
+                for (const policy of CODE_SAFETY_POLICIES) {
+                    const result = policy.evaluate(mockProposal, event);
+                    const decision = typeof result === 'string' ? result : result.decision;
+                    if (decision === 'DENY') {
+                        finalDecision = 'DENY';
+                        denyReason = typeof result === 'object' ? result.reason || policy.name : policy.name;
+                        break;
+                    }
+                }
+
+                // Log decision
+                await db.run(
+                    `INSERT INTO decision_logs (decision_id, event_id, tenant_id, policy_name, decision, timestamp, payload) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    crypto.randomUUID(), event.event_id, 'default', 'code_safety', finalDecision, event.timestamp, JSON.stringify(event.payload)
+                );
+
+                return {
+                    content: [{
+                        type: 'text',
+                        text: JSON.stringify({
+                            allowed: finalDecision === 'ALLOW',
+                            decision: finalDecision,
+                            file_path: args.file_path,
+                            operation: args.operation,
+                            reason: denyReason || 'Passed all policies'
+                        }, null, 2)
+                    }]
+                };
+            } catch (error) {
+                return {
+                    content: [{
+                        type: 'text',
+                        text: JSON.stringify({ allowed: true, error: String(error), note: 'Policy check failed, defaulting to allow' })
+                    }]
+                };
+            }
+        }
+    );
+
+    // Tool: abs_check_command
+    server.tool(
+        'abs_check_command',
+        'Check if a terminal command is allowed by governance policies. Use before running commands.',
+        CheckCommandSchema.shape,
+        async (args) => {
+            const { CODE_SAFETY_POLICIES } = await import('../policies/library/code_safety');
+            
+            const event = {
+                event_type: 'agent.command',
+                event_id: crypto.randomUUID(),
+                timestamp: new Date().toISOString(),
+                tenant_id: 'default',
+                payload: {
+                    command: args.command,
+                    cwd: args.cwd
+                }
+            };
+
+            const mockProposal = {
+                proposal_id: crypto.randomUUID(),
+                process_id: 'code-agent',
+                current_state: 'EXECUTING',
+                recommended_action: 'run_command',
+                action_params: { command: args.command },
+                explanation: { summary: 'Command execution', rationale: '', evidence_refs: [] },
+                confidence: 1.0,
+                risk_level: 'low' as const
+            };
+
+            try {
+                let finalDecision = 'ALLOW';
+                let denyReason = '';
+
+                for (const policy of CODE_SAFETY_POLICIES) {
+                    const result = policy.evaluate(mockProposal, event);
+                    const decision = typeof result === 'string' ? result : result.decision;
+                    if (decision === 'DENY') {
+                        finalDecision = 'DENY';
+                        denyReason = typeof result === 'object' ? result.reason || policy.name : policy.name;
+                        break;
+                    }
+                }
+
+                // Log decision
+                await db.run(
+                    `INSERT INTO decision_logs (decision_id, event_id, tenant_id, policy_name, decision, timestamp, payload) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    crypto.randomUUID(), event.event_id, 'default', 'code_safety', finalDecision, event.timestamp, JSON.stringify(event.payload)
+                );
+
+                return {
+                    content: [{
+                        type: 'text',
+                        text: JSON.stringify({
+                            allowed: finalDecision === 'ALLOW',
+                            decision: finalDecision,
+                            command: args.command,
+                            reason: denyReason || 'Passed all policies'
+                        }, null, 2)
+                    }]
+                };
+            } catch (error) {
+                return {
+                    content: [{
+                        type: 'text',
+                        text: JSON.stringify({ allowed: true, error: String(error), note: 'Policy check failed, defaulting to allow' })
+                    }]
+                };
+            }
+        }
+    );
+
     return server;
 }
 
