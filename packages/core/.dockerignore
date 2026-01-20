@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.gitignore
+.env
+*.sqlite
+*.db
+*.log
+.DS_Store
+.wrangler
+coverage
+test_db_*
