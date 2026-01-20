@@ -5,7 +5,14 @@ import { EventProcessor } from '../../core/processor';
 import { requireScope } from '../middleware/auth';
 import { Integrity } from '../../core/integrity';
 
-const events = new Hono();
+interface EventsEnv {
+    EVENTS_QUEUE?: Queue<unknown>;
+    LLM_PROVIDER?: string;
+    OPENAI_API_KEY?: string;
+    GEMINI_API_KEY?: string;
+}
+
+const events = new Hono<{ Bindings: EventsEnv }>();
 
 events.post('/', requireScope('events:write'), async (c) => {
   try {
@@ -20,56 +27,55 @@ events.post('/', requireScope('events:write'), async (c) => {
     const event = validation.data;
     const db = getDB();
 
-    // 3. Persist Event (Source of Truth) - IMMUTABLE
-    
-    // 3a. Get Previous Hash (Chain Link)
+    // 2. Persist Event (Source of Truth) - IMMUTABLE
     const [lastEvent] = await db.all<{ hash: string }>(`
         SELECT hash FROM events_store ORDER BY rowid DESC LIMIT 1
     `);
     const previousHash = lastEvent?.hash || null;
-
-    // 3b. Compute New Hash (Payload + PrevHash)
     const hash = Integrity.computeHash(JSON.stringify(event), previousHash);
 
-    // 3c. Insert with Integrity Data
     await db.run(
         `INSERT INTO events_store (
-            event_id, tenant_id, event_type, payload, ingested_at, correlation_id, 
-            previous_hash, hash
+            id, type, payload, source, timestamp, status, hash, previous_hash
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         event.event_id,
-        event.tenant_id,
         event.event_type,
         JSON.stringify(event.payload),
+        event.source || 'api',
         new Date().toISOString(),
-        event.correlation_id,
-        previousHash,
-        hash
+        'pending',
+        hash,
+        previousHash
     );
 
-    // 4. Process (Sync or Async)
-    // ---------------------------------------------------------
-    // 2. Processing (Sync vs Async)
-    // ---------------------------------------------------------
-    const processor = new EventProcessor(db);
-    const isAsync = c.req.query('async') === 'true';
-
-    if (isAsync) {
-        // Fire and Forget (but log errors)
-        processor.process(event).catch(err => {
-            console.error(`⚠️ Async processing failed for ${event.event_id}:`, err);
+    // 3. Enqueue for async processing (v2.0 - Queue-based)
+    const queue = c.env?.EVENTS_QUEUE;
+    if (queue) {
+        await queue.send({
+            event,
+            enqueuedAt: new Date().toISOString()
         });
-
+        
+        console.log(`📤 Event ${event.event_id} enqueued for processing`);
+        
         return c.json({
             status: 'accepted',
-            message: 'Event persisted and queued for processing.',
+            message: 'Event persisted and queued for async processing.',
             event_id: event.event_id,
             correlation_id: event.correlation_id,
-            mode: 'async'
+            mode: 'queue'
         }, 202);
     }
 
-    // Default: Synchronous Processing
+    // Fallback: Sync processing if queue not available
+    console.log(`⚠️ Queue not available, processing synchronously`);
+    const llmProvider = c.env?.LLM_PROVIDER || 'mock';
+    const llmApiKey = c.env?.OPENAI_API_KEY || c.env?.GEMINI_API_KEY;
+    
+    const processor = new EventProcessor(db, {
+        llmProvider,
+        llmApiKey
+    });
     const result = await processor.process(event);
 
     return c.json(result, 200);

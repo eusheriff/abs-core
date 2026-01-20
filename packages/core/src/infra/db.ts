@@ -53,14 +53,15 @@ export const initSchema = async () => {
 
 export const getRecentLogs = async (limit: number = 50) => {
     const db = getDB();
+    // Maps production schema (init.sql) to application domain types
     return await db.all(`
         SELECT 
-            decision_id,
+            id as decision_id,
             timestamp as created_at, 
             event_id as trace_id,
             'decision.proposed' as event_type,
-            full_log_json as decision_payload,
-            execution_status
+            metadata as decision_payload,
+            decision as execution_status
         FROM decision_logs 
         ORDER BY timestamp DESC 
         LIMIT ?

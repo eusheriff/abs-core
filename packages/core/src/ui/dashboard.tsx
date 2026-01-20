@@ -4,7 +4,7 @@ import { Layout } from './layout';
 export const Dashboard = (props: { logs: any[] }) => {
     return Layout({
         title: 'Observability',
-        head: html`<meta http-equiv="refresh" content="2">`, // Simple Auto-Refresh
+        head: html`<meta http-equiv="refresh" content="5">`, // Simple Auto-Refresh
         children: html`
             <header>
                 <div>
@@ -14,7 +14,7 @@ export const Dashboard = (props: { logs: any[] }) => {
                     </p>
                 </div>
                 <div>
-                    <span class="badge">v0.4.0</span>
+                    <span class="badge">v1.1</span>
                     <span class="badge" style="background: var(--success-color); color: white;">Running</span>
                 </div>
             </header>
@@ -31,9 +31,22 @@ export const Dashboard = (props: { logs: any[] }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    ${props.logs.map(log => {
-                        const decision = JSON.parse(log.decision_payload);
-                        const isSafe = decision.confidence > 0.7;
+                    ${props.logs?.map(log => {
+                        let decision;
+                        try {
+                            // Handle both stringified JSON (from DB) and object (if direct)
+                            decision = typeof log.decision_payload === 'string' 
+                                ? JSON.parse(log.decision_payload) 
+                                : log.decision_payload || {};
+                        } catch (e) {
+                            decision = { 
+                                recommended_action: 'error', 
+                                confidence: 0, 
+                                explanation: { summary: 'Invalid JSON', rationale: String(e) } 
+                            };
+                        }
+                        
+                        const isSafe = (decision.confidence || 0) > 0.7;
                         
                         let execBadgeColor = '#8b949e'; // Pending/Grey
                         if (log.execution_status === 'EXECUTED') execBadgeColor = '#238636'; // Green
@@ -63,9 +76,9 @@ export const Dashboard = (props: { logs: any[] }) => {
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 8px;">
                                         <div style="flex: 1; height: 4px; background: var(--border-color); border-radius: 2px;">
-                                            <div style="width: ${decision.confidence * 100}%; height: 100%; background: ${isSafe ? 'var(--success-color)' : 'var(--danger-color)'}; border-radius: 2px;"></div>
+                                            <div style="width: ${(decision.confidence || 0) * 100}%; height: 100%; background: ${isSafe ? 'var(--success-color)' : 'var(--danger-color)'}; border-radius: 2px;"></div>
                                         </div>
-                                        <span style="font-size: 12px; width: 32px;">${(decision.confidence * 100).toFixed(0)}%</span>
+                                        <span style="font-size: 12px; width: 32px;">${((decision.confidence || 0) * 100).toFixed(0)}%</span>
                                     </div>
                                 </td>
                                 <td>
@@ -78,7 +91,7 @@ export const Dashboard = (props: { logs: any[] }) => {
                 </tbody>
             </table>
             
-            ${props.logs.length === 0 ? html`
+            ${(!props.logs || props.logs.length === 0) ? html`
                 <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
                     No decision logs found yet. Send an event to see it here.
                 </div>

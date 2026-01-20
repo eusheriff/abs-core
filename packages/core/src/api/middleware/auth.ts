@@ -1,8 +1,16 @@
 import { Context, Next } from 'hono';
-import { verifyKey, hasScope, Scope } from '../../core/auth';
+import { verifyKey, hasScope, Scope, ApiKey } from '../../core/auth';
+
+interface Bindings {
+    DB: unknown; // D1 database binding
+}
+
+interface Variables {
+    apiKey: ApiKey;
+}
 
 export const requireScope = (scope: Scope) => {
-    return async (c: Context, next: Next) => {
+    return async (c: Context<{ Bindings: Bindings; Variables: Variables }>, next: Next) => {
         const authHeader = c.req.header('Authorization');
         
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -10,14 +18,15 @@ export const requireScope = (scope: Scope) => {
         }
 
         const token = authHeader.split(' ')[1];
-        const key = await verifyKey(token);
+        // Pass DB binding for D1 lookup (with fallback to mock if undefined)
+        const key = await verifyKey(token, c.env?.DB as Parameters<typeof verifyKey>[1]);
 
         if (!key) {
             return c.json({ error: 'Unauthorized', message: 'Invalid API Key' }, 401);
         }
 
         if (!hasScope(key, scope)) {
-            return c.json({ error: 'Forbidden', message: `msg: Missing required scope: ${scope}` }, 403);
+            return c.json({ error: 'Forbidden', message: `Missing required scope: ${scope}` }, 403);
         }
 
         // Attach key to context if needed later
@@ -26,3 +35,5 @@ export const requireScope = (scope: Scope) => {
         await next();
     };
 };
+
+

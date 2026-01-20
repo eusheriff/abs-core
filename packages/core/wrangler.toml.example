@@ -1,0 +1,44 @@
+# wrangler.toml - Example Configuration
+# Copy this file to wrangler.toml and fill in your values
+
+name = "abs-core"
+main = "src/api/worker.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Custom Domain (optional)
+# routes = [
+# 	{ pattern = "abs.yourdomain.com", custom_domain = true }
+# ]
+
+# D1 Database Binding
+# Create your database: npx wrangler d1 create abs-core-db
+[[d1_databases]]
+binding = "DB"
+database_name = "abs-core-db"
+database_id = "YOUR_DATABASE_ID_HERE"  # Get from: npx wrangler d1 list
+migrations_dir = "src/infra/migrations"
+
+[vars]
+LLM_PROVIDER = "mock"  # Options: mock, openai, gemini
+LOG_LEVEL = "info"
+
+# LLM Provider Secrets (configure via: wrangler secret put <NAME>)
+# OPENAI_API_KEY - Required when LLM_PROVIDER = "openai"
+# GEMINI_API_KEY - Required when LLM_PROVIDER = "gemini"
+
+# Queue Bindings (v2.0 - optional for async processing)
+# Create queues first:
+#   npx wrangler queues create abs-events-queue
+#   npx wrangler queues create abs-events-dlq
+
+# [[queues.producers]]
+# queue = "abs-events-queue"
+# binding = "EVENTS_QUEUE"
+
+# [[queues.consumers]]
+# queue = "abs-events-queue"
+# max_batch_size = 10
+# max_batch_timeout = 30
+# max_retries = 3
+# dead_letter_queue = "abs-events-dlq"

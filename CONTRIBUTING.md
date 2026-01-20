@@ -1,43 +1,61 @@
 # Contributing to ABS Core
 
-Thank you for your interest in contributing!
-We are building a **governance-first** runtime, and quality/safety is our top priority.
-
-## Handrails 🛡️
-
-Before submitting a PR, please read [INVARIANTS.md](../INVARIANTS.md).
-Any Code Change that violates these invariants will be rejected:
-1.  Bypassing the Policy Gate.
-2.  Executing actions without logging.
-3.  Removing Type Safety (no `any`).
-
-## Development Flow
-
-1.  **Fork & Clone**:
-    ```bash
-    git clone ...
-    npm install
-    npm run dev
-    ```
-
-2.  **Make Changes**:
-    - If adding a Feature: Create a `feat/` branch.
-    - If fixing a Bug: Create a `fix/` branch.
-    - If refactoring: Create a `chore/` or `refactor/` branch.
-
-3.  **Test**:
-    - We currently value manual verification via `abs simulate` or `curl`.
-    - Ensure `npm run dev` starts without errors.
-    - Ensure no Lint warnings are introduced.
-
-## Pull Request Process
-
-1.  Describe **Why** you are making the change.
-2.  Describe **How** it affects the Decision Integrity.
-3.  Link related Issues.
-4.  Wait for the Maintainer review.
+First off, thank you for considering contributing to ABS Core!
 
 ## Code of Conduct
 
-Be invalidly kind. We are professionals building professional tools.
-Respect, patience, and technical rigor are expected.
+This project adheres to a Code of Conduct. By participating, you are expected to uphold this code.
+
+## How to Contribute
+
+### Reporting Bugs
+
+- Check if the issue already exists
+- Use the bug report template
+- Include reproduction steps
+
+### Suggesting Features
+
+- Check the roadmap first
+- Open a discussion before a PR
+
+### Pull Requests
+
+1. Fork the repo
+2. Create a feature branch: `git checkout -b feat/my-feature`
+3. Make your changes
+4. Run tests: `npm test`
+5. Commit with conventional commits: `feat: add new feature`
+6. Push and open a PR
+
+## Development Setup
+
+```bash
+# Clone
+git clone https://github.com/YOUR_USERNAME/abs-core.git
+cd abs-core
+
+# Install
+npm install
+
+# Setup Cloudflare D1
+cp packages/core/wrangler.toml.example packages/core/wrangler.toml
+npx wrangler d1 create abs-core-db
+# Update wrangler.toml with your database_id
+
+# Run migrations
+npx wrangler d1 migrations apply abs-core-db --local
+
+# Dev server
+npm run dev
+```
+
+## Architecture
+
+- `packages/core/src/api/` - HTTP handlers (Hono)
+- `packages/core/src/core/` - Business logic, policies, LLM providers
+- `packages/core/src/infra/` - Database, migrations
+
+## License
+
+By contributing, you agree that your contributions will be licensed under Apache 2.0.

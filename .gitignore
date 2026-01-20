@@ -27,3 +27,11 @@ Thumbs.db
 abs_core.db
 packages/core/.wrangler
 log/
+
+# OSS Safety - Keep personal config out of public repo
+packages/core/wrangler.toml
+!packages/core/wrangler.toml.example
+
+# Internal docs (not for public consumption)
+docs/_consolidated/
+docs/AUDIT_*.md

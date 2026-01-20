@@ -1,26 +1,44 @@
 import { v4 as uuidv4 } from 'uuid';
-import { getProvider } from './provider-factory';
+
 import { PolicyRegistry } from './policy-registry';
 import { DecisionProposal } from './schemas';
 import { Metrics } from './metrics';
 import { DB } from '../infra/db-adapter';
+import { LLMProvider, getProvider, ProviderType } from './provider-factory';
+
+export interface ProcessorConfig {
+    llmProvider: ProviderType;
+    llmApiKey?: string;
+    llmModel?: string;
+}
 
 export class EventProcessor {
-    constructor(private db: DB) {}
+    private provider: LLMProvider;
+
+    constructor(private db: DB, config?: ProcessorConfig) {
+        // Initialize LLM provider based on config
+        this.provider = getProvider(
+            config?.llmProvider || 'mock',
+            {
+                apiKey: config?.llmApiKey,
+                model: config?.llmModel
+            }
+        );
+        console.log(`[Processor] Initialized with ${this.provider.name} provider`);
+    }
 
     async process(event: any) {
         const start = Date.now();
-        console.log(`⚙️ Processing Event: ${event.event_type} [${event.event_id}]`);
+        console.log(`⚙️ Processing Event: ${event.event_type} [${event.event_id}] via ${this.provider.name}`);
 
         try {
-            // 1. Load Process State (Mock)
+            // 1. Load Process State
             const currentState = 'IDLE'; 
 
-            // 2. AI Decision (LLM / Provider)
-            const provider = getProvider(); 
-            const partialProposal = await provider.propose(event, currentState);
+            // 2. AI Decision (LLM Provider)
+            const partialProposal = await this.provider.propose(event);
 
-            // Hydrate Proposal
+            // Hydrate Proposal with defaults
             const validProposal: DecisionProposal = {
                 proposal_id: uuidv4(),
                 process_id: event.correlation_id || uuidv4(),
@@ -41,29 +59,31 @@ export class EventProcessor {
             const latency = Date.now() - start;
 
             await this.db.run(`
-                INSERT INTO decision_logs (decision_id, tenant_id, event_id, correlation_id, timestamp, full_log_json)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO decision_logs (id, event_id, policy_name, provider, decision, reason, metadata, latency_ms, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
                 decisionId,
-                event.tenant_id,
                 event.event_id,
-                event.correlation_id,
-                new Date().toISOString(),
+                policy.name || 'default',
+                this.provider.name,
+                decision,
+                validProposal.explanation.summary,
                 JSON.stringify({
-                    policy_decision: decision,
-                    input_event: event,
                     ai_proposal: validProposal,
-                    latency_ms: latency
-                })
+                    input_event: event
+                }),
+                latency,
+                new Date().toISOString()
             );
 
             Metrics.record('processing_latency', latency);
-            console.log(`✅ Decision Logged: ${decision} (${latency}ms)`);
+            console.log(`✅ Decision Logged: ${decision} (${latency}ms) via ${this.provider.name}`);
 
             return {
                 decision_id: decisionId,
                 status: 'processed',
                 decision: decision,
+                provider: this.provider.name,
                 latency_ms: latency
             };
 
