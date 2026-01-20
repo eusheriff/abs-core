@@ -1,7 +1,7 @@
 import { MockProvider } from './providers/mock';
 import { OpenAIProvider } from './providers/openai';
 import { GeminiProvider } from './providers/gemini';
-import { VCRProvider } from './vcr-provider';
+// import { VCRProvider } from './vcr-provider';
 import { LLMProvider, ProviderType, ProviderConfig } from './interfaces';
 
 // Re-export types for convenience if needed, or consumers should use interfaces
@@ -39,17 +39,19 @@ export function getProvider(type: ProviderType | string, config?: ProviderConfig
             break;
     }
 
-    // Checking process.env safely (for Node environments)
-    // In Cloudflare Workers, process might not exist or be empty
+    /*
+    // VCR Logic disabled for Edge Worker compatibility (FS dependency)
+    // TODO: Re-enable via dynamic import for testing scenarios only
     const vcrMode = typeof process !== 'undefined' ? process.env?.ABS_VCR_MODE : undefined;
 
     if (vcrMode && vcrMode !== 'off') {
         const mode = vcrMode === 'record' || vcrMode === 'replay' ? vcrMode : 'off';
         if (mode !== 'off') {
             console.log(`[Provider] Wrapping ${provider.name} in VCR (mode=${mode})`);
-            return new VCRProvider(provider, mode);
+            // return new VCRProvider(provider, mode);
         }
     }
+    */
 
     return provider;
 }
