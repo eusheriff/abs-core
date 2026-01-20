@@ -60,6 +60,11 @@ export class SQLiteAdapter implements DatabaseAdapter {
             `);
         }
     }
+    
+    // Alias for compatibility
+    async initialize(): Promise<void> {
+        return this.init();
+    }
 
     // Helper for testing
     close(): void {
