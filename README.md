@@ -49,75 +49,56 @@ graph LR
 
 Note: The **Decision Log** happens *strictly before* Execution. If the DB insert fails, the action is never attempted.
 
-## 🚀 Deployment Options
+## 🚀 Getting Started (Free Community Edition)
 
-### Option 1: MCP Server (For AI Agents/IDEs) 🆕
-Run ABS as a **Model Context Protocol** server to protect your local AI workflow (Cursor, VSCode, Claude Desktop).
+The **ABS Scanner** (`@abs/scan`) is a lightweight "Sentry for LLMs" that runs locally in your application. It audits your AI's decisions without blocking execution.
 
-```bash
-# SSH into your VPS or generic Linux host
-# ABS MCP runs over Stdio (SSH)
-{
-  "mcpServers": {
-    "abs-governance": {
-      "command": "ssh",
-      "args": ["user@vps-ip", "cd /opt/abs/packages/core && npm run mcp"]
-    }
-  }
-}
-```
-
-### Option 2: Sidecar / API Gateway (Cloudflare)
-Deploy as a global edge worker to intercept and govern API traffic.
-
-```bash
-# Deploy to Cloudflare Workers
-npm run deploy
-```
-
-### Option 3: Scanner SDK (Fire-and-Forget)
-Embed ABS directly into your TypeScript application for "Shadow Mode" auditing.
+### Installation
 
 ```bash
 npm install @abs/scan
 ```
 
+### Usage (Shadow Mode)
+
+Embed the scanner in your existing TS/JS application to visualize what *would* have been blocked.
+
 ```typescript
 import { ABS } from '@abs/scan';
 
+// 1. Initialize local scanner
 const abs = new ABS({ mode: 'scanner' });
-await abs.log({ input, output }); // Non-blocking audit
+
+// 2. Log AI interactions (Non-blocking)
+// This will analyze against local policies and print violations to console
+await abs.log({
+  input: "Delete production database",
+  output: "Executing DELETE schema...",
+  policy: "strict-safety"
+});
 ```
 
-### Option 4: Self-Hosted (Docker/VPS)
-Run anywhere Node.js runs (Oracle, AWS, GCP, On-Prem).
+## 🛡️ Enterprise Runtime (Paid)
 
-```bash
-# Docker
-docker run -p 8787:8787 -e ABS_MODE=runtime abs-core
+Found vulnerabilities? Upgrade to the **ABS Runtime** to block them in real-time.
 
-# VPS Quick Start
-curl -fsSL https://raw.githubusercontent.com/eusheriff/abs-core/main/scripts/deploy-vps.sh | bash
-```
+**ABS MCP Server** integrates directly with your IDE or Agent workflow to enforce policies *before* execution.
 
-### Option 3: CLI Lab (Local Testing)
+| Feature | Community Scanner | Enterprise Runtime |
+| :--- | :---: | :---: |
+| **Audit/Logging** | ✅ Local | ✅ Centralized |
+| **Policy Check** | ✅ Dry-Run | ✅ Enforcement |
+| **Real-time Blocking** | ❌ | ✅ |
+| **Integration** | SDK | MCP / Sidecar |
 
-```bash
-# Run the CLI directly (no global install needed)
-npm run abs -- simulate ticket.created -d '{"text": "Urgent refund needed"}'
+👉 **[Get Enterprise Access](https://oconnector.tech/abs)** to actuate your governance layer.
 
-# View decision logs
-npm run abs -- logs --limit 5
-```
+---
 
-Example output:
-```text
-┌──────────────────────────────────────┬────────────────┬──────────┬───────────┐
-│ ID                                   │ Event          │ Decision │ Latency   │
-├──────────────────────────────────────┼────────────────┼──────────┼───────────┤
-│ 8bbe99ee-6412-4b19-b7e8-096837567d26 │ ticket.created │ allow    │ 45ms      │
-└──────────────────────────────────────┴────────────────┴──────────┴───────────┘
-```
+## 🗺️ Repository Structure (Code Map)
+- **Scanner SDK**: [`packages/scan/`](packages/scan/) (The community tool)
+- **Core Runtime**: [`packages/core/`](packages/core/) ( The governance logic)
+- **Policies**: [`examples/policies/`](examples/policies/) (Open source rule definitions)
 
 ---
 
