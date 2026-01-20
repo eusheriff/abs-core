@@ -1,15 +1,18 @@
 import { PolicyEngine, PolicyResult } from './interfaces';
 import { SimplePolicyEngine } from './policy';
 import { BotOperationalPolicy } from './policy-bot-operational';
+import { WhatsAppBotPolicy } from './policy-whatsapp-bot';
 import { DecisionProposal } from './schemas';
 
 export class PolicyRegistry {
     private static policies: Map<string, PolicyEngine> = new Map();
     private static defaultPolicy: PolicyEngine = new SimplePolicyEngine();
 
-    // Initialize with bot operational policy for whatsapp events
+    // Initialize with policies for different event types
     static {
-        this.register('whatsapp', new BotOperationalPolicy());
+        // WhatsApp-specific policy (more detailed, 6 rules)
+        this.register('whatsapp', new WhatsAppBotPolicy() as unknown as PolicyEngine);
+        // Generic bot policy (5 rules)
         this.register('bot', new BotOperationalPolicy());
     }
 
