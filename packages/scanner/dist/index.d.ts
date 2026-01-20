@@ -1,17 +1,19 @@
 export interface ABSEvent {
-    input?: string;
-    output?: string;
+    input: string;
+    output: string;
+    policy?: string;
     model?: string;
     metadata?: Record<string, any>;
     tenant_id?: string;
 }
 export interface ABSConfig {
-    dsn: string;
+    dsn?: string;
     apiKey?: string;
-    scannerMode?: boolean;
+    mode?: 'scanner' | 'runtime';
+    debug?: boolean;
 }
 export declare class ABS {
-    private static config;
-    static init(config: ABSConfig): void;
-    static log(event: ABSEvent): Promise<void>;
+    private config;
+    constructor(config?: ABSConfig);
+    log(event: ABSEvent): Promise<void>;
 }
