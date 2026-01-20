@@ -25,7 +25,7 @@ We offer the Runtime purely as a managed or self-hosted commercial product.
 | :--- | :--- | :--- | :--- |
 | **Professional** | Freelancers / Solo Devs | **$299** / year | • Single User License<br>• Access to MCP Binary/Docker<br>• Standard Updates |
 | **Team** | AI Squads needed Governance | **$899** / month | • Up to 10 Seats<br>• Centralized Policy Server<br>• Audit Dashboard Access<br>• Priority Support |
-| **Enterprise** | Regulated Industries | **Contact Sales** | • Unlimited Seats<br>• VPC / On-Prem Deployment<br>• SLA & Custom MSAs<br>• Forensic Audit Export |
+| **Enterprise** | Regulated Industries | **$2,500** / month | • Unlimited Seats<br>• VPC / On-Prem Deployment<br>• SLA & Custom MSAs<br>• Forensic Audit Export |
 
 ## How to Buy
 Visit [oconnector.tech/abs](https://oconnector.tech/abs) to purchase a license key.
