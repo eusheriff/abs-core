@@ -16,6 +16,7 @@
 
 - **Core**: Unified Runtime (`packages/core/src/api/factory.ts`)
   - **Modes**: `scanner` (Free/Passive) vs `runtime` (Paid/Active).
+  - **Auth**: IAM Layer with Cloudflare Workers + KV + Turnstile (Anti-Bot).
   - **2026-01-20**: Implemented **Vector 5 (Idempotency)**.
   - **Schema**: Created `004_idempotency.sql` adding UNIQUE index on `decision_logs(event_id)`.
   - **Logic**: Updated `EventProcessor.process` to catch unique constraint violations and return existing decision (`processed_duplicate`).
@@ -43,6 +44,11 @@
 - **LLM**: Gemini 1.5 Flash (6 keys em rodízio)
 - **Security**: Prompt Injection Sanitizer + Idempotency Check + Metrics Auth
 - **Observability**: `/metrics` (Prometheus) protegido por scope `admin:read`
+- **IAM**:
+  - **Service**: `auth-worker` (Cloudflare Workers)
+  - **Store**: `ABS_AUTH` (KV Namespace)
+  - **Bot**: Cloudflare Turnstile (Site Key `0x4A...`)
+  - **Flow**: Session -> PAT Exchange -> Bearer Middleware
 
 ## Integração Ativa
 
@@ -68,3 +74,4 @@
 - [x] v1.4: Prompt Injection Protection
 - [x] v2.0: Scale (Queue-based processing)
 - [x] v0.6: Bot Operational Governance (Policy Pack v0)
+- [x] v2.8: IAM & Commercial Licensing (Open Core Strategy)

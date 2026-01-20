@@ -12,8 +12,25 @@ app.use('*', cors())
 
 // 1. Mock Login (Replace with GitHub OAuth later)
 app.post('/login', async (c) => {
-  const { email, password } = await c.req.json()
+  const { email, password, turnstile } = await c.req.json()
   
+  // 0. Validate Turnstile
+  if (!turnstile) return c.json({ error: 'Missing captcha' }, 400)
+  
+  const ip = c.req.header('CF-Connecting-IP')
+  const formData = new FormData()
+  formData.append('secret', '0x4AAAAAACNu2JqUWAas5oH0RIfM0Vlt7Ws')
+  formData.append('response', turnstile)
+  formData.append('remoteip', ip || '')
+
+  const url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
+  const result = await fetch(url, { body: formData, method: 'POST' })
+  const outcome = await result.json()
+
+  // @ts-ignore
+  if (!outcome.success) return c.json({ error: 'Bot detected' }, 403)
+
+  // 1. Mock Login (Replace with GitHub OAuth later)
   // TODO: Validate password in D1
   if (email === 'dev@oconnector.tech' && password === 'Rsg4dr3g44@') {
     // Generate Session ID

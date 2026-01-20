@@ -126,3 +126,19 @@
     - Demo executed: Events ingested by v2.7.0 backend.
     - Dashboard: Confirmed logs visible with "Latency Breakdown".
   - **Strategic Impact**: Proven feasibility of splitting "Scanner" (Free) from "Runtime" (Paid).
+
+- 2026-01-20: Ecosystem & IAM Implementation (Phases 7 & 8)
+  - **Goal**: Commercialize ABS with a "Seat-based" model and Anti-Bot protection.
+  - **Landing Page**:
+    - **Tech**: Next.js 14 + Tailwind (Cloudflare Pages).
+    - **Features**: Scanner Demo, Pricing Funnel (MIT vs Enterprise).
+    - **Domain**: `abscore.app` (DNS migrated to Cloudflare).
+  - **IAM System**:
+    - **Architecture**: `auth-worker` (Hono) using Cloudflare KV (`ABS_AUTH`).
+    - **Security**: Added Cloudflare Turnstile CAPTCHA to Login Page.
+    - **Integration**: MCP Server now enforces `ABS_TOKEN` check on startup.
+    - **Client**: Web Dashboard built for Token Generation.
+  - **Licensing**:
+    - **Model**: Open Core (MIT Scanner, Commercial Runtime).
+    - **Docs**: Created `LICENSING.md`.
+  - **Status**: Ready for Enterprise Beta (`v2.8.0`).
