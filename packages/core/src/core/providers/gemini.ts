@@ -37,7 +37,7 @@ export class GeminiProvider implements LLMProvider {
         // Support multiple keys separated by comma
         const keyString = config.apiKey || '';
         this.apiKeys = keyString.split(',').map(k => k.trim()).filter(k => k.length > 0);
-        this.model = config.model || 'gemini-2.0-flash';
+        this.model = config.model || 'gemini-2.5-flash';
         
         console.log(`[Gemini] Initialized with ${this.apiKeys.length} API key(s) in rotation`);
     }
