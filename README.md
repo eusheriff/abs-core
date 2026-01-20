@@ -1,11 +1,16 @@
 # ABS Core
 > **Autonomous Business System (Runtime)**
-> `v2.0.0`
+> `v2.7.0`
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![CI](https://github.com/eusheriff/abs-core/actions/workflows/ci.yml/badge.svg)](https://github.com/eusheriff/abs-core/actions/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/Tests-Passing-success)](packages/core/test)
 [![Security](https://img.shields.io/badge/Security-TruffleHog%20%2B%20Trivy-green)](https://github.com/eusheriff/abs-core/actions)
+
+<p align="center">
+  <img src="docs/images/landing-page.png" alt="ABS Core - The Immune System for AI Agents" width="800">
+</p>
+
 
 > **ABS Core is not an agent framework.**
 > It is a governed runtime that prevents probabilistic models from executing unbounded actions.
