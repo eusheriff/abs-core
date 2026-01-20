@@ -64,7 +64,7 @@ POST /v1/events ──► Ingest ──► Queue ──► Process ──► Log
 ### Option 1: Use Hosted API
 
 ```bash
-curl -X POST https://abs.oconnector.tech/v1/events \
+curl -X POST https://YOUR_DOMAIN/v1/events \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-demo-abs-v0" \
   -d '{

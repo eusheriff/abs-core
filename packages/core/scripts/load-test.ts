@@ -4,12 +4,13 @@
  * Usage:
  *   npx tsx scripts/load-test.ts --requests 100 --concurrency 10
  * 
- * Or with k6:
- *   k6 run scripts/load-test.js
+ * Environment:
+ *   ABS_API_URL - Target URL (default: http://localhost:8787)
+ *   ABS_API_KEY - API key (default: test-key)
  */
 
-const API_URL = process.env.ABS_API_URL || 'https://abs.oconnector.tech';
-const API_KEY = process.env.ABS_API_KEY || 'sk-demo-abs-v0';
+const API_URL = process.env.ABS_API_URL || 'http://localhost:8787';
+const API_KEY = process.env.ABS_API_KEY || 'test-key';
 
 interface TestResult {
     success: number;

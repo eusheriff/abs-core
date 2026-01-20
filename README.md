@@ -56,7 +56,7 @@ The easiest way to use ABS Core - no installation required:
 
 ```bash
 # Send an event to the hosted API
-curl -X POST https://abs.oconnector.tech/v1/events \
+curl -X POST https://YOUR_DOMAIN/v1/events \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{"event_id":"uuid","tenant_id":"demo","event_type":"ticket.created","source":"api","occurred_at":"2026-01-19T00:00:00Z","payload":{"text":"Hello"},"correlation_id":"corr-1"}'
