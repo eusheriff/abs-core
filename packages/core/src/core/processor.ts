@@ -3,19 +3,19 @@ import { v4 as uuidv4 } from 'uuid';
 import { PolicyRegistry } from './policy-registry';
 import { DecisionProposal, EventEnvelopeSchema, EventEnvelope } from './schemas';
 import { Metrics } from './metrics';
-import { DB } from '../infra/db-adapter';
+import { DatabaseAdapter } from '../infra/db-adapter';
 import { LLMProvider, getProvider, ProviderType } from './provider-factory';
 import { sanitize } from './sanitizer';
 
 export interface ProcessorConfig {
-    llmProvider: ProviderType;
+    llmProvider: string;
     llmApiKey?: string;
     llmModel?: string;
 }
 
 export interface ProcessResult {
     decision_id: string;
-    status: 'processed' | 'rejected' | 'failed';
+    status: 'processed' | 'rejected' | 'failed' | 'processed_duplicate' | 'duplicate'; // added specific statuses
     decision: string;
     provider: string;
     latency_ms: number;
@@ -25,9 +25,12 @@ export interface ProcessResult {
 export class EventProcessor {
     private provider: LLMProvider;
 
-    constructor(private db: DB, config?: ProcessorConfig) {
+    constructor(private db: DatabaseAdapter, config?: ProcessorConfig) {
+        // Safe cast or defaulting. getProvider expects ProviderType.
+        const providerName = (config?.llmProvider as ProviderType) || 'mock';
+        
         this.provider = getProvider(
-            config?.llmProvider || 'mock',
+            providerName,
             {
                 apiKey: config?.llmApiKey,
                 model: config?.llmModel
@@ -56,6 +59,32 @@ export class EventProcessor {
         const validEvent: EventEnvelope = validationResult.data;
         
         console.log(`⚙️ Processing Event: ${validEvent.event_type} [${validEvent.event_id}] via ${this.provider.name}`);
+
+        // 0. IDEMPOTENCY CHECK (Prevent duplicate processing)
+        try {
+            const [existing] = await this.db.all<{ execution_status: string; decision_id: string; full_log_json: string }>(
+                `SELECT decision_id, execution_status, full_log_json FROM decision_logs WHERE event_id = ? LIMIT 1`,
+                validEvent.event_id
+            );
+
+            if (existing) {
+                console.log(`skipping duplicate event ${validEvent.event_id} (already processed)`);
+                const logData = JSON.parse(existing.full_log_json || '{}');
+                return {
+                    decision_id: existing.decision_id || 'duplicate',
+                    status: 'processed', // or 'duplicate' if we want to distinguish
+                    decision: logData.decision || existing.execution_status,
+                    provider: 'cache',
+                    latency_ms: 0,
+                    policy_id: logData.policy_id
+                };
+            }
+        } catch (e) {
+            console.warn('[Processor] Idempotency check failed:', e);
+            // Continue processing on error (fail open for read errors? or fail closed?)
+            // Fail open for reading logs = risk of duplicate execution.
+            // But if DB is down, next steps will fail too.
+        }
 
         try {
             // 2. PROMPT INJECTION CHECK
@@ -114,6 +143,7 @@ export class EventProcessor {
 
             const logResult = await this.logDecision({
                 decisionId,
+                tenantId: validEvent.tenant_id,
                 eventId: validEvent.event_id,
                 policyName: policy.name || 'default',
                 provider: this.provider.name,
@@ -157,6 +187,7 @@ export class EventProcessor {
 
     private async logDecision(params: {
         decisionId: string;
+        tenantId: string;
         eventId: string;
         policyName: string;
         provider: string;
@@ -167,23 +198,24 @@ export class EventProcessor {
     }): Promise<{ success: boolean }> {
         try {
             const result = await this.db.run(`
-                INSERT INTO decision_logs (id, event_id, policy_name, provider, decision, reason, metadata, latency_ms, timestamp)
+                INSERT INTO decision_logs (decision_id, tenant_id, event_id, policy_name, provider, decision, execution_response, full_log_json, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
                 params.decisionId,
+                params.tenantId,
                 params.eventId,
                 params.policyName,
                 params.provider,
                 params.decision,
-                params.reason,
-                JSON.stringify(params.metadata),
-                params.latency,
+                params.reason, // treating reason as execution_response summary for now. Wait, schema has full_log_json/execution_response.
+                JSON.stringify(params.metadata), // full_log_json
                 new Date().toISOString()
             );
-            return { success: result?.isSuccess !== false };
-        } catch (error) {
-            console.error('Failed to log decision:', error);
+            return { success: result.isSuccess !== false };
+        } catch (e) {
+            console.error('Failed to log decision:', e);
             return { success: false };
         }
     }
+
 }
