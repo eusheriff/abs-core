@@ -110,6 +110,23 @@ Example output:
 
 ---
 
+## 🛡️ Testing & Assurance
+
+ABS Core is built with a "Test-First" philosophy for critical paths.
+
+```bash
+# Run the full suite (Idempotency, Observability, VCR)
+cd packages/core
+npm run test
+```
+
+Key suites:
+- **Idempotency**: Verifies race condition handling and DB constraints.
+- **Forensic**: Validates `trace_id` lineage and latency breakdown.
+- **VCR**: Ensures deterministic LLM replays development.
+
+---
+
 ## Security Posture
 We follow the **OWASP Top 10 for LLM Applications**.
 *   **LLM01 (Prompt Injection)**: Inputs are sanitized and strictly delimited.
