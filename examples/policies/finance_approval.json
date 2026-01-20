@@ -1,0 +1,27 @@
+{
+  "name": "finance_approval_matrix",
+  "description": "Enforces approval limits based on transaction amount and role",
+  "version": "1.0.0",
+  "rules": [
+    {
+      "if": { ">": [{ "var": "event.payload.amount" }, 10000] },
+      "then": {
+        "and": [
+          { "==": [{ "var": "event.payload.currency" }, "USD"] },
+          { "in": ["CFO_APPROVAL", { "var": "event.payload.signatures" }] }
+        ]
+      },
+      "else": true
+    },
+    {
+      "if": { ">": [{ "var": "event.payload.amount" }, 1000] },
+      "then": {
+        "in": ["MANAGER_APPROVAL", { "var": "event.payload.signatures" }]
+      },
+      "else": true
+    }
+  ],
+  "recovery": {
+    "on_deny": "escalate"
+  }
+}

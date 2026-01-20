@@ -1,0 +1,22 @@
+{
+  "name": "hr_pii_protection",
+  "description": "Prevents unauthorized access to sensitive employee data",
+  "version": "1.0.0",
+  "rules": [
+    {
+      "if": { "==": [{ "var": "event.event_type" }, "employee.view"] },
+      "then": {
+        "or": [
+            { "==": [{ "var": "context.user.role" }, "HR_ADMIN"] },
+            { 
+                "and": [
+                    { "==": [{ "var": "context.user.role" }, "MANAGER"] },
+                    { "==": [{ "var": "context.user.department" }, { "var": "event.payload.department" }] }
+                ]
+            }
+        ]
+      },
+      "else": true
+    }
+  ]
+}
