@@ -142,3 +142,20 @@
     - **Model**: Open Core (MIT Scanner, Commercial Runtime).
     - **Docs**: Created `LICENSING.md`.
   - **Status**: Ready for Enterprise Beta (`v2.8.0`).
+
+- 2026-01-20: Distribution & Marketplace Prep (Phase 9)
+  - **NPM**: Configured `@abs/scan` for global execution (`npx`).
+  - **VS Code**: Scaffolded extension in `packages/vscode`.
+  - **Build**: Extension compiled successfully (`skipLibCheck` tweak required).
+  - **Artifacts**: Created local VSIX capabilities (ready for `vsce package`).
+
+### Phase 9: Distribution & Extensions 📦
+**Goal**: Prepare ABS Core for public distribution via NPM and VS Code Marketplace.
+
+1.  **NPM Package (`@abs/scan`)**:
+    - **Configured**: `packages/scanner/package.json` with `bin` entry for `npx @abs/scan`.
+    - **Ready**: Run `npm publish` to release.
+2.  **VS Code Extension (`packages/vscode`)**:
+    - **Artifact**: `abs-vscode-0.0.1.vsix` (7.9 KB).
+    - **Installation**: `code --install-extension packages/vscode/abs-vscode-0.0.1.vsix`.
+    - **Command**: `ABS: Scan Current File` (Ctrl+Shift+P).

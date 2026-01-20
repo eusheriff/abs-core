@@ -4,8 +4,19 @@
   "description": "ABS Lightweight Scanner SDK",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "abs-scan": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {},
   "devDependencies": {
