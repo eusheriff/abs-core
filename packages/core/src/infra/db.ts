@@ -21,17 +21,20 @@ export const initSchema = async () => {
     // 2. Events Store (Immutable "Source of Truth")
     await db.exec(`
       CREATE TABLE IF NOT EXISTS events_store (
-        event_id TEXT PRIMARY KEY,
+        id TEXT PRIMARY KEY,
         tenant_id TEXT NOT NULL,
-        event_type TEXT NOT NULL,
+        type TEXT NOT NULL,
         payload TEXT NOT NULL,
-        ingested_at TEXT NOT NULL,
+        source TEXT NOT NULL,
+        timestamp TEXT NOT NULL,
+        status TEXT NOT NULL,
         correlation_id TEXT,
         previous_hash TEXT,
         hash TEXT,
         signature TEXT
       );
       CREATE INDEX IF NOT EXISTS idx_events_hash ON events_store(hash);
+      CREATE INDEX IF NOT EXISTS idx_events_tenant_time ON events_store(tenant_id, timestamp);
     `);
 
     // 3. Decision Log (Side-Effects / Audit)

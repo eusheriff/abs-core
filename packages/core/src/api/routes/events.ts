@@ -28,25 +28,41 @@ events.post('/', requireScope('events:write'), async (c) => {
     const db = getDB();
 
     // 2. Persist Event (Source of Truth) - IMMUTABLE
-    const [lastEvent] = await db.all<{ hash: string }>(`
-        SELECT hash FROM events_store ORDER BY rowid DESC LIMIT 1
-    `);
-    const previousHash = lastEvent?.hash || null;
-    const hash = Integrity.computeHash(JSON.stringify(event), previousHash);
+    try {
+        const [lastEvent] = await db.all<{ hash: string }>(`
+            SELECT hash FROM events_store ORDER BY rowid DESC LIMIT 1
+        `);
+        const previousHash = lastEvent?.hash || null;
+        const hash = Integrity.computeHash(JSON.stringify(event), previousHash);
 
-    await db.run(
-        `INSERT INTO events_store (
-            id, type, payload, source, timestamp, status, hash, previous_hash
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        event.event_id,
-        event.event_type,
-        JSON.stringify(event.payload),
-        event.source || 'api',
-        new Date().toISOString(),
-        'pending',
-        hash,
-        previousHash
-    );
+        await db.run(
+            `INSERT INTO events_store (
+                id, tenant_id, type, payload, source, timestamp, status, hash, previous_hash
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            event.event_id,
+            event.tenant_id,
+            event.event_type,
+            JSON.stringify(event.payload),
+            event.source,
+            new Date().toISOString(),
+            'pending',
+            hash,
+            previousHash
+        );
+    } catch (e: any) {
+        // Idempotency Check: If event ID exists, treat as success (already accepted)
+        if (e.message?.includes('CONSTRAINT') || e.code === 'SQLITE_CONSTRAINT' || e.message?.includes('UNIQUE')) {
+            console.warn(`⚠️ Duplicate event received: ${event.event_id}. Treating as idempotent success.`);
+            return c.json({
+                status: 'accepted',
+                message: 'Event already received (idempotent)',
+                event_id: event.event_id,
+                correlation_id: event.correlation_id,
+                mode: 'deduplicated'
+            }, 200);
+        }
+        throw e; // Rethrow real errors
+    }
 
     // 3. Enqueue for async processing (v2.0 - Queue-based)
     const queue = c.env?.EVENTS_QUEUE;

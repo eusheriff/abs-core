@@ -28,6 +28,14 @@ app.get('/dashboard', async (c) => {
     return c.html(Dashboard({ logs }).toString());
 });
 
+// Observability Metrics (Prometheus style JSON)
+import { Metrics } from '../core/metrics';
+import { requireScope } from './middleware/auth';
+
+app.get('/metrics', requireScope('admin:read'), (c) => {
+    return c.json(Metrics.snapshot());
+});
+
 // Routes
 app.route('/v1/events', eventsRouter);
 import { adminRouter } from './routes/admin';
