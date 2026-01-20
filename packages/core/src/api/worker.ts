@@ -58,8 +58,9 @@ app.route('/admin', adminRouter);
 
 // Metrics endpoint (Prometheus format)
 import { Metrics } from '../core/metrics';
+import { requireScope } from './middleware/auth';
 
-app.get('/metrics', (c) => {
+app.get('/metrics', requireScope('admin:read'), (c) => {
     const format = c.req.query('format');
     if (format === 'json') {
         return c.json(Metrics.snapshot());
