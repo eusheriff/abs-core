@@ -1,0 +1,23 @@
+# CODEOWNERS - Require review for sensitive paths
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default: maintainer owns everything
+* @eusheriff
+
+# Security-critical paths require explicit review
+/packages/core/src/core/auth.ts        @eusheriff
+/packages/core/src/api/middleware/     @eusheriff
+/packages/core/src/core/sanitizer.ts   @eusheriff
+
+# LLM providers (sensitive: API keys, prompts)
+/packages/core/src/core/providers/     @eusheriff
+
+# Policy engine (governance logic)
+/packages/core/src/core/policy*.ts     @eusheriff
+
+# Infrastructure (migrations, schemas)
+/packages/core/src/infra/migrations/   @eusheriff
+
+# Config files (secrets exposure risk)
+*.env*                                  @eusheriff
+wrangler.toml*                          @eusheriff

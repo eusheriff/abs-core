@@ -1,0 +1,96 @@
+name: PR Governance
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  path-based-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v42
+
+      - name: Check sensitive paths
+        id: sensitive
+        run: |
+          SENSITIVE_PATHS="auth|billing|middleware|providers|sanitizer|policy|migrations"
+          CHANGED="${{ steps.changed-files.outputs.all_changed_files }}"
+
+          if echo "$CHANGED" | grep -qE "$SENSITIVE_PATHS"; then
+            echo "sensitive=true" >> $GITHUB_OUTPUT
+            echo "⚠️ PR touches sensitive paths:"
+            echo "$CHANGED" | grep -E "$SENSITIVE_PATHS"
+          else
+            echo "sensitive=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check large PR
+        id: size
+        run: |
+          ADDITIONS=${{ github.event.pull_request.additions }}
+          DELETIONS=${{ github.event.pull_request.deletions }}
+          TOTAL=$((ADDITIONS + DELETIONS))
+
+          if [ "$TOTAL" -gt 500 ]; then
+            echo "large=true" >> $GITHUB_OUTPUT
+            echo "⚠️ Large PR: $TOTAL lines changed (>500)"
+          else
+            echo "large=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Post governance summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sensitive = '${{ steps.sensitive.outputs.sensitive }}' === 'true';
+            const large = '${{ steps.size.outputs.large }}' === 'true';
+
+            let body = '## 🔒 ABS Governance Check\n\n';
+
+            if (sensitive) {
+              body += '⚠️ **Sensitive paths detected** - Requires maintainer review\n';
+            }
+
+            if (large) {
+              body += '⚠️ **Large PR** - Consider decomposition (>500 lines)\n';
+            }
+
+            if (!sensitive && !large) {
+              body += '✅ No governance flags\n';
+            }
+
+            body += '\n---\n*ABS Dev-Time Governance v0*';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+  require-tests-for-sensitive:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.changed_files, 'auth') || contains(github.event.pull_request.changed_files, 'policy')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests (required for sensitive paths)
+        run: npm test
