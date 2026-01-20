@@ -221,6 +221,28 @@ export async function createMCPServer(db: DatabaseAdapter, config?: ProcessorCon
 
 // CLI Entry Point (for stdio transport)
 export async function runMCPServer() {
+    // 0. Validate License / Token (Enterprise Check)
+    const token = process.env.ABS_TOKEN;
+    if (!token) {
+        console.error('[ABS MCP] ❌ FATAL: Missing ABS_TOKEN environment variable.');
+        console.error('[ABS MCP] Please run "abs login" or generate a token at https://abscore.app/dashboard');
+        process.exit(1);
+    }
+
+    try {
+        const res = await fetch('https://auth-worker.dev-oconnector.workers.dev/verify', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+            console.error('[ABS MCP] 🚫 LICENSE ERROR: Invalid or expired token.');
+            process.exit(1);
+        }
+        const license = await res.json();
+        console.error(`[ABS MCP] ✅ License Verified: ${license.email} (User ID: ${license.userId})`);
+    } catch (err) {
+        console.error('[ABS MCP] ⚠️ WARNING: Could not verify license server (Network Error). Proceeding in Offline Mode.');
+    }
+
     // For CLI usage, we need a simple in-memory or SQLite DB adapter
     const { SQLiteAdapter } = await import('../infra/sqlite-adapter');
     const db = new SQLiteAdapter(':memory:');
