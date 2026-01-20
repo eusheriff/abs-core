@@ -138,5 +138,11 @@ See [SECURITY.md](SECURITY.md) for full details.
 This runtime enforces invariants that cannot be bypassed by the LLM.
 See [INVARIANTS.md](INVARIANTS.md).
 
+## 📚 Policy Library
+
+See real-world examples in [`examples/policies/`](examples/policies/):
+- **Finance**: [Approval Matrix](examples/policies/finance_approval.json) ($10k+ requires CFO).
+- **HR**: [PII Redaction](examples/policies/hr_pii_protection.json) (Protect employee data).
+
 ## License
 Apache 2.0

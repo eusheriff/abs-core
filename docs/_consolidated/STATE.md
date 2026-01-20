@@ -1,9 +1,16 @@
 # Estado Atual do Sistema
 
-**Versão**: v2.7.0
-**Status**: 🟢 RELEASED (Enterprise)
-**URL**: `https://abs.oconnector.tech`
-**Strategy**: Scanner/Runtime + ESCALATE + Dynamic Rules + Forensic Logs + Idempotency
+## Status
+- **Version**: `v2.7.0`
+- **State**: 🟢 RELEASED (Enterprise)
+- **URL**: `https://abs.oconnector.tech`
+- **Score**: 8.2/10 (Audit) -> Targeting 10/10 with Ecosystem additions.
+
+## Roadmap & Next Steps
+1. **Security**: User must enable GitHub Security Alerts & Dependabot.
+2. **Community**: Issue/PR Templates added.
+3. **Examples**: Policy Library seeded.
+4. **Adoption**: Promote usage of `abs-core` as standard runtime.
 
 ## Arquitetura Atual
 
@@ -36,10 +43,6 @@
 - **Security**: Prompt Injection Sanitizer + Idempotency Check + Metrics Auth
 - **Observability**: `/metrics` (Prometheus) protegido por scope `admin:read`
 
-### Next Steps
-1. **Maintenance**: Monitoring production metrics.
-2. **Dashboard**: Update UI for Forensic capabilities.
-
 ## Integração Ativa
 
 ### Bot Manú (WhatsApp)
@@ -57,8 +60,7 @@
               (~5ms)                      async       (Gemini)
 ```
 
-## Roadmap
-
+## Legacy Roadmap
 - [x] v1.1: Production Deploy & Ops
 - [x] v1.2: Security Hardening
 - [x] v1.3: LLM Integration
