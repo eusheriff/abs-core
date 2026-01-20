@@ -1,10 +1,10 @@
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { eventsRouter } from './routes/events';
-import { Dashboard } from '../ui/dashboard';
-import { setDB, getRecentLogs } from '../infra/db';
+import { setDB } from '../infra/db';
 import { D1Adapter } from '../infra/db-d1';
 import { EventProcessor } from '../core/processor';
+import { createApp, Bindings } from './factory';
+
+// Create Unified App
+const app = createApp();
 
 // Message type for queue
 interface QueueMessage {
@@ -20,73 +20,14 @@ interface QueueMessage {
     enqueuedAt: string;
 }
 
-type Bindings = {
-    DB: D1Database;
-    LLM_PROVIDER: string;
-    OPENAI_API_KEY: string;
-    GEMINI_API_KEY: string;
-    EVENTS_QUEUE: Queue<QueueMessage>;
-}
-
-const app = new Hono<{ Bindings: Bindings }>();
-
-// Middlewares
-app.use('*', cors());
-
-// Root
-app.get('/', (c) => c.text('ABS Core v2.0: Active (Queue-based Processing)'));
-
-// Health
-app.get('/health', (c) => c.json({ 
-    status: 'ok', 
-    runtime: 'worker', 
-    version: 'v2.0-scale',
-    features: ['queue-processing', 'prompt-sanitization', 'key-rotation']
-}));
-
-// Dashboard
-app.get('/dashboard', async (c) => {
-    const logs = await getRecentLogs(50);
-    return c.html(Dashboard({ logs }).toString());
-});
-
-// Events API
-app.route('/v1/events', eventsRouter);
-
-import { adminRouter } from './routes/admin';
-app.route('/admin', adminRouter);
-
-// Metrics endpoint (Prometheus format)
-import { Metrics } from '../core/metrics';
-import { requireScope } from './middleware/auth';
-
-app.get('/metrics', requireScope('admin:read'), (c) => {
-    const format = c.req.query('format');
-    if (format === 'json') {
-        return c.json(Metrics.snapshot());
-    }
-    // Default: Prometheus format
-    return c.text(Metrics.toPrometheus(), 200, {
-        'Content-Type': 'text/plain; version=0.0.4'
-    });
-});
-
 export default {
     // HTTP Handler
     fetch: async (request: Request, env: Bindings, ctx: ExecutionContext) => {
         try {
-            setDB(new D1Adapter(env.DB));
+            // Inject D1 Adapter
+            setDB(new D1Adapter(env.DB as D1Database));
             
-            const globalProcess = (globalThis as any).process || {};
-            const currentEnv = globalProcess.env || {};
-            (globalThis as any).process = { 
-                env: { 
-                    ...currentEnv,
-                    ...env, 
-                    EXECUTION_WEBHOOK_URL: 'mock-webhook'
-                } 
-            };
-
+            // Allow app to access env bindings
             return await app.fetch(request, env, ctx);
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Unknown Worker Error';
@@ -98,10 +39,10 @@ export default {
     queue: async (batch: MessageBatch<QueueMessage>, env: Bindings) => {
         console.log(`📥 Processing batch of ${batch.messages.length} messages from queue`);
         
-        setDB(new D1Adapter(env.DB));
+        setDB(new D1Adapter(env.DB as D1Database));
         
         const processor = new EventProcessor(
-            new D1Adapter(env.DB),
+            new D1Adapter(env.DB as D1Database),
             {
                 llmProvider: env.LLM_PROVIDER || 'mock',
                 llmApiKey: env.OPENAI_API_KEY || env.GEMINI_API_KEY
@@ -118,7 +59,7 @@ export default {
                 const result = await processor.process(event);
                 
                 // Update event status to processed
-                const db = new D1Adapter(env.DB);
+                const db = new D1Adapter(env.DB as D1Database);
                 await db.run(
                     `UPDATE events_store SET status = ? WHERE id = ?`,
                     result.decision === 'ALLOW' ? 'processed' : 'reviewed',

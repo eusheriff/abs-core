@@ -43,11 +43,13 @@ export const initSchema = async () => {
       decision_id TEXT PRIMARY KEY,
       tenant_id TEXT NOT NULL,
       event_id TEXT NOT NULL,
-      correlation_id TEXT,
-      timestamp TEXT NOT NULL,
-      full_log_json TEXT NOT NULL,
-      execution_status TEXT DEFAULT 'PENDING',
+      policy_name TEXT,
+      provider TEXT,
+      decision TEXT,
       execution_response TEXT,
+      full_log_json TEXT NOT NULL,
+      timestamp TEXT NOT NULL,
+      correlation_id TEXT,
       previous_hash TEXT,
       hash TEXT
     );
@@ -59,11 +61,11 @@ export const getRecentLogs = async (limit: number = 50) => {
     // Maps production schema (init.sql) to application domain types
     return await db.all(`
         SELECT 
-            id as decision_id,
+            decision_id,
             timestamp as created_at, 
             event_id as trace_id,
-            'decision.proposed' as event_type,
-            metadata as decision_payload,
+            'decision.processed' as event_type,
+            full_log_json as decision_payload,
             decision as execution_status
         FROM decision_logs 
         ORDER BY timestamp DESC 
