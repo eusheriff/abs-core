@@ -29,3 +29,16 @@
 - **Versão**: v1.0.0
 - **Segurança**: Log auditável e imutável.
 - **Operação**: Repo limpo e pronto para CI/CD real.
+
+## 2026-01-19 — v1.1: Production Enterprise Release (2026-01-19)
+- **Status**: ✅ DEPLOYED (Production)
+- **URL**: `https://abs.oconnector.tech`
+- **Infrastructure**: Cloudflare Workers + D1 (Remote)
+- **Key Changes**:
+  - `Process Polyfill`: Added `globalThis.process` support for Workers.
+  - `Schema Fix`: Mapped DB aliases (`id` -> `decision_id`) to fix dashboard crash.
+  - `UI Resilience`: Hardened `dashboard.tsx` against corrupt JSON logs.
+- **Verification**: 
+  - Health Check: 200 OK
+  - Dashboard: 200 OK (Rendered)
+

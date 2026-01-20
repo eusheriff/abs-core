@@ -1,45 +1,40 @@
-# STATE.md — OConnector ABS Core
+# Estado Atual do Sistema
 
-> Fonte da verdade para continuidade entre sessões e LLMs.
+**Versão**: v2.0 (Scale - Queue Architecture)
+**Status**: 🟢 DEPLOYED
+**URL**: `https://abs.oconnector.tech`
 
-## Projeto
+## Arquitetura Atual
 
-| Campo | Valor |
-|-------|-------|
-| **Nome** | oconnector-abs-core |
-| **Estratégia** | Open Core (Scanner Grátis + Enterprise) |
-| **Estágio** | **v1.0.0 (Released)** |
-| **Maintainer** | OConnector Technology |
-| **Autor** | Rodrigo Gomes |
-| **Início** | 2026-01-19 |
-| **Deploy** | [Live URL](https://abs-core.dev-oconnector.workers.dev) |
+- **Core**: Cloudflare Worker (`abs-core`)
+- **Database**: D1 (`abs-core-db`)
+- **Queue**: Cloudflare Queues (`abs-events-queue`, `abs-events-dlq`)
+- **Auth**: API Keys (D1 com hash SHA-256)
+- **LLM**: Gemini 1.5 Flash (6 keys em rodízio)
+- **Security**: Prompt Injection Sanitizer
 
-## Visão
+## Integração Ativa
 
-**ABS Core: A governance-first runtime for autonomous business decisions.**
-Priorizamos a confiabilidade da decisão sobre a inteligência do modelo. Autonomia sem governança é risco.
+### Bot Manú (WhatsApp)
+- **Policy Pack v0**: 5 políticas de governança
+  - P-01: Fora de horário → HANDOFF
+  - P-02: Promessa comercial → HANDOFF
+  - P-03: Baixa confiança → DENY
+  - P-04: Escalada sem sinais → DENY
+  - P-05: Repetição → DENY
 
-## Estado Atual
+## Fluxo v2.0
 
-- **Fase**: v1.0.0 (Enterprise Trust).
-- **Modules**: Core (Runtime), Scan (Static Analysis), CLI (Unified).
-- **Security**: OWASP Compliant, Immutable Logs (Hash Chain).
-- **Current Sprint**: **Release & Maintenance**.
+```
+[Client] → [Ingestion] → 202 Accepted → [Queue] → [Processor] → [Decision]
+              (~5ms)                      async       (Gemini)
+```
 
 ## Roadmap
-- [x] v0.4: Proof of Concept (Done)
-- [x] v0.5: Master Audit + Static Analysis (Done)
-- [x] v0.5-oss: Public Launch (Released)
-- [x] v0.6: AuthZ & Multi-Policy (Implemented)
-- [x] v0.7: Event Sourcing & Replay (Implemented)
-- [x] v0.8: End-to-End Testing Pipeline (Implemented)
-- [x] v0.9: Performance & Scalability (Completed)
-- [x] v1.0: Enterprise Trust & Security (Released)
 
-## Decisões Fixas
-
-- **License**: Apache 2.0
-- **Strategy**: CLI-First (Developer Adoption & CI/CD proof).
-- **Policy**: Invariante (Hard Gate).
-- **Architecture**: Verifiable Runtime (Hash Chaining).
-- **Posicionamento**: Engenharia > Marketing.
+- [x] v1.1: Production Deploy & Ops
+- [x] v1.2: Security Hardening
+- [x] v1.3: LLM Integration
+- [x] v1.4: Prompt Injection Protection
+- [x] v2.0: Scale (Queue-based processing)
+- [x] v0.6: Bot Operational Governance (Policy Pack v0)

@@ -64,9 +64,22 @@ const COMMERCIAL_PATTERNS = [
 ];
 
 export class WhatsAppBotPolicy {
+    name = 'WhatsAppBotPolicy';
     
-    evaluate(event: { payload: BotActionPayload }, proposal: DecisionProposal): PolicyResult {
-        const { payload } = event;
+    evaluate(event: { payload?: BotActionPayload }, proposal: DecisionProposal): PolicyResult {
+        const payload = event?.payload;
+        
+        // Safe guard: if payload doesn't match expected structure, fall back to LLM proposal
+        if (!payload || !payload.context) {
+            console.log('[WhatsAppBotPolicy] Payload não segue schema esperado, usando proposta do LLM');
+            return {
+                decision: (proposal.recommended_action || 'escalate') as PolicyResult['decision'],
+                reason: proposal.explanation?.summary || 'Payload não segue schema WhatsApp',
+                policy_id: 'WB-FALLBACK',
+                risk_level: (proposal.risk_level || 'medium') as PolicyResult['risk_level']
+            };
+        }
+        
         const { context, content, action } = payload;
         
         // WB-01: Business hours check
@@ -80,7 +93,7 @@ export class WhatsAppBotPolicy {
         }
         
         // WB-02: Commercial promise detection
-        if (content.message && this.containsCommercialPromise(content.message)) {
+        if (content?.message && this.containsCommercialPromise(content.message)) {
             return {
                 decision: 'handoff',
                 reason: 'Mensagem contém promessa comercial - requer validação humana',
@@ -90,7 +103,7 @@ export class WhatsAppBotPolicy {
         }
         
         // WB-03: Low confidence block
-        if (context.confidence_score < 0.7) {
+        if (typeof context.confidence_score === 'number' && context.confidence_score < 0.7) {
             return {
                 decision: 'deny',
                 reason: `Confiança insuficiente: ${(context.confidence_score * 100).toFixed(0)}% (mínimo 70%)`,
@@ -100,13 +113,13 @@ export class WhatsAppBotPolicy {
         }
         
         // WB-04 & WB-05: Discount handling
-        if (content.discount_percent) {
+        if (content?.discount_percent) {
             const discountResult = this.evaluateDiscount(content.discount_percent, context.customer_tier);
             if (discountResult) return discountResult;
         }
         
         // WB-06: Spam protection
-        if (context.daily_interactions > 50) {
+        if (typeof context.daily_interactions === 'number' && context.daily_interactions > 50) {
             return {
                 decision: 'deny',
                 reason: `Limite diário excedido: ${context.daily_interactions}/50 interações`,
@@ -117,10 +130,10 @@ export class WhatsAppBotPolicy {
         
         // Default: use LLM proposal
         return {
-            decision: proposal.recommended_action as PolicyResult['decision'],
-            reason: proposal.explanation,
+            decision: (proposal.recommended_action || 'allow') as PolicyResult['decision'],
+            reason: proposal.explanation?.summary || 'Aprovado pela política',
             policy_id: 'DEFAULT',
-            risk_level: proposal.risk_level as PolicyResult['risk_level']
+            risk_level: (proposal.risk_level || 'low') as PolicyResult['risk_level']
         };
     }
     
