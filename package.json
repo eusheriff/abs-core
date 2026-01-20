@@ -19,7 +19,6 @@
   },
   "devDependencies": {
     "eslint": "^8.0.0",
-    "tsx": "^4.7.0",
     "typescript": "^5.2.2",
     "vitest": "^0.34.0"
   },
@@ -41,6 +40,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.3",
     "@types/better-sqlite3": "^7.6.13",
-    "better-sqlite3": "^12.6.2"
+    "better-sqlite3": "^12.6.2",
+    "tsx": "^4.7.0"
   }
 }
