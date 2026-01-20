@@ -159,3 +159,7 @@
     - **Artifact**: `abs-vscode-0.0.1.vsix` (7.9 KB).
     - **Installation**: `code --install-extension packages/vscode/abs-vscode-0.0.1.vsix`.
     - **Command**: `ABS: Scan Current File` (Ctrl+Shift+P).
+    - **Branding**: Added orange shield logo (`icon.png`) to extension and landing page.
+    - **DNS**: Configured `abscore.app` (Nameservers updated to Cloudflare).
+    - **SEO**: Updated metadata and OpenGraph tags.
+

@@ -75,3 +75,12 @@
 - [x] v2.0: Scale (Queue-based processing)
 - [x] v0.6: Bot Operational Governance (Policy Pack v0)
 - [x] v2.8: IAM & Commercial Licensing (Open Core Strategy)
+- [x] v2.9: Distribution Channels (NPM + VS Code + Marketplace)
+
+## Project Status
+- **Current Phase**: Phase 9 (Distribution) - **COMPLETED**
+- **Next Phase**: Phase 10 (Launch & Marketing)
+- **Recent Accomplishments**: 
+    - Full IAM Stack deployed (Cloudflare Workers + Turnstile).
+    - Landing Page live at `abscore.app`.
+    - VS Code Extension packaged and ready for manual upload.
