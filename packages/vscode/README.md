@@ -1,32 +1,85 @@
-# ABS Core for VS Code
+# ABS Core for VS Code 🛡️
 
-This extension integrates the **ABS Core Scanner** directly into your editor, allowing you to scan your current file for policy violations and security risks with a single command.
+[![Visual Studio Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-blue?logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=oconnector.abs-vscode)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-0.0.1-orange)](https://github.com/eusheriff/abs-core)
 
-## Features
+> **Stop AI Coding Agents from Destroying Your Codebase.**
 
-- **Scan Current File**: Open the command palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and run `ABS: Scan Current File`.
-- **Real-time Feedback**: View scan results directly in the output channel.
-- **Policy Enforcement**: Checks your code against the active policies defined in your ABS Runtime.
+This extension integrates the **ABS Core Scanner** directly into VS Code, protecting you from destructive commands, policy violations, and security risks—whether caused by you or your AI assistant.
 
-## Requirements
+---
 
-- Node.js (v18+) installed.
-- Internet connection (to fetch policies from ABS Runtime if configured, or run local checks).
+## ✨ Key Features
 
-## Installation (Local Development)
+| Feature | Description |
+|---------|-------------|
+| 🔍 **Scan Current File** | Check your active file for policy violations with one command. |
+| 🛡️ **Coding Agent Safeguards** | Block dangerous patterns like `rm -rf`, `git reset --hard`, and editing `.env` files. |
+| 📊 **Real-time Feedback** | View scan results instantly in the VS Code Output panel. |
+| 🔗 **Runtime Integration** | Connect to your ABS Runtime for centralized policy enforcement (Enterprise). |
 
-1. Clone the repository.
-2. Navigate to `packages/vscode`.
-3. Run `npm install`.
-4. Press `F5` to open a new VS Code window with the extension loaded.
+---
 
-## Publishing to Marketplace
+## 🚀 Quick Start
 
-1. Install `vsce`: `npm install -g @vscode/vsce`.
-2. Login: `vsce login <publisher id>`.
-3. Package: `vsce package` (Creating .vsix).
-4. Publish: `vsce publish`.
+1. **Open Command Palette**: `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac).
+2. **Run**: `ABS: Scan Current File`.
+3. **Review**: Check the "ABS Core" output channel for results.
 
-## License
+---
 
-MIT
+## 🎯 Use Cases
+
+- **Protect from AI Assistants**: Cursor, Copilot, and other AI agents sometimes propose destructive commands. ABS blocks them before execution.
+- **Enforce Team Policies**: Define rules like "No hardcoded secrets" or "No direct DB writes" and scan on save.
+- **Audit Trail**: Every scan is logged, providing a forensic trail of what was checked and when.
+
+---
+
+## ⚙️ Requirements
+
+- **Node.js** v18+ (for local scanning).
+- **Optional**: ABS Runtime Token for Enterprise features (`ABS_TOKEN`).
+
+---
+
+## 📦 Installation
+
+### From Marketplace (Recommended)
+Search for "ABS Core" in VS Code Extensions or [click here](https://marketplace.visualstudio.com/items?itemName=oconnector.abs-vscode).
+
+### From Source
+```bash
+git clone https://github.com/eusheriff/abs-core.git
+cd abs-core/packages/vscode
+npm install
+code --extensionDevelopmentPath=.
+```
+
+---
+
+## 🔒 Policies Included
+
+The extension ships with built-in safeguards:
+
+| Rule ID | Description | Action |
+|---------|-------------|--------|
+| `code-01` | Block recursive delete (`rm -rf`) outside temp dirs | DENY |
+| `code-02` | Protect secrets (`.env`, `.pem`, SSH keys) | ESCALATE |
+| `code-03` | Block force push (`git push --force`) | DENY |
+| `code-04` | Block hard reset (`git reset --hard`) | ESCALATE |
+
+---
+
+## 🌐 Links
+
+- **Website**: [abscore.app](https://abscore.app)
+- **GitHub**: [eusheriff/abs-core](https://github.com/eusheriff/abs-core)
+- **Enterprise**: [OConnector Technology](https://oconnector.tech/abs)
+
+---
+
+## 📄 License
+
+MIT © [OConnector Technology](https://oconnector.tech)

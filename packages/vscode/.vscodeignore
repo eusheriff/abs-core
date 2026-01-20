@@ -5,6 +5,9 @@ src/**
 tsconfig.json
 **/*.ts
 **/node_modules
-../
+../**
+../../**
 **/.env
 **/.env.*
+icon - cópia.png
+*.map

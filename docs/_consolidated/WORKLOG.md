@@ -163,3 +163,14 @@
     - **DNS**: Configured `abscore.app` (Nameservers updated to Cloudflare).
     - **SEO**: Updated metadata and OpenGraph tags.
 
+### Phase 10: Launch & Marketing (2026-01-20)
+- **Strategy**: Created `docs/LAUNCH_PLAN.md` with Seed User program.
+- **Assets**:
+    - Created `examples/demo_terminal.ts` for "The Save" GIF.
+    - Drafted `docs/ANNOUNCEMENT_POST.md` for social media.
+- **Roadmap**:
+    - Architected Multi-LLM support (`src/llm/factory.ts`).
+    - Documented On-Premise Docker Strategy (`docs/ONPREMISE.md`).
+- **New Vector**: ABS for Coding Agents (`coding_safeguards.json`).
+- **Community**: Added GitHub Issue Templates and Success Stories page.
+
