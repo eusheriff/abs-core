@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { eventsRouter } from './routes/events';
 import { adminRouter } from './routes/admin';
+import { reviewsRouter } from './routes/reviews';
 import { Dashboard } from '../ui/dashboard';
 import { getRecentLogs } from '../infra/db';
 import { Metrics } from '../core/metrics';
