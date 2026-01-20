@@ -56,6 +56,20 @@ app.route('/v1/events', eventsRouter);
 import { adminRouter } from './routes/admin';
 app.route('/admin', adminRouter);
 
+// Metrics endpoint (Prometheus format)
+import { Metrics } from '../core/metrics';
+
+app.get('/metrics', (c) => {
+    const format = c.req.query('format');
+    if (format === 'json') {
+        return c.json(Metrics.snapshot());
+    }
+    // Default: Prometheus format
+    return c.text(Metrics.toPrometheus(), 200, {
+        'Content-Type': 'text/plain; version=0.0.4'
+    });
+});
+
 export default {
     // HTTP Handler
     fetch: async (request: Request, env: Bindings, ctx: ExecutionContext) => {
