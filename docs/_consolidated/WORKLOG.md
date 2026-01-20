@@ -97,3 +97,12 @@
   - **Version**: Bumped `@abs/core` to `2.7.0`.
   - **Status**: Stable.
 
+- 2026-01-20: Audit Remediation (Pipeline 10/10)
+  - **Issue**: External audit report (8.2/10) highlighted opacity and lock-in risks.
+  - **Fixes**:
+    - **Transparency**: Added Code Map to README linking to core source.
+    - **Lock-in**: Documented Docker usage for cloud-agnostic deployment.
+    - **Security**: Link `SECURITY.md` risks directly to mitigation code.
+    - **Assurance**: Added Coverage Badge and improved E2E tests (Idempotency).
+    - **Ecosystem**: Released Policy Library (`examples/policies`) and Issue Templates.
+  - **Status**: Remediation Complete. Ready for GitHub Security Alerts.

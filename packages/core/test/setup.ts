@@ -35,8 +35,8 @@ export async function setupTestEnv() {
     // For integration tests on Hono, we can often use app.request() without listening on a port.
     // However, the goal is E2E, so listening is better to test actual HTTP.
     
-    try {
-       startServer(randomPort);
+       // Server already started above
+       // startServer(randomPort); 
     } catch (e) {
        // Ignore if address in use, retry logic usually needed but skipping for MVP
     }
