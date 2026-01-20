@@ -1,0 +1,46 @@
+[
+    {
+        "id": "code-01-no-destructive-rm",
+        "description": "Prevent recursive deletion of files outside of temporary directories.",
+        "risk_level": "CRITICAL",
+        "rule": {
+            "type": "regex_match",
+            "field": "command",
+            "pattern": "^rm\\s+-[rR][fF]\\s+(?!/?tmp/|/?dist/|/?build/|/?coverage/)",
+            "action": "DENY"
+        }
+    },
+    {
+        "id": "code-02-protect-secrets",
+        "description": "Prevent modification or deletion of environment and key files.",
+        "risk_level": "HIGH",
+        "rule": {
+            "type": "keyword_match",
+            "field": "filepath",
+            "keywords": [".env", ".pem", "id_rsa", "secrets.json"],
+            "action": "ESCALATE"
+        }
+    },
+    {
+        "id": "code-03-no-force-push",
+        "description": "Prevent force pushing to git repositories.",
+        "risk_level": "HIGH",
+        "rule": {
+            "type": "regex_match",
+            "field": "command",
+            "pattern": "git\\s+push\\s+.*--force",
+            "action": "DENY"
+        }
+    },
+    {
+        "id": "code-04-no-hard-reset",
+        "description": "Prevent hard resetting git history.",
+        "risk_level": "HIGH",
+        "rule": {
+            "type": "regex_match",
+            "field": "command",
+            "pattern": "git\\s+reset\\s+--hard",
+            "action": "ESCALATE"
+        }
+    }
+]

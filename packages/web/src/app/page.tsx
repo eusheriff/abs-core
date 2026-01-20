@@ -31,9 +31,9 @@ export default function Home() {
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
           The Immune System <br /> for AI Agents.
         </h1>
-        <p className="text-zinc-400 text-xl max-w-2xl mx-auto mb-10">
-          ABS Core is a governance runtime that prevents LLMs from executing dangerous actions. Start with the free request scanner today.
-        </p>
+          ABS Core is a governance runtime that prevents LLMs from executing dangerous actions. 
+          <br className="hidden md:block" />
+          Protects Business Agents <b>AND</b> Coding Assistants (Cursor, Copilot) from destruction.
         
         <div className="flex flex-col md:flex-row items-center justify-center gap-4">
           <div className="flex items-center gap-0 rounded-lg bg-zinc-900 border border-zinc-800 p-1 pl-4 pr-1">
@@ -131,6 +131,7 @@ export default function Home() {
               <FeatureItem text="Everything in Scanner" check={true} highlight />
               <FeatureItem text="Real-time Blocking (MCP)" check={true} highlight />
               <FeatureItem text="Forensic Audit Logs" check={true} highlight />
+              <FeatureItem text="Coding Agent Safeguards 🛡️" check={true} highlight />
               <FeatureItem text="Cloudflare Edge Deploy" check={true} highlight />
               <FeatureItem text="SSO & RBAC" check={true} highlight />
               <FeatureItem text="SLA & Support" check={true} highlight />
