@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "abs-oracle": {
+      "command": "ssh",
+      "args": [
+        "-i",
+        "/Users/isheriffgomes/.ssh/abs_mcp_key",
+        "ubuntu@163.176.247.143",
+        "cd /opt/abs/packages/core && export NODE_OPTIONS='--max-old-space-size=512' && /usr/bin/node /opt/abs/node_modules/.bin/tsx src/mcp/server.ts"
+      ]
+    }
+  }
+}

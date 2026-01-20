@@ -81,17 +81,32 @@ This leaves ~700MB for OS and swap buffer.
 
 ### Cursor / VSCode
 
-Add to your MCP config:
+Add this to your MCP config (usually `~/.cursor/mcp.json` or via Settings):
 
 ```json
 {
   "mcpServers": {
-    "abs-governance": {
+    "abs-oracle": {
       "command": "ssh",
-      "args": ["-tt", "user@your-vps-ip", "cd /opt/abs/packages/core && npm run mcp"]
+      "args": [
+        "-i",
+        "/Users/YOUR_USER/.ssh/abs_mcp_key",
+        "ubuntu@163.176.247.143",
+        "cd /opt/abs/packages/core && export NODE_OPTIONS='--max-old-space-size=512' && /usr/bin/node /opt/abs/node_modules/.bin/tsx src/mcp/server.ts"
+      ]
     }
   }
 }
+```
+
+> **Note:** Replace `/Users/YOUR_USER` with your local path.
+
+### Verified Connection Command
+
+If you want to test manually from your terminal:
+
+```bash
+ssh -i ~/.ssh/abs_mcp_key ubuntu@163.176.247.143 "cd /opt/abs/packages/core && export NODE_OPTIONS='--max-old-space-size=512' && /usr/bin/node /opt/abs/node_modules/.bin/tsx src/mcp/server.ts"
 ```
 
 ### HTTP Mode (Alternative)

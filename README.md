@@ -49,65 +49,55 @@ graph LR
 
 Note: The **Decision Log** happens *strictly before* Execution. If the DB insert fails, the action is never attempted.
 
-## Quick Start
+## 🚀 Deployment Options
 
-### Option 1: Use the Hosted API (Recommended)
-
-The easiest way to use ABS Core - no installation required:
+### Option 1: MCP Server (For AI Agents/IDEs) 🆕
+Run ABS as a **Model Context Protocol** server to protect your local AI workflow (Cursor, VSCode, Claude Desktop).
 
 ```bash
-# Send an event to the hosted API
-curl -X POST https://YOUR_DOMAIN/v1/events \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{"event_id":"uuid","tenant_id":"demo","event_type":"ticket.created","source":"api","occurred_at":"2026-01-19T00:00:00Z","payload":{"text":"Hello"},"correlation_id":"corr-1"}'
+# SSH into your VPS or generic Linux host
+# ABS MCP runs over Stdio (SSH)
+{
+  "mcpServers": {
+    "abs-governance": {
+      "command": "ssh",
+      "args": ["user@vps-ip", "cd /opt/abs/packages/core && npm run mcp"]
+    }
+  }
+}
 ```
 
-## 🗺️ Repository Structure (Code Map)
-
-For auditors and developers, here is where the logic lives:
-- **Core Runtime**: [`packages/core/src/api/factory.ts`](packages/core/src/api/factory.ts) (Unified logic)
-- **Policy Engine**: [`packages/core/src/core/dynamic-policy.ts`](packages/core/src/core/dynamic-policy.ts) (JSON Rule Evaluation)
-- **Sanitization**: [`packages/core/src/core/sanitizer.ts`](packages/core/src/core/sanitizer.ts) (Prompt Injection Defense)
-- **Ref Runtime**: [`core/`](core/) (Abstract definitions)
-
-## 🐳 Running with Docker (No Cloudflare)
-
-Avoid lock-in by running ABS Core as a standard Node.js container:
+### Option 2: Sidecar / API Gateway (Cloudflare)
+Deploy as a global edge worker to intercept and govern API traffic.
 
 ```bash
-# Build & Run locally
-docker build -t abs-core ./packages/core
-docker run -p 8787:8787 -e ABS_MODE=runtime -e LLM_PROVIDER=mock abs-core
+# Deploy to Cloudflare Workers
+npm run deploy
 ```
 
-See [`packages/core/Dockerfile`](packages/core/Dockerfile) for details.
-
-### Option 2: Self-Host (Clone & Deploy)
+### Option 3: Scanner SDK (Fire-and-Forget)
+Embed ABS directly into your TypeScript application for "Shadow Mode" auditing.
 
 ```bash
-# 1. Clone the repo
-git clone https://github.com/eusheriff/abs-core.git
-cd abs-core
+npm install @abs/scan
+```
 
-# 2. Install dependencies
-npm install
+```typescript
+import { ABS } from '@abs/scan';
 
-# 3. Setup Cloudflare
-cp packages/core/wrangler.toml.example packages/core/wrangler.toml
-# Edit wrangler.toml with your database_id
+const abs = new ABS({ mode: 'scanner' });
+await abs.log({ input, output }); // Non-blocking audit
+```
 
-# 4. Create D1 database
-npx wrangler d1 create abs-core-db
+### Option 4: Self-Hosted (Docker/VPS)
+Run anywhere Node.js runs (Oracle, AWS, GCP, On-Prem).
 
-# 5. Run migrations
-npx wrangler d1 migrations apply abs-core-db --local
+```bash
+# Docker
+docker run -p 8787:8787 -e ABS_MODE=runtime abs-core
 
-# 6. Start dev server
-npm run dev
-
-# 7. Test locally
-npm run abs -- simulate ticket.created -d '{"text": "Hello"}'
+# VPS Quick Start
+curl -fsSL https://raw.githubusercontent.com/eusheriff/abs-core/main/scripts/deploy-vps.sh | bash
 ```
 
 ### Option 3: CLI Lab (Local Testing)
