@@ -25,7 +25,7 @@ program
   .action((options) => {
     // Determine context (Node vs Worker isn't relevant here as CLI is Node)
     const dbPath = path.resolve(options.db);
-    if (!/^[a-zA-Z0-9_\-\.\/]+$/.test(options.db)) {
+    if (!/^[a-zA-Z0-9_\-./]+$/.test(options.db)) {
        console.error('❌ Invalid database path. Use alphanumeric characters, dots, dashes and underscores.');
        process.exit(1);
     }

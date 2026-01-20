@@ -26,6 +26,7 @@ describe('E2E Pipeline', () => {
             tenant_id: 'test-tenant',
             correlation_id: uuidv4(),
             occurred_at: new Date().toISOString(),
+            source: 'test-source',
             payload: { amount: 1000 }
         };
 
