@@ -137,4 +137,8 @@ See real-world examples in [`examples/policies/`](examples/policies/):
 - **HR**: [PII Redaction](examples/policies/hr_pii_protection.json) (Protect employee data).
 
 ## License
-Apache 2.0
+
+**Open Core Component (`@abs/scan`)**: [MIT](LICENSE)  
+**Enterprise Runtime (MCP)**: [Commercial License](LICENSING.md)
+
+&copy; 2026 OConnector. All rights reserved.
