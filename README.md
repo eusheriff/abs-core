@@ -62,6 +62,26 @@ curl -X POST https://YOUR_DOMAIN/v1/events \
   -d '{"event_id":"uuid","tenant_id":"demo","event_type":"ticket.created","source":"api","occurred_at":"2026-01-19T00:00:00Z","payload":{"text":"Hello"},"correlation_id":"corr-1"}'
 ```
 
+## 🗺️ Repository Structure (Code Map)
+
+For auditors and developers, here is where the logic lives:
+- **Core Runtime**: [`packages/core/src/api/factory.ts`](packages/core/src/api/factory.ts) (Unified logic)
+- **Policy Engine**: [`packages/core/src/core/dynamic-policy.ts`](packages/core/src/core/dynamic-policy.ts) (JSON Rule Evaluation)
+- **Sanitization**: [`packages/core/src/core/sanitizer.ts`](packages/core/src/core/sanitizer.ts) (Prompt Injection Defense)
+- **Ref Runtime**: [`core/`](core/) (Abstract definitions)
+
+## 🐳 Running with Docker (No Cloudflare)
+
+Avoid lock-in by running ABS Core as a standard Node.js container:
+
+```bash
+# Build & Run locally
+docker build -t abs-core ./packages/core
+docker run -p 8787:8787 -e ABS_MODE=runtime -e LLM_PROVIDER=mock abs-core
+```
+
+See [`packages/core/Dockerfile`](packages/core/Dockerfile) for details.
+
 ### Option 2: Self-Host (Clone & Deploy)
 
 ```bash
