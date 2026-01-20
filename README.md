@@ -13,7 +13,8 @@
 It acts as a safety middleware between your LLM (Reasoning) and your Execution Layer (Actions).
 
 🔎 *Confused by the acronym? See [Disambiguation](GLOSSARY.md).*  
-📜 *Read our [Project Philosophy](PROJECT_PHILOSOPHY.md).*
+📜 *Read our [Project Philosophy](PROJECT_PHILOSOPHY.md).*  
+🚀 *New here? Start with [Getting Started Guide](GETTING_STARTED.md).*
 
 ### Why it exists
 > **LLMs are probabilistic. Business execution must not be.**
