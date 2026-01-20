@@ -13,8 +13,8 @@
   "dependencies": {
     "commander": "^11.0.0",
     "chalk": "^4.1.2",
-    "@abs/core": "^0.5.0",
-    "@abs/scan": "^0.1.0"
+    "@abs/core": "*",
+    "@abs/scan": "*"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
