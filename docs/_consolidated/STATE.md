@@ -1,86 +1,36 @@
-# Estado Atual do Sistema
+# Context Pack: ABS Core Governance
 
-## Status
-- **Version**: `v2.7.0`
-- **State**: 🟢 RELEASED (Enterprise)
-- **URL**: `https://abs.oconnector.tech`
-- **Score**: 8.2/10 (Audit) -> Targeting 10/10 with Ecosystem additions.
+## Estado Atual
+- **Projeto:** abs-core (Autonomous Business System Runtime)
+- **Objetivo:** Governança para agentes de codificação
+- **MCP Server:** Oracle VM (163.176.247.143) via SSH
+- **Modo:** Shadow (log only)
 
-## Roadmap & Next Steps
-1. **Security**: User must enable GitHub Security Alerts & Dependabot.
-2. **Community**: Issue/PR Templates added.
-3. **Examples**: Policy Library seeded.
-4. **Adoption**: Promote usage of `abs-core` as standard runtime.
+## Arquivos Principais
+- `packages/core/src/mcp/server.ts` - MCP Server com 6 tools
+- `packages/core/src/policies/library/code_safety.ts` - 4 políticas de código
+- `cursor-mcp-config.json` - Config para Cursor IDE
 
-## Arquitetura Atual
+## Tools MCP Disponíveis
+| Tool | Descrição |
+|------|-----------|
+| `abs_evaluate` | Avalia interação LLM contra políticas |
+| `abs_log` | Log de auditoria (fire-and-forget) |
+| `abs_check_policy` | Dry-run de política |
+| `abs_get_decisions` | Consulta Decision Logs |
+| `abs_check_file_edit` | **Valida edição de arquivo** |
+| `abs_check_command` | **Valida comando de terminal** |
 
-- **Core**: Unified Runtime (`packages/core/src/api/factory.ts`)
-  - **Modes**: `scanner` (Free/Passive) vs `runtime` (Paid/Active).
-  - **Auth**: IAM Layer with Cloudflare Workers + KV + Turnstile (Anti-Bot).
-  - **2026-01-20**: Implemented **Vector 5 (Idempotency)**.
-  - **Schema**: Created `004_idempotency.sql` adding UNIQUE index on `decision_logs(event_id)`.
-  - **Logic**: Updated `EventProcessor.process` to catch unique constraint violations and return existing decision (`processed_duplicate`).
-  - **Tests**: Added `idempotency.test.ts` verifying Hard Check (0ms) and Race Condition Recovery.
-  - **Docs**: Created `ADR-003` justifying DB constraints over Durable Objects.
-  - **Fixes**: Corrected invalid event IDs in tests and ensured consistent status codes.
-  - **SaaS**: Cloudflare Worker (`worker.ts`)
-  - **On-Premise**: Docker Container (`Dockerfile` / `server.ts`)
-  - **SDK**: `@abs/scan` (Lightweight Node.js Client - Roadmap Phase 5)
-- **Database**: 
-  - **SaaS**: Cloudflare D1
-  - **On-Premise**: SQLite (Volume persistente)
-- [x] **Vector 5: Partial Failures (Idempotency)**
-  - [x] Schema: Unique constraint on `decision_logs.event_id`.
-  - [x] Logic: Optimistic concurrency control in `EventProcessor`.
-  - [x] Tests: Race condition handling verified via mocks.
-  - [x] Decision: ADR-003 (DB Constraints vs Durable Objects).
-- [x] **Vector 6: Forensic Observability**
-  - [x] Granular Latency Breakdown (`validation`, `llm`, `db`, `overhead`).
-  - [x] Persistent Trace ID in `decision_logs` metadata.
-  - [x] Verified by `test/observability.test.ts`.
-- **Queue**: Cloudflare Queues (SaaS only)
-- **Auth**: API Keys (Generic / DB-backed)
-- **Auth**: API Keys (D1 com hash SHA-256)
-- **LLM**: Gemini 1.5 Flash (6 keys em rodízio)
-- **Security**: Prompt Injection Sanitizer + Idempotency Check + Metrics Auth
-- **Observability**: `/metrics` (Prometheus) protegido por scope `admin:read`
-- **IAM**:
-  - **Service**: `auth-worker` (Cloudflare Workers)
-  - **Store**: `ABS_AUTH` (KV Namespace)
-  - **Bot**: Cloudflare Turnstile (Site Key `0x4A...`)
-  - **Flow**: Session -> PAT Exchange -> Bearer Middleware
+## Políticas Ativas
+1. `protected-files` - Bloqueia .env, secrets, keys
+2. `blocked-commands` - Bloqueia rm -rf, DROP TABLE, etc.
+3. `edit-size-limit` - Limita 500 linhas por edição
+4. `no-secrets-in-code` - Detecta segredos hardcoded
 
-## Integração Ativa
+## Decisões Tomadas
+- [2026-01-20] Modo Shadow inicial para validação
+- [2026-01-20] Sem dependência de minimatch (glob nativo)
+- [2026-01-20] tsx on-the-fly (sem build tsc por OOM)
 
-### Bot Manú (WhatsApp)
-- **Policy Pack v0**: 5 políticas de governança
-  - P-01: Fora de horário → HANDOFF
-  - P-02: Promessa comercial → HANDOFF
-  - P-03: Baixa confiança → DENY
-  - P-04: Escalada sem sinais → DENY
-  - P-05: Repetição → DENY
-
-## Fluxo v2.0
-
-```
-[Client] → [Ingestion] → 202 Accepted → [Queue] → [Processor] → [Decision]
-              (~5ms)                      async       (Gemini)
-```
-
-## Legacy Roadmap
-- [x] v1.1: Production Deploy & Ops
-- [x] v1.2: Security Hardening
-- [x] v1.3: LLM Integration
-- [x] v1.4: Prompt Injection Protection
-- [x] v2.0: Scale (Queue-based processing)
-- [x] v0.6: Bot Operational Governance (Policy Pack v0)
-- [x] v2.8: IAM & Commercial Licensing (Open Core Strategy)
-- [x] v2.9: Distribution Channels (NPM + VS Code + Marketplace)
-
-## Project Status
-- **Current Phase**: Phase 9 (Distribution) - **COMPLETED**
-- **Next Phase**: Phase 10 (Launch & Marketing)
-- **Recent Accomplishments**: 
-    - Full IAM Stack deployed (Cloudflare Workers + Turnstile).
-    - Landing Page live at `abscore.app`.
-    - VS Code Extension packaged and ready for manual upload.
+## Próximos Passos
+Ver: `.agent/workflows/abs-governance.md`
