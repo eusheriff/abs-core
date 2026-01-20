@@ -1,62 +1,55 @@
-/**
- * LLM Provider Factory
- * 
- * Factory pattern for instantiating AI providers based on configuration.
- * Supports mock (testing), OpenAI, and Gemini providers.
- */
-
 import { MockProvider } from './providers/mock';
 import { OpenAIProvider } from './providers/openai';
 import { GeminiProvider } from './providers/gemini';
+import { VCRProvider } from './vcr-provider';
+import { LLMProvider, ProviderType, ProviderConfig } from './interfaces';
 
-export type ProviderType = 'mock' | 'openai' | 'gemini';
-
-export interface PartialProposal {
-    recommended_action: string;
-    action_params?: Record<string, unknown>;
-    explanation: {
-        summary: string;
-        rationale: string;
-        evidence_refs?: string[];
-    };
-    confidence: number;
-    risk_level: 'low' | 'medium' | 'high' | 'critical';
-}
-
-export interface ProviderConfig {
-    apiKey?: string;
-    model?: string;
-    maxTokens?: number;
-    temperature?: number;
-}
-
-export interface LLMProvider {
-    name: string;
-    propose(event: unknown, context?: unknown): Promise<PartialProposal>;
-}
+// Re-export types for convenience if needed, or consumers should use interfaces
+export type { LLMProvider, ProviderType, ProviderConfig };
 
 /**
  * Get an LLM provider instance based on type.
  * Falls back to MockProvider if type is unknown or config is missing.
  */
 export function getProvider(type: ProviderType | string, config?: ProviderConfig): LLMProvider {
+    let provider: LLMProvider;
+
     switch (type) {
         case 'openai':
             if (!config?.apiKey) {
                 console.warn('[Provider] OpenAI requested but no API key provided, falling back to mock');
-                return new MockProvider();
+                provider = new MockProvider();
+            } else {
+                provider = new OpenAIProvider(config);
             }
-            return new OpenAIProvider(config);
+            break;
         
         case 'gemini':
             if (!config?.apiKey) {
                 console.warn('[Provider] Gemini requested but no API key provided, falling back to mock');
-                return new MockProvider();
+                provider = new MockProvider();
+            } else {
+                provider = new GeminiProvider(config);
             }
-            return new GeminiProvider(config);
+            break;
         
         case 'mock':
         default:
-            return new MockProvider();
+            provider = new MockProvider();
+            break;
     }
+
+    // Checking process.env safely (for Node environments)
+    // In Cloudflare Workers, process might not exist or be empty
+    const vcrMode = typeof process !== 'undefined' ? process.env?.ABS_VCR_MODE : undefined;
+
+    if (vcrMode && vcrMode !== 'off') {
+        const mode = vcrMode === 'record' || vcrMode === 'replay' ? vcrMode : 'off';
+        if (mode !== 'off') {
+            console.log(`[Provider] Wrapping ${provider.name} in VCR (mode=${mode})`);
+            return new VCRProvider(provider, mode);
+        }
+    }
+
+    return provider;
 }

@@ -2,6 +2,8 @@ import { setDB } from '../infra/db';
 import { D1Adapter } from '../infra/db-d1';
 import { EventProcessor } from '../core/processor';
 import { createApp, Bindings } from './factory';
+import { Logger } from '../core/logger';
+import { TraceContext } from '../core/context';
 
 // Create Unified App
 const app = createApp();
@@ -18,6 +20,7 @@ interface QueueMessage {
         correlation_id: string;
     };
     enqueuedAt: string;
+    traceId?: string; // Propagated context
 }
 
 export default {
@@ -37,7 +40,6 @@ export default {
 
     // Queue Consumer Handler (v2.0)
     queue: async (batch: MessageBatch<QueueMessage>, env: Bindings) => {
-        console.log(`📥 Processing batch of ${batch.messages.length} messages from queue`);
         
         setDB(new D1Adapter(env.DB as D1Database));
         
@@ -51,11 +53,24 @@ export default {
         );
 
         for (const message of batch.messages) {
+            let logger: Logger | null = null;
             try {
-                const { event, enqueuedAt } = message.body;
+                const { event, enqueuedAt, traceId } = message.body;
+                
+                // Reconstruct Context
+                const context: TraceContext = {
+                    traceId: traceId || event.correlation_id || message.id, // Fallback to message ID
+                    spanId: message.id, // New span for worker processing
+                    tenantId: event.tenant_id
+                };
+                logger = new Logger(context);
+
                 const queueLatency = Date.now() - new Date(enqueuedAt).getTime();
                 
-                console.log(`⚙️ Processing event ${event.event_id} (queued ${queueLatency}ms ago)`);
+                logger.info(`Processing event from queue`, { 
+                    event_id: event.event_id, 
+                    queue_latency_ms: queueLatency 
+                });
                 
                 const result = await processor.process(event);
                 
@@ -67,13 +82,18 @@ export default {
                     event.event_id
                 );
                 
-                console.log(`✅ Event ${event.event_id} processed: ${result.decision}`);
+                logger.info(`Event processed successfully`, { decision: result.decision });
                 
                 // Acknowledge the message
                 message.ack();
                 
             } catch (error) {
-                console.error(`❌ Failed to process event:`, error);
+                // If logger wasn't initialized, create a fallback
+                if (!logger) {
+                    console.error('Critical failure before logger init', error);
+                } else {
+                    logger.error(`Failed to process event`, { error: String(error) });
+                }
                 // Retry will happen automatically (max_retries = 3)
                 message.retry();
             }

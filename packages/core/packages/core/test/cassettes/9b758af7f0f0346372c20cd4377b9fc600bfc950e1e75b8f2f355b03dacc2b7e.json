@@ -1,0 +1,11 @@
+{
+  "recommended_action": "approve",
+  "action_params": {},
+  "explanation": {
+    "summary": "Auto-approved by Mock Provider",
+    "rationale": "This is a mock response for development/testing. In production, use a real LLM provider.",
+    "evidence_refs": []
+  },
+  "confidence": 0.99,
+  "risk_level": "low"
+}

@@ -1,25 +1,44 @@
 # Estado Atual do Sistema
 
-**Versão**: v2.3 (Release: `v0.6.0-beta` + Scanner Mode)
-**Status**: 🟢 DEPLOYED & CONTAINERIZED
+**Versão**: v2.7.0
+**Status**: 🟢 RELEASED (Enterprise)
 **URL**: `https://abs.oconnector.tech`
-**Strategy**: Free Scanner vs Paid Runtime (Switchable via `ABS_MODE`)
+**Strategy**: Scanner/Runtime + ESCALATE + Dynamic Rules + Forensic Logs + Idempotency
 
 ## Arquitetura Atual
 
 - **Core**: Unified Runtime (`packages/core/src/api/factory.ts`)
   - **Modes**: `scanner` (Free/Passive) vs `runtime` (Paid/Active).
+  - **2026-01-20**: Implemented **Vector 5 (Idempotency)**.
+  - **Schema**: Created `004_idempotency.sql` adding UNIQUE index on `decision_logs(event_id)`.
+  - **Logic**: Updated `EventProcessor.process` to catch unique constraint violations and return existing decision (`processed_duplicate`).
+  - **Tests**: Added `idempotency.test.ts` verifying Hard Check (0ms) and Race Condition Recovery.
+  - **Docs**: Created `ADR-003` justifying DB constraints over Durable Objects.
+  - **Fixes**: Corrected invalid event IDs in tests and ensured consistent status codes.
   - **SaaS**: Cloudflare Worker (`worker.ts`)
   - **On-Premise**: Docker Container (`Dockerfile` / `server.ts`)
 - **Database**: 
   - **SaaS**: Cloudflare D1
   - **On-Premise**: SQLite (Volume persistente)
+- [x] **Vector 5: Partial Failures (Idempotency)**
+  - [x] Schema: Unique constraint on `decision_logs.event_id`.
+  - [x] Logic: Optimistic concurrency control in `EventProcessor`.
+  - [x] Tests: Race condition handling verified via mocks.
+  - [x] Decision: ADR-003 (DB Constraints vs Durable Objects).
+- [x] **Vector 6: Forensic Observability**
+  - [x] Granular Latency Breakdown (`validation`, `llm`, `db`, `overhead`).
+  - [x] Persistent Trace ID in `decision_logs` metadata.
+  - [x] Verified by `test/observability.test.ts`.
 - **Queue**: Cloudflare Queues (SaaS only)
 - **Auth**: API Keys (Generic / DB-backed)
 - **Auth**: API Keys (D1 com hash SHA-256)
 - **LLM**: Gemini 1.5 Flash (6 keys em rodízio)
 - **Security**: Prompt Injection Sanitizer + Idempotency Check + Metrics Auth
 - **Observability**: `/metrics` (Prometheus) protegido por scope `admin:read`
+
+### Next Steps
+1. **Maintenance**: Monitoring production metrics.
+2. **Dashboard**: Update UI for Forensic capabilities.
 
 ## Integração Ativa
 

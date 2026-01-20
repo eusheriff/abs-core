@@ -80,6 +80,7 @@ export function createApp() {
     // API Routes
     app.route('/v1/events', eventsRouter);
     app.route('/admin', adminRouter);
+    app.route('/admin/reviews', reviewsRouter);
 
     return app;
 }

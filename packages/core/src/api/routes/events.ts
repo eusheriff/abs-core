@@ -26,6 +26,13 @@ events.post('/', requireScope('events:write'), async (c) => {
     }
     
     const event = validation.data;
+    // 0. Observability Context
+    const traceId = c.req.header('x-trace-id') || event.correlation_id || crypto.randomUUID();
+    c.header('x-trace-id', traceId);
+    
+    // Normalize event with trace info if missing
+    if (!event.correlation_id) event.correlation_id = traceId;
+
     const db = getDB();
 
     // 2. Persist Event (Source of Truth) - IMMUTABLE
@@ -59,6 +66,7 @@ events.post('/', requireScope('events:write'), async (c) => {
                 message: 'Event already received (idempotent)',
                 event_id: event.event_id,
                 correlation_id: event.correlation_id,
+                trace_id: traceId,
                 mode: 'deduplicated'
             }, 200);
         }
@@ -70,22 +78,24 @@ events.post('/', requireScope('events:write'), async (c) => {
     if (queue) {
         await queue.send({
             event,
+            traceId, // Propagate context to worker
             enqueuedAt: new Date().toISOString()
         });
         
-        console.log(`📤 Event ${event.event_id} enqueued for processing`);
+        console.log(`📤 Event ${event.event_id} enqueued for processing [Trace: ${traceId}]`);
         
         return c.json({
             status: 'accepted',
             message: 'Event persisted and queued for async processing.',
             event_id: event.event_id,
             correlation_id: event.correlation_id,
+            trace_id: traceId,
             mode: 'queue'
         }, 202);
     }
 
     // Fallback: Sync processing if queue not available
-    console.log(`⚠️ Queue not available, processing synchronously`);
+    console.log(`⚠️ Queue not available, processing synchronously [Trace: ${traceId}]`);
     const llmProvider = c.env?.LLM_PROVIDER || 'mock';
     const llmApiKey = c.env?.OPENAI_API_KEY || c.env?.GEMINI_API_KEY;
     
@@ -96,7 +106,7 @@ events.post('/', requireScope('events:write'), async (c) => {
     });
     const result = await processor.process(event);
 
-    return c.json(result, 200);
+    return c.json({ ...result, trace_id: traceId }, 200);
 
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';

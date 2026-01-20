@@ -5,7 +5,7 @@
  * No external API calls.
  */
 
-import { LLMProvider, PartialProposal } from '../provider-factory';
+import { LLMProvider, PartialProposal } from '../interfaces';
 
 export class MockProvider implements LLMProvider {
     name = 'mock';

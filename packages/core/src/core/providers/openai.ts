@@ -5,7 +5,7 @@
  * Requires OPENAI_API_KEY secret in Cloudflare.
  */
 
-import { LLMProvider, PartialProposal, ProviderConfig } from '../provider-factory';
+import { LLMProvider, PartialProposal, ProviderConfig } from '../interfaces';
 import { PromptSanitizer } from '../sanitizer';
 
 const DECISION_PROMPT = `You are an autonomous business decision agent. Analyze the incoming event and propose an action.

@@ -54,6 +54,29 @@ export const initSchema = async () => {
       hash TEXT
     );
   `);
+
+    // 4. Pending Reviews (Human-in-the-Loop)
+    await db.exec(`
+    CREATE TABLE IF NOT EXISTS pending_reviews (
+      review_id TEXT PRIMARY KEY,
+      event_id TEXT NOT NULL,
+      tenant_id TEXT NOT NULL,
+      decision_id TEXT NOT NULL,
+      status TEXT DEFAULT 'pending',
+      escalation_reason TEXT,
+      reviewer_id TEXT,
+      reviewed_at TEXT,
+      created_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_reviews_status ON pending_reviews(status);
+    CREATE INDEX IF NOT EXISTS idx_reviews_tenant ON pending_reviews(tenant_id);
+  `);
+
+    // 5. Hard Idempotency (Unique Event Constraint)
+    // Ensures concurrent requests cannot create duplicate decisions
+    await db.exec(`
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_decision_logs_event_unique ON decision_logs(event_id);
+    `);
 };
 
 export const getRecentLogs = async (limit: number = 50) => {
