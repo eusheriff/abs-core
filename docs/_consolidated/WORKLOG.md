@@ -106,3 +106,13 @@
     - **Assurance**: Added Coverage Badge and improved E2E tests (Idempotency).
     - **Ecosystem**: Released Policy Library (`examples/policies`) and Issue Templates.
   - **Status**: Remediation Complete. Ready for GitHub Security Alerts.
+
+- 2026-01-20: Dashboard Forensic Visualization (Vector 6)
+  - **Feature**: Added "Latency Analysis" column to Admin Dashboard.
+  - **Visualization**: Stacked Bar Chart broken down by:
+    - 🔵 LLM (Generative)
+    - 🟡 Policy (Governance)
+    - 🟣 DB (Persistence)
+    - ⚪ Overhead (Validation/Sanitization)
+  - **Goal**: Demonstrate granular "Traceability" for Enterprise clients.
+  - **Status**: Deployed (v2.7.0+).
