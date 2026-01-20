@@ -14,20 +14,20 @@ export type Bindings = {
     GEMINI_API_KEY?: string;
     EVENTS_QUEUE?: unknown;
     LOG_LEVEL?: string;
+    ABS_MODE?: 'scanner' | 'runtime'; // New: Operation Mode
 };
 
 export type Variables = {
     apiKey?: any;
 };
 
-// ... types
-
 export function createApp() {
     const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
     // Middlewares
     app.use('*', cors());
-    
+
+
     // Env Injection (Node.js / Local Fallback)
     app.use('*', async (c, next) => {
         if (!c.env && typeof process !== 'undefined' && process.env) {
@@ -35,20 +35,22 @@ export function createApp() {
             c.env = {
                 ...process.env,
                 LLM_PROVIDER: process.env.LLM_PROVIDER || 'mock',
-                LOG_LEVEL: process.env.LOG_LEVEL || 'info'
+                LOG_LEVEL: process.env.LOG_LEVEL || 'info',
+                ABS_MODE: (process.env.ABS_MODE || 'runtime') as 'scanner' | 'runtime'
             };
         }
         await next();
     });
 
     // Root - Status Check
-    app.get('/', (c) => c.text(`ABS Core v2.0: Active (${c.env?.LLM_PROVIDER || 'unknown'})`));
+    app.get('/', (c) => c.text(`ABS Core v2.2: Active (${c.env?.LLM_PROVIDER || 'unknown'}) [Mode: ${c.env?.ABS_MODE || 'runtime'}]`));
 
     // Health Check
     app.get('/health', (c) => c.json({ 
         status: 'ok', 
-        version: 'v0.5.0',
-        env: c.env?.LLM_PROVIDER || 'unknown'
+        version: 'v0.6.0-beta', // Bump version capability
+        env: c.env?.LLM_PROVIDER || 'unknown',
+        mode: c.env?.ABS_MODE || 'runtime'
     }));
 
 

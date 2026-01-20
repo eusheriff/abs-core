@@ -1,17 +1,25 @@
 # Estado Atual do Sistema
 
-**Versão**: v2.0 (Scale - Queue Architecture)
-**Status**: 🟢 DEPLOYED
+**Versão**: v2.3 (Release: `v0.6.0-beta` + Scanner Mode)
+**Status**: 🟢 DEPLOYED & CONTAINERIZED
 **URL**: `https://abs.oconnector.tech`
+**Strategy**: Free Scanner vs Paid Runtime (Switchable via `ABS_MODE`)
 
 ## Arquitetura Atual
 
-- **Core**: Cloudflare Worker (`abs-core`)
-- **Database**: D1 (`abs-core-db`)
-- **Queue**: Cloudflare Queues (`abs-events-queue`, `abs-events-dlq`)
+- **Core**: Unified Runtime (`packages/core/src/api/factory.ts`)
+  - **Modes**: `scanner` (Free/Passive) vs `runtime` (Paid/Active).
+  - **SaaS**: Cloudflare Worker (`worker.ts`)
+  - **On-Premise**: Docker Container (`Dockerfile` / `server.ts`)
+- **Database**: 
+  - **SaaS**: Cloudflare D1
+  - **On-Premise**: SQLite (Volume persistente)
+- **Queue**: Cloudflare Queues (SaaS only)
+- **Auth**: API Keys (Generic / DB-backed)
 - **Auth**: API Keys (D1 com hash SHA-256)
 - **LLM**: Gemini 1.5 Flash (6 keys em rodízio)
-- **Security**: Prompt Injection Sanitizer
+- **Security**: Prompt Injection Sanitizer + Idempotency Check + Metrics Auth
+- **Observability**: `/metrics` (Prometheus) protegido por scope `admin:read`
 
 ## Integração Ativa
 

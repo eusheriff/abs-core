@@ -10,6 +10,7 @@ interface EventsEnv {
     LLM_PROVIDER?: string;
     OPENAI_API_KEY?: string;
     GEMINI_API_KEY?: string;
+    ABS_MODE?: 'scanner' | 'runtime';
 }
 
 const events = new Hono<{ Bindings: EventsEnv }>();
@@ -90,7 +91,8 @@ events.post('/', requireScope('events:write'), async (c) => {
     
     const processor = new EventProcessor(db, {
         llmProvider,
-        llmApiKey
+        llmApiKey,
+        mode: (c.env?.ABS_MODE || 'runtime') as 'scanner' | 'runtime'
     });
     const result = await processor.process(event);
 

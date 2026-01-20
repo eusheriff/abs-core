@@ -45,7 +45,8 @@ export default {
             new D1Adapter(env.DB as D1Database),
             {
                 llmProvider: env.LLM_PROVIDER || 'mock',
-                llmApiKey: env.OPENAI_API_KEY || env.GEMINI_API_KEY
+                llmApiKey: env.OPENAI_API_KEY || env.GEMINI_API_KEY,
+                mode: env.ABS_MODE || 'runtime'
             }
         );
 

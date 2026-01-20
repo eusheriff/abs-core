@@ -12,6 +12,12 @@
 - Auditoria apontou riscos de segurança e falta de "trust" no log de eventos.
 - Repositório continha arquivos sensíveis/locais (`.db`, `.wrangler`).
 
+- 2026-01-20: Implemented Scanner vs Runtime strategy (ADR-002)
+  - Refactored `EventProcessor` to support `ABS_MODE`.
+  - Added `scanner` mode (passive monitoring) and `runtime` mode (active enforcement).
+  - Created `src/policies/starter-pack.ts` as example.
+  - Verification: `test/scanner.test.ts` passed.
+  - Updated `STATE.md` to v2.3.
 ### Ações Realizadas
 - [x] **Repo Hygiene**:
   - Removido `abs_core.db` e `.wrangler` do git.

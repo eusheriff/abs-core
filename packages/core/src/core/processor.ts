@@ -11,11 +11,12 @@ export interface ProcessorConfig {
     llmProvider: string;
     llmApiKey?: string;
     llmModel?: string;
+    mode?: 'scanner' | 'runtime';
 }
 
 export interface ProcessResult {
     decision_id: string;
-    status: 'processed' | 'rejected' | 'failed' | 'processed_duplicate' | 'duplicate'; // added specific statuses
+    status: 'processed' | 'rejected' | 'failed' | 'processed_duplicate' | 'duplicate';
     decision: string;
     provider: string;
     latency_ms: number;
@@ -24,6 +25,7 @@ export interface ProcessResult {
 
 export class EventProcessor {
     private provider: LLMProvider;
+    private mode: 'scanner' | 'runtime';
 
     constructor(private db: DatabaseAdapter, config?: ProcessorConfig) {
         // Safe cast or defaulting. getProvider expects ProviderType.
@@ -36,7 +38,8 @@ export class EventProcessor {
                 model: config?.llmModel
             }
         );
-        console.log(`[Processor] Initialized with ${this.provider.name} provider`);
+        this.mode = config?.mode || 'runtime';
+        console.log(`[Processor] Initialized with ${this.provider.name} provider (Mode: ${this.mode})`);
     }
 
     async process(event: unknown): Promise<ProcessResult> {
@@ -81,9 +84,6 @@ export class EventProcessor {
             }
         } catch (e) {
             console.warn('[Processor] Idempotency check failed:', e);
-            // Continue processing on error (fail open for read errors? or fail closed?)
-            // Fail open for reading logs = risk of duplicate execution.
-            // But if DB is down, next steps will fail too.
         }
 
         try {
@@ -100,6 +100,7 @@ export class EventProcessor {
                 await this.logDecision({
                     decisionId,
                     eventId: validEvent.event_id,
+                    tenantId: validEvent.tenant_id,
                     policyName: 'INJECTION_BLOCKED',
                     provider: 'sanitizer',
                     decision: 'DENY',
@@ -135,9 +136,20 @@ export class EventProcessor {
 
             // 4. POLICY GATE (Governance)
             const policy = PolicyRegistry.getPolicy(validEvent.event_type);
-            const decision = policy.evaluate(validProposal, validEvent);
+            const rawDecision = policy.evaluate(validProposal, validEvent);
+            const decisionStr = typeof rawDecision === 'string' ? rawDecision : rawDecision.decision || 'unknown';
+
+            // SCANNER MODE OVERRIDE
+            let executionStatus = decisionStr;
+            let scannerNote = '';
+
+            if (this.mode === 'scanner' && decisionStr === 'DENY') {
+                console.warn(`[Scanner] Suppressing DENY for event ${validEvent.event_id}. Marking as MONITOR.`);
+                executionStatus = 'MONITOR'; // Override for client
+                scannerNote = ' [Scanner Override: Would be DENY]';
+            }
             
-            // 5. IMMUTABLE DECISION LOG (MUST succeed before returning)
+            // 5. IMMUTABLE DECISION LOG
             const decisionId = uuidv4();
             const latency = Date.now() - start;
 
@@ -147,32 +159,29 @@ export class EventProcessor {
                 eventId: validEvent.event_id,
                 policyName: policy.name || 'default',
                 provider: this.provider.name,
-                decision: typeof decision === 'string' ? decision : decision.decision || 'unknown',
-                reason: validProposal.explanation.summary,
-                metadata: { ai_proposal: validProposal, input_event: validEvent },
+                decision: decisionStr, // Log REAL intent
+                reason: validProposal.explanation.summary + scannerNote,
+                metadata: { ai_proposal: validProposal, input_event: validEvent, scanner_override: executionStatus !== decisionStr },
                 latency
             });
 
-            // CRITICAL: If log failed, we MUST NOT return success
             if (!logResult.success) {
                 Metrics.recordError('db');
                 throw new Error('Decision log failed - aborting to maintain invariant');
             }
 
-            // 6. Record metrics with proper method
-            const decisionStr = typeof decision === 'string' ? decision.toLowerCase() : 'unknown';
             Metrics.recordDecision(
-                decisionStr as 'allow' | 'deny' | 'escalate' | 'handoff',
+                decisionStr.toLowerCase() as any,
                 latency,
                 policy.name
             );
 
-            console.log(`✅ Decision Logged: ${decision} (${latency}ms) via ${this.provider.name}`);
+            console.log(`✅ Decision Logged: ${decisionStr} -> Executed: ${executionStatus} (${latency}ms)`);
 
             return {
                 decision_id: decisionId,
                 status: 'processed',
-                decision: typeof decision === 'string' ? decision : decision.decision || 'unknown',
+                decision: executionStatus,
                 provider: this.provider.name,
                 latency_ms: latency,
                 policy_id: policy.name
@@ -207,8 +216,8 @@ export class EventProcessor {
                 params.policyName,
                 params.provider,
                 params.decision,
-                params.reason, // treating reason as execution_response summary for now. Wait, schema has full_log_json/execution_response.
-                JSON.stringify(params.metadata), // full_log_json
+                params.reason,
+                JSON.stringify(params.metadata),
                 new Date().toISOString()
             );
             return { success: result.isSuccess !== false };
@@ -217,5 +226,4 @@ export class EventProcessor {
             return { success: false };
         }
     }
-
 }
