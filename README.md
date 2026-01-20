@@ -1,9 +1,10 @@
 # ABS Core
 > **Autonomous Business System (Runtime)**
-> `v0.5-audited`
+> `v2.0.0`
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/Audit-PASSED-green)](docs/AUDIT_MASTER_v0.5.md)
+[![CI](https://github.com/eusheriff/abs-core/actions/workflows/ci.yml/badge.svg)](https://github.com/eusheriff/abs-core/actions/workflows/ci.yml)
+[![Security](https://img.shields.io/badge/Security-TruffleHog%20%2B%20Trivy-green)](https://github.com/eusheriff/abs-core/actions)
 
 > **ABS Core is not an agent framework.**
 > It is a governed runtime that prevents probabilistic models from executing unbounded actions.
