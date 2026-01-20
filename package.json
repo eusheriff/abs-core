@@ -1,19 +1,41 @@
 {
-  "name": "oconnector-abs-monorepo",
-  "version": "0.5.0",
+  "name": "abs-core",
+  "version": "2.0.0",
+  "description": "Autonomous Business System - Governed runtime for AI decision-making",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
+    "dev": "cd packages/core && npm run dev",
+    "build": "cd packages/core && npm run build",
+    "deploy": "cd packages/core && npm run deploy",
     "test": "vitest run",
+    "test:watch": "vitest",
     "test:e2e": "vitest run packages/core/test/e2e.test.ts",
-    "lint": "eslint packages/*/src --ext .ts"
+    "lint": "eslint packages/*/src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "abs": "tsx packages/core/src/cli/index.ts"
   },
   "devDependencies": {
     "typescript": "^5.2.2",
     "vitest": "^0.34.0",
     "tsx": "^4.7.0",
     "eslint": "^8.0.0"
-  }
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eusheriff/abs-core.git"
+  },
+  "keywords": [
+    "llm",
+    "governance",
+    "policy",
+    "autonomous",
+    "cloudflare-workers"
+  ],
+  "license": "Apache-2.0"
 }

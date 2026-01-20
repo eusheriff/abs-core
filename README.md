@@ -47,51 +47,64 @@ graph LR
 
 Note: The **Decision Log** happens *strictly before* Execution. If the DB insert fails, the action is never attempted.
 
-## Quick Start (CLI Lab)
-The fastest way to test the governance loop. No API keys required (runs in mock mode).
+## Quick Start
 
-### 1. Install & Simulate
+### Option 1: Use the Hosted API (Recommended)
+
+The easiest way to use ABS Core - no installation required:
+
 ```bash
-# Install dependencies
+# Send an event to the hosted API
+curl -X POST https://abs.oconnector.tech/v1/events \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{"event_id":"uuid","tenant_id":"demo","event_type":"ticket.created","source":"api","occurred_at":"2026-01-19T00:00:00Z","payload":{"text":"Hello"},"correlation_id":"corr-1"}'
+```
+
+### Option 2: Self-Host (Clone & Deploy)
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/eusheriff/abs-core.git
+cd abs-core
+
+# 2. Install dependencies
 npm install
 
-# Start the runtime (in terminal 1)
+# 3. Setup Cloudflare
+cp packages/core/wrangler.toml.example packages/core/wrangler.toml
+# Edit wrangler.toml with your database_id
+
+# 4. Create D1 database
+npx wrangler d1 create abs-core-db
+
+# 5. Run migrations
+npx wrangler d1 migrations apply abs-core-db --local
+
+# 6. Start dev server
 npm run dev
 
-# Simulate an event (in terminal 2)
-# This sends a payload through the Policy Gate -> Decision Log -> Execution
+# 7. Test locally
+npm run abs -- simulate ticket.created -d '{"text": "Hello"}'
+```
+
+### Option 3: CLI Lab (Local Testing)
+
+```bash
+# Run the CLI directly (no global install needed)
 npm run abs -- simulate ticket.created -d '{"text": "Urgent refund needed"}'
+
+# View decision logs
+npm run abs -- logs --limit 5
 ```
 
-### Installation in Other Projects
-
-You can use the CLI directly in other projects without publishing to npm:
-
-**Option 1: Run via npx (No Install)**
-```bash
-npx github:eusheriff/abs-core simulate ticket.created -d '{"text": "Hello"}'
-```
-
-**Option 2: Install as Dependency**
-```bash
-npm install -g github:eusheriff/abs-core
-# Then run anywhere:
-abs --help
-```
-
-### 2. Inspect the Decision Log
-```bash
-# See why a decision was made
-npm run abs -- logs --limit 1
-```
-
-You should see:
+Example output:
 ```text
-┌──────────────────────────────────────┬────────────────┬──────────┬───────────┬──────────────────────┐
-│ ID                                   │ Event          │ Decision │ Latency   │ Time                 │
-├──────────────────────────────────────┼────────────────┼──────────┼───────────┼──────────────────────┤
-│ 8bbe99ee-6412-4b19-b7e8-096837567d26 │ ticket.created │ allow    │ 45ms      │ 2026-01-19T17...     │
-└──────────────────────────────────────┴────────────────┴──────────┴───────────┴──────────────────────┘
+┌──────────────────────────────────────┬────────────────┬──────────┬───────────┐
+│ ID                                   │ Event          │ Decision │ Latency   │
+├──────────────────────────────────────┼────────────────┼──────────┼───────────┤
+│ 8bbe99ee-6412-4b19-b7e8-096837567d26 │ ticket.created │ allow    │ 45ms      │
+└──────────────────────────────────────┴────────────────┴──────────┴───────────┘
 ```
 
 ---
