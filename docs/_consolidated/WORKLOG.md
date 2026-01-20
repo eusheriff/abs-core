@@ -55,7 +55,6 @@
   - **API**: Added `/admin/reviews` endpoints (List, Approve, Reject).
   - **Integration**: Registered `reviewsRouter` in `factory.ts`.
   - **Status**: Ready for manual testing/integration.
-
 - 2026-01-20: Implemented Dynamic Policy Engine (Roadmap Vector 2)
   - **Core**: Added `json-logic-js` dependency.
   - **Schema**: Created `PolicyRuleSchema` (Zod).
@@ -116,3 +115,14 @@
     - ⚪ Overhead (Validation/Sanitization)
   - **Goal**: Demonstrate granular "Traceability" for Enterprise clients.
   - **Status**: Deployed (v2.7.0+).
+
+- 2026-01-20: Architecture Split - Scanner SDK POC (Phase 5)
+  - **Goal**: Validate "Sentry-like" passive extension model.
+  - **Artifacts**:
+    - Created `packages/scanner` (Lightweight TS SDK).
+    - Created `examples/scanner_demo.ts`.
+  - **Validation**:
+    - Build successful (manual `tsc`).
+    - Demo executed: Events ingested by v2.7.0 backend.
+    - Dashboard: Confirmed logs visible with "Latency Breakdown".
+  - **Strategic Impact**: Proven feasibility of splitting "Scanner" (Free) from "Runtime" (Paid).
