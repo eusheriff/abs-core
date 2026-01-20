@@ -5,7 +5,7 @@ import { DecisionProposal, EventEnvelopeSchema, EventEnvelope } from './schemas'
 import { Metrics } from './metrics';
 import { DB } from '../infra/db-adapter';
 import { LLMProvider, getProvider, ProviderType } from './provider-factory';
-import { sanitizeInput } from './sanitizer';
+import { sanitize } from './sanitizer';
 
 export interface ProcessorConfig {
     llmProvider: ProviderType;
@@ -60,9 +60,9 @@ export class EventProcessor {
         try {
             // 2. PROMPT INJECTION CHECK
             const payloadStr = JSON.stringify(validEvent.payload);
-            const sanitizeResult = sanitizeInput(payloadStr);
+            const sanitizeResult = sanitize(payloadStr);
             
-            if (sanitizeResult.risk === 'critical') {
+            if (sanitizeResult.flagged) {
                 Metrics.recordError('injection');
                 Metrics.recordDecision('deny', Date.now() - start, 'INJECTION_BLOCKED');
                 
@@ -74,7 +74,7 @@ export class EventProcessor {
                     policyName: 'INJECTION_BLOCKED',
                     provider: 'sanitizer',
                     decision: 'DENY',
-                    reason: `Prompt injection detected: ${sanitizeResult.matches.join(', ')}`,
+                    reason: `Prompt injection detected: ${sanitizeResult.flags.join(', ')}`,
                     metadata: { sanitize_result: sanitizeResult, event: validEvent },
                     latency: Date.now() - start
                 });
@@ -90,7 +90,7 @@ export class EventProcessor {
             }
 
             // 3. LLM PROPOSAL (with sanitized input)
-            const eventForLLM = { ...validEvent, payload: sanitizeResult.sanitized };
+            const eventForLLM = { ...validEvent, payload: sanitizeResult.clean };
             const partialProposal = await this.provider.propose(eventForLLM);
 
             const validProposal: DecisionProposal = {
