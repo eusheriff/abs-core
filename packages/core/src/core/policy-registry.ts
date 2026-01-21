@@ -3,13 +3,19 @@ import { SimplePolicyEngine } from './policy';
 import { BotOperationalPolicy } from './policy-bot-operational';
 import { WhatsAppBotPolicy } from './policy-whatsapp-bot';
 import { DynamicPolicy } from './dynamic-policy';
-import { PolicyRule } from './schemas/policy-definition';
+import { PolicyRule } from './schemas';
 
 // Re-export types for convenience
 export type { PolicyEngine, PolicyResult } from './interfaces';
 
 // Define DecisionResult compatibility type if not in interfaces
-export type DecisionResult = string | { decision: string; reason?: string };
+export type DecisionResult = string | { 
+    decision: string; 
+    reason?: string; 
+    score?: number;
+    domain?: string;
+    tags?: string[];
+};
 
 export interface Policy {
     name?: string;

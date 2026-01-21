@@ -11,6 +11,7 @@ interface EventsEnv {
     OPENAI_API_KEY?: string;
     GEMINI_API_KEY?: string;
     ABS_MODE?: 'scanner' | 'runtime';
+    ABS_INTERACTIVE?: string;
 }
 
 const events = new Hono<{ Bindings: EventsEnv }>();
@@ -41,7 +42,14 @@ events.post('/', requireScope('events:write'), async (c) => {
             SELECT hash FROM events_store ORDER BY rowid DESC LIMIT 1
         `);
         const previousHash = lastEvent?.hash || null;
-        const hash = Integrity.computeHash(JSON.stringify(event), previousHash);
+        
+        // Canonical Representation for Audit (Must match Re-verification logic)
+        // Format: id:tenant:type:source:timestamp:payload_json
+        const timestamp = new Date().toISOString();
+        const payloadStr = JSON.stringify(event.payload);
+        const canonical = `${event.event_id}:${event.tenant_id}:${event.event_type}:${event.source}:${timestamp}:${payloadStr}`;
+        
+        const hash = Integrity.computeHash(canonical, previousHash);
 
         await db.run(
             `INSERT INTO events_store (
@@ -50,9 +58,9 @@ events.post('/', requireScope('events:write'), async (c) => {
             event.event_id,
             event.tenant_id,
             event.event_type,
-            JSON.stringify(event.payload),
+            payloadStr,
             event.source,
-            new Date().toISOString(),
+            timestamp,
             'pending',
             hash,
             previousHash
@@ -102,7 +110,8 @@ events.post('/', requireScope('events:write'), async (c) => {
     const processor = new EventProcessor(db, {
         llmProvider,
         llmApiKey,
-        mode: (c.env?.ABS_MODE || 'runtime') as 'scanner' | 'runtime'
+        mode: (c.env?.ABS_MODE || 'runtime') as 'scanner' | 'runtime',
+        interactive_mode: c.env?.ABS_INTERACTIVE === 'true' || process.env.ABS_INTERACTIVE === 'true'
     });
     const result = await processor.process(event);
 

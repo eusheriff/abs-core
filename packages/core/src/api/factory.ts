@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import { eventsRouter } from './routes/events';
 import { adminRouter } from './routes/admin';
 import { reviewsRouter } from './routes/reviews';
+import { superviseRouter } from './routes/supervise'; // New Import
 import { Dashboard } from '../ui/dashboard';
 import { getRecentLogs } from '../infra/db';
 import { Metrics } from '../core/metrics';
@@ -15,6 +16,7 @@ export type Bindings = {
     GEMINI_API_KEY?: string;
     EVENTS_QUEUE?: unknown;
     LOG_LEVEL?: string;
+    ABS_SECRET_KEY?: string; // For HMAC Signing
     ABS_MODE?: 'scanner' | 'runtime'; // New: Operation Mode
 };
 
@@ -22,14 +24,14 @@ export type Variables = {
     apiKey?: any;
 };
 
-export function createApp() {
+export function createApp(envOverrides?: Partial<Bindings>) {
     const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
     // Middlewares
     app.use('*', cors());
 
 
-    // Env Injection (Node.js / Local Fallback)
+    // Env Injection (Node.js / Local Fallback / Overrides)
     app.use('*', async (c, next) => {
         if (!c.env && typeof process !== 'undefined' && process.env) {
             // @ts-ignore
@@ -40,6 +42,12 @@ export function createApp() {
                 ABS_MODE: (process.env.ABS_MODE || 'runtime') as 'scanner' | 'runtime'
             };
         }
+        
+        // Apply Overrides (e.g. Queue Adapter)
+        if (envOverrides) {
+             c.env = { ...c.env, ...envOverrides };
+        }
+        
         await next();
     });
 
@@ -82,6 +90,7 @@ export function createApp() {
     app.route('/v1/events', eventsRouter);
     app.route('/admin', adminRouter);
     app.route('/admin/reviews', reviewsRouter);
+    app.route('/v1/supervise', superviseRouter); // New Endpoint
 
     return app;
 }

@@ -4,6 +4,7 @@ import { EventProcessor } from '../core/processor';
 import { createApp, Bindings } from './factory';
 import { Logger } from '../core/logger';
 import { TraceContext } from '../core/context';
+import { signer } from '../crypto/signer';
 
 // Create Unified App
 const app = createApp();
@@ -27,6 +28,9 @@ export default {
     // HTTP Handler
     fetch: async (request: Request, env: Bindings, ctx: ExecutionContext) => {
         try {
+            // Initialize Signer with Secret
+            signer.init(env.ABS_SECRET_KEY);
+
             // Inject D1 Adapter
             setDB(new D1Adapter(env.DB as D1Database));
             
@@ -41,6 +45,9 @@ export default {
     // Queue Consumer Handler (v2.0)
     queue: async (batch: MessageBatch<QueueMessage>, env: Bindings) => {
         
+        // Initialize Signer with Secret
+        signer.init(env.ABS_SECRET_KEY);
+
         setDB(new D1Adapter(env.DB as D1Database));
         
         const processor = new EventProcessor(

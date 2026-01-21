@@ -40,9 +40,11 @@ export type DecisionProposal = z.infer<typeof DecisionProposalSchema>;
 export const PolicyDecisionSchema = z.object({
   decision_id: z.string().uuid().optional(), // Can be same as proposal or new
   policy_decision: z.enum(['allow', 'deny', 'escalate']),
+  risk_score: z.number().min(0).max(100).default(0), // 0-100 Score
   policy_trace: z.object({
     matched_rules: z.array(z.string()),
     violated_rules: z.array(z.string()),
+    risk_factors: z.array(z.string()).optional(), // Reasons for score
     computed_fields: z.record(z.any()).optional(),
   }),
   required_human_review: z.boolean(),

@@ -3,12 +3,25 @@ import { config } from 'dotenv';
 import { LocalDBAdapter } from '../infra/db-local';
 import { setDB, initSchema } from '../infra/db';
 import { createApp } from './factory';
+import { signer } from '../crypto/signer';
 
 // Load env
 config();
 
+// --------------------------------------------------------
+// Redis Integration
+// --------------------------------------------------------
+let kvOverrides: any = {};
+if (process.env.REDIS_URL) {
+    console.log('🔌 Connecting to Redis for Queue Support...');
+    // Dynamic import to avoid breaking non-node bundles if this file acts as shared entry (unlikely but safe)
+    // Actually server.ts is strictly Node.
+    const { RedisQueueAdapter } = require('../infra/queue-redis');
+    kvOverrides['EVENTS_QUEUE'] = new RedisQueueAdapter(process.env.REDIS_URL);
+}
+
 // Create Unified App
-const app = createApp();
+const app = createApp(kvOverrides);
 
 // Export app for testing/CLI
 export { app };
@@ -16,6 +29,10 @@ export { app };
 const run = (port: number) => {
     // Inject Local Adapter when running the server
     const dbPath = process.env.DATABASE_URL || 'abs_core.db';
+    
+    // Initialize Signer
+    signer.init(process.env.ABS_SECRET_KEY);
+
     console.log(`📦 Initializing Local DB using adapter at ${dbPath}`);
     setDB(new LocalDBAdapter(dbPath));
     

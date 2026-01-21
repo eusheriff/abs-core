@@ -3,7 +3,7 @@
   "displayName": "ABS Core Integration",
   "publisher": "oconnector",
   "description": "Integrate ABS Core Scanner directly into VS Code.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "icon": "icon.png",
   "repository": {
     "type": "git",
@@ -15,7 +15,9 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [

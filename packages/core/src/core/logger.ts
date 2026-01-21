@@ -1,4 +1,5 @@
 import { TraceContext } from './context';
+import { signer } from '../crypto/signer';
 
 export type LogSeverity = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR' | 'CRITICAL';
 
@@ -37,8 +38,16 @@ export class Logger {
       ...attributes
     };
 
+    // Sign the complete log entry
+    const signature = signer.sign(logEntry);
+    
+    const signedEntry = {
+        ...logEntry,
+        signature
+    };
+
     // In a real OTel setup, this would emit to a collector.
     // Here we wrap in a structured JSON for Cloudflare/Vercel logs capture.
-    console.log(JSON.stringify(logEntry));
+    console.log(JSON.stringify(signedEntry));
   }
 }

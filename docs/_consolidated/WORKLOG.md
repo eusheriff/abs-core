@@ -173,4 +173,20 @@
     - Documented On-Premise Docker Strategy (`docs/ONPREMISE.md`).
 - **New Vector**: ABS for Coding Agents (`coding_safeguards.json`).
 - **Community**: Added GitHub Issue Templates and Success Stories page.
+- 2026-01-20: Enterprise Hardening - Cryptographic Audit (Phase 12)
+  - **Goal**: Tamper-proof decision logs for compliance.
+  - **Core**: Implemented `CryptoService` (HMAC-SHA256).
+  - **Integration**:
+    - `logger.ts`: Signs every log entry before emission.
+    - `worker.ts` & `server.ts`: Initialize signer with `ABS_SECRET_KEY`.
+  - **Test**: Added `test/crypto.test.ts` (Pass).
+  - **Status**: Completed. All new logs are now signed.
+
+- 2026-01-20: Governance & Integration (v2.8.0-rc1)
+  - **Gatekeeper**: Implemented "Human-in-the-Loop" (`abs supervise`) for Score >= 50.
+  - **Audit**: Added "Blockchain Lite" verification (`abs audit verify`) to integrity-check `events_store`.
+  - **Governance L3**: Added Domain (`FINANCIAL`, `PII`) and Tags to Policy Schema.
+  - **Integration**: Added `RedisQueueAdapter` (`ioredis`) for scalable async processing (Enterprise).
+  - **Tests**: Verified Integrity, Gatekeeper, and Redis Integration.
+  - **Status**: Ready for Production Deploy.
 

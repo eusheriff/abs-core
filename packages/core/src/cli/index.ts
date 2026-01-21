@@ -285,9 +285,22 @@ program
   });
 
 // -----------------------------------------------------------------------------
-// 5. POLICIES
+// 5. SUPERVISE (Gatekeeper)
 // -----------------------------------------------------------------------------
-const policies = program.command('policies').description('Manage governance policies');
+import { registerSuperviseCommand } from './commands/supervise';
+registerSuperviseCommand(program);
+
+// -----------------------------------------------------------------------------
+// 6. AUDIT (Integrity)
+// -----------------------------------------------------------------------------
+import { registerAuditCommand } from './commands/audit';
+registerAuditCommand(program);
+
+// -----------------------------------------------------------------------------
+// 7. POLICIES
+// -----------------------------------------------------------------------------
+import { registerPoliciesCommand } from './commands/policies';
+registerPoliciesCommand(program);
 
 policies
     .command('check')

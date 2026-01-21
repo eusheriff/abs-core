@@ -8,6 +8,7 @@ export const PolicyRuleSchema = z.object({
   priority: z.number().default(100),
   condition: z.record(z.any()), // JSON Logic object
   effect: z.enum(['ALLOW', 'DENY', 'ESCALATE', 'MONITOR']),
+  score_impact: z.number().optional(), // Points to add if matched (e.g. 20)
   reason_template: z.string().optional(),
   enabled: z.boolean().default(true)
 });

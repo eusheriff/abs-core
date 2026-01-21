@@ -10,27 +10,34 @@ import { sanitize } from './sanitizer';
 import { Logger } from './logger';
 import { TraceContext, createTraceId, createSpanId } from './context';
 
+import { OrchestrationAdapter } from '../orchestration/interfaces';
+
 export interface ProcessorConfig {
     llmProvider: string;
     llmApiKey?: string;
     llmModel?: string;
     mode?: 'scanner' | 'runtime';
+    orchestrator?: OrchestrationAdapter;
+    interactive_mode?: boolean;
 }
 
 export interface ProcessResult {
     decision_id: string;
-    status: 'processed' | 'rejected' | 'failed' | 'processed_duplicate' | 'duplicate' | 'pending_review';
+    status: 'processed' | 'rejected' | 'failed' | 'processed_duplicate' | 'duplicate' | 'pending_review' | 'queued' | 'suspended';
     decision: string;
     provider: string;
     latency_ms: number;
     policy_id?: string;
     review_id?: string;
-    trace_id?: string; // New field
+    trace_id?: string;
+    task_id?: string;
 }
 
 export class EventProcessor {
     private provider: LLMProvider;
     private mode: 'scanner' | 'runtime';
+    private orchestrator?: OrchestrationAdapter;
+    private interactive: boolean;
 
     constructor(private db: DatabaseAdapter, config?: ProcessorConfig) {
         // Safe cast or defaulting. getProvider expects ProviderType.
@@ -44,7 +51,45 @@ export class EventProcessor {
             }
         );
         this.mode = config?.mode || 'runtime';
+        this.orchestrator = config?.orchestrator;
+        this.interactive = config?.interactive_mode || false;
         // Note: console.log here is fine for startup, or update to use global logger if available
+    }
+
+    /**
+     * Submit an event for asynchronous processing via the Orchestrator.
+     * @param event The event envelope
+     * @returns task_id
+     */
+    async submitAsync(event: EventEnvelope): Promise<string> {
+        if (!this.orchestrator) {
+            throw new Error('Orchestration not configured');
+        }
+
+        // Validate basic envelope before queuing
+        const validation = EventEnvelopeSchema.safeParse(event);
+        if (!validation.success) {
+            throw new Error('Event validation failed: ' + validation.error.message);
+        }
+
+        return this.orchestrator.schedule({
+            id: event.event_id, // Use event ID as task ID for idempotency mapping
+            type: 'process_event',
+            payload: event
+        });
+    }
+
+    /**
+     * Register this processor as a worker for the orchestrator.
+     */
+    async startWorker(): Promise<void> {
+        if (!this.orchestrator) return;
+
+        this.orchestrator.worker('process_event', async (task) => {
+            await this.process(task.payload);
+        });
+        
+        await this.orchestrator.connect();
     }
 
     async process(event: unknown): Promise<ProcessResult> {
@@ -190,7 +235,22 @@ export class EventProcessor {
             // 4. POLICY GATE (Governance)
             const policy = PolicyRegistry.getPolicy(validEvent.event_type);
             const rawDecision = policy.evaluate(validProposal, validEvent);
-            const decisionStr = typeof rawDecision === 'string' ? rawDecision : rawDecision.decision || 'unknown';
+            
+            let decisionStr = typeof rawDecision === 'string' ? rawDecision : rawDecision.decision || 'unknown';
+            const decisionScore = typeof rawDecision === 'object' && rawDecision.score ? rawDecision.score : 0;
+            let decisionReason = typeof rawDecision === 'object' && rawDecision.reason ? rawDecision.reason : 'Policy Evaluation';
+
+            // Global Risk Thresholds (Safety Net)
+            if (decisionScore >= 80 && decisionStr !== 'DENY') {
+                logger.warn(`[Risk Protection] Score ${decisionScore} >= 80. Overriding to DENY.`);
+                decisionStr = 'DENY';
+                decisionReason += ` (Risk Score: ${decisionScore} - Critical)`;
+            } else if (decisionScore >= 50 && decisionStr === 'ALLOW') {
+                logger.warn(`[Risk Protection] Score ${decisionScore} >= 50. Overriding to ESCALATE.`);
+                decisionStr = 'ESCALATE';
+                decisionReason += ` (Risk Score: ${decisionScore} - High)`;
+            }
+            
             breakdown.policy_ms = tick();
 
             // SCANNER MODE OVERRIDE
@@ -243,6 +303,23 @@ export class EventProcessor {
                 Metrics.recordDecision('escalate', latency, policy.name);
                 logger.info(`Decision ESCALATE: Pending human review`, { review_id: reviewId, event_id: validEvent.event_id });
 
+                // INTERACTIVE GATEKEEPER
+                // If we are in interactive mode, and the decision is not explicit ALLOW,
+                // or if it's ESCALATE, we suspend and wait (in a real CLI this might block or return suspended).
+                // For now, if interactive and ESCALATE, we return 'suspended' to let CLI prompt user.
+                if (this.interactive) {
+                     return {
+                        decision_id: decisionId,
+                        status: 'suspended', // CLI should catch this and prompt user
+                        decision: 'ESCALATE',
+                        provider: this.provider.name,
+                        latency_ms: latency,
+                        policy_id: policy.name,
+                        review_id: reviewId,
+                        trace_id: traceId
+                    };
+                }
+
                 return {
                     decision_id: decisionId,
                     status: 'pending_review',
@@ -269,11 +346,12 @@ export class EventProcessor {
                     policyName: policy.name || 'default',
                     provider: this.provider.name,
                     decision: decisionStr, // Log REAL intent
-                    reason: validProposal.explanation.summary + scannerNote,
+                    reason: decisionReason + scannerNote,
                     metadata: { 
                         ai_proposal: validProposal, 
                         input_event: validEvent, 
                         scanner_override: executionStatus !== decisionStr,
+                        risk_score: decisionScore,
                         trace_id: traceId,
                         latency_breakdown: { ...breakdown, db_ms: Date.now() - dbStart } // Capture final DB write time
                     },
