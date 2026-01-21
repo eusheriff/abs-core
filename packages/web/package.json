@@ -1,6 +1,7 @@
 {
   "name": "web",
   "version": "0.1.0",
+  "author": "Engº Rodrigo Gomes <dev@oconnector.tech>",
   "private": true,
   "scripts": {
     "dev": "next dev",

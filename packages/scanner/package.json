@@ -2,6 +2,7 @@
   "name": "@abs/scan",
   "version": "0.1.0",
   "description": "ABS Lightweight Scanner SDK",
+  "author": "Engº Rodrigo Gomes <dev@oconnector.tech>",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {

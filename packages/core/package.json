@@ -2,6 +2,7 @@
   "name": "@abs/core",
   "version": "2.7.0",
   "description": "ABS Core Runtime",
+  "author": "Engº Rodrigo Gomes <dev@oconnector.tech>",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
