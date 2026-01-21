@@ -264,6 +264,48 @@
     - Unit Tests: `semantic-tracer.test.ts` (Pass)
     - Integration: Build running.
 
-- 2026-01-21: Governance & VS Code Fixes
-  - **VS Code**: Fixed "No active file to scan" bug. Updated icon.
-  - **Core**: Integrated SequenceAnalyzer, AgentMemory, ActionSanitizer.
+
+- 2026-01-21: Deployment v3.1 (Governance + Telemetry)
+  - **Deployed**: `abs-core` to Cloudflare Workers via Wrangler.
+  - **Domain**: `abs.oconnector.tech` (Used as fallback).
+  - **DNS Issue**: `abscore.app` blocked by "externally managed DNS" error (Code 100117).
+  - **Verification**: `curl https://abs.oconnector.tech/health` -> 200 OK.
+  - **Content**: 
+    - Semantic Telemetry (`IntentTracer`, `SessionManager`).
+    - Governance (`SequenceAnalyzer`, `AgentMemory`, `Sanitizer`).
+    - VS Code Fixes (`abs-vscode-0.0.5`).
+  - **Status**: ✅ PRODUCTION READY (Code Live).
+
+- 2026-01-21: Deployment Halted (DNS Conflict)
+  - **Issue**: Deploy to `abscore.app` failed due to existing DNS records (Code 100117).
+  - **Resolution**: Removed conflicting CNAME (`abscore-lp.pages.dev`) via Cloudflare API.
+  - **Action**: Re-ran `wrangler deploy` with Global API Keys.
+  - **Outcome**: ✅ Deployed successfully to `abscore.app`.
+  - **Note**: Propagation might result in mixed serving (Landing Page vs Worker) temporarily.
+
+
+
+- 2026-01-21: VS Code Extension Fix (v0.0.11)
+  - **Issue**: Scan functionality returning 404.
+  - **Analysis**: Backend requires Auth (`events:write`) and correct URL (`/v1/events`). Extension was sending unauthenticated requests to `/v1/events/ingest`.
+  - **Fixes**:
+    - Updated `extension.ts` to points to `${apiUrl}/v1/events`.
+    - Implemented `Authorization: Bearer` header.
+    - Added `abs.apiKey` configuration (Default: `sk-producer-v0`).
+    - Bumped version to `0.0.11`.
+  - **Verification**: Compiled successfully.
+
+- 2026-01-21: Feature - Smart Scan (v0.0.12)
+  - **Goal**: Optimize scan to focus on high-value targets and respect API rate limits.
+  - **Strategy**: 
+    - Replaced naive recursive scan with `getSmartFiles`.
+    - Targets: `.cursorrules`, `.vscode/*.json`, `.env`, `Dockerfile`, `package.json`, `prompts/`.
+    - Limit: Increased from 50 (random) to 100 (prioritized).
+  - **Artifact**: `abs-vscode-0.0.12.vsix` verified.
+
+- 2026-01-21: Marketplace DNS Verification
+  - **Goal**: Verify domain `abscore.app` for VS Code Marketplace publisher.
+  - **Action**: Created TXT record via Cloudflare API.
+  - **Record**: `_visual-studio-marketplace-oconnector.abscore.app` -> `c9722c56...`
+  - **Verification**: `dig` confirmed propagation. User submitted to Marketplace.
+

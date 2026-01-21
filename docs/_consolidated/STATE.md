@@ -15,18 +15,21 @@ The recent focus was on **Cryptographic Audit**, ensuring all decision logs are 
 - [x] **Advanced Policy**: Implemented "Risk Scoring" (0-100) and Thresholds (30/80).
 - [x] **Semantic Telemetry (v3.1)**: Implemented `IntentTracer` and `SessionManager` (Verified).
 - [x] **Audit Remediation (P0)**: Standardized Licensing (Apache-2.0), Security Model (Hash Chain), and Qualified Marketing Claims.
-- **Audit Remediation (P1/P2/P3)**: Published Benchmarks (P99 ~20ms), Implemented `abs audit verify`, and Resolved High-Severity Lints (Secrets/Paths).
+- [x] **Fix VS Code Scan**: Resolved 404/401 API errors (v0.0.11) and added Smart Scan (v0.0.12).
+- [x] **Marketplace DNS**: Verified `abscore.app` domain for Visual Studio Marketplace.
 
 ## Active Decisions (ADR)
 - **ADR-005 (Implicit)**: Use `node:crypto` via `nodejs_compat` for Workers to ensure cross-runtime signing compatibility.
+- **ADR-006 (Implicit)**: VS Code "Smart Scan" (limits to 100 config files) vs MCP "Enterprise" (unlimited local).
 
 ## Roadmap (Next 3 Steps)
 - **Immediate**:
   - [x] ~~Audit Remediation (P0/P1/P2/P3)~~ (DONE)
   - [x] **Formalize `abs supervise`** (CLI)
-  - [x] **Formalize `abs supervise`** (CLI)
-  - [x] **Deploy to Production** (Workers)
+  - [x] **Deploy to Production** (Workers) - `abscore.app` ✅
   - [x] **Implement VS Code Sidebar GUI** (ArmorIQ Style)
+  - [x] **Verify VS Code Extension** (User Acceptance)
+  - [ ] **Publish VS Code Extension** (Move to Marketplace)
 
 ## Known Risks
 - **Key Management**: `ABS_SECRET_KEY` rotation is not yet automated.

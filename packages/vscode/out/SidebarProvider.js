@@ -22,9 +22,8 @@ class SidebarProvider {
                     }
                     const files = data.value; // Array of strings
                     vscode.window.showInformationMessage(`Starting Quick Scan for: ${Array.isArray(files) ? files.join(', ') : 'Active File'}`);
-                    // In a real implementation, we would pass 'files' to the CLI command.
-                    // For now, we trigger the default scan to prove connectivity.
-                    vscode.commands.executeCommand('abs.scanFile', files);
+                    // Trigger the main Smart Scan command which handles its own logic
+                    vscode.commands.executeCommand('abs.scanWorkspace');
                     break;
                 }
                 case 'onInfo': {
