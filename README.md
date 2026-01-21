@@ -26,6 +26,30 @@ It acts as a safety middleware between your LLM (Reasoning) and your Execution L
 > **LLMs are probabilistic. Business execution must not be.**
 > ABS Core bridges that gap.
 
+## Category: Execution Governance
+
+ABS Core is a **runtime governance layer** for AI Agents.
+It sits between the LLM's reasoning and the system's execution tools (Shell, Git, Database, API).
+
+### Use Case: Coding Agents & IDEs
+LLMs embedded in IDEs (Cursor, VS Code, Copilot) are **agents** that can:
+- Edit critical code.
+- Execute shell commands.
+- Modify infrastructure.
+
+ABS Core prevents "Excessive Agency" by enforcing policies *before* these actions are executed.
+
+### Use Case: Autonomous & Trained Bots
+Training (Fine-tuning/RAG) improves **quality**, not **safety**.
+A trained bot is still a probabilistic engine that can:
+- Hallucinate a price discount.
+- Delete the wrong customer record.
+- Execute a payment twice.
+
+ABS Core acts as the **runtime policy gate** for these autonomous executions.
+
+
+
 ## What is ABS?
 *   A runtime that enforces **Decision Integrity** for autonomous business processes.
 *   The LLM **Proposes** actions.
@@ -143,7 +167,7 @@ See real-world examples in [`examples/policies/`](examples/policies/):
 
 ## License
 
-**Open Core Component (`@abs/scan`)**: [MIT](LICENSE)  
+**Open Core Component (`@abs/scan`)**: [Apache 2.0](LICENSE)
 **Enterprise Runtime (MCP)**: [Commercial License](LICENSING.md)
 
 &copy; 2026 OConnector. All rights reserved.

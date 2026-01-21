@@ -41,13 +41,12 @@ export default function Home() {
       {/* Hero */}
       <section className="pt-32 pb-20 px-6 max-w-6xl mx-auto text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-medium text-zinc-400 mb-6">
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           v2.7.0 is now available
         </div>
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
-          The Immune System <br /> for AI Agents.
+          Execution Governance <br /> for AI Agents.
         </h1>
-        ABS Core is a governance runtime that prevents LLMs from executing
+        ABS Core is a <b>runtime safety layer</b> that prevents LLMs from executing
         dangerous actions.
         <br className="hidden md:block" />
         Protects Business Agents <b>AND</b> Coding Assistants (Cursor, Copilot)
@@ -204,7 +203,7 @@ export default function Home() {
             </div>
             <div className="mt-auto">
               <div className="text-2xl font-bold mb-1">Free</div>
-              <p className="text-xs text-zinc-500 mb-6">Open Source (MIT)</p>
+              <p className="text-xs text-zinc-500 mb-6">Open Source (Apache 2.0)</p>
               <button className="w-full py-3 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition-colors font-medium">
                 View Documentation
               </button>

@@ -14,8 +14,14 @@
 
 ABS Core operates under a **Zero Trust** assumption regarding LLM outputs.
 - **Trust Boundary**: The `EventProcessor` is the gatekeeper.
-- **Untrusted Input**: Everything from LLMs (decisions, reasons, payloads).
+- **Untrusted Input**: Everything from LLMs (decisions, reasons, payloads) and **Generated Code**.
 - **Trusted Component**: Policies (code), State Store (DB), and The Runtime itself.
+
+### Specific Risks: Coding Agents
+- **Indirect Prompt Injection**: Malicious code in a repo tricking the IDE Agent.
+- **Excessive Agency**: `rm -rf /` or `git push --force` without approval.
+- **Secret Exfiltration**: Generated code sending `.env` to third-party.
+
 
 ## OWASP Top 10 for LLM Applications (Coverage Matrix)
 
