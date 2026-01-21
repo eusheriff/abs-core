@@ -39,3 +39,19 @@ export type PolicyResult = 'ALLOW' | 'DENY' | 'MANUAL_REVIEW';
 export interface PolicyEngine {
     evaluate(proposal: DecisionProposal, event: any): PolicyResult;
 }
+
+// --- Shared Policy Types (to avoid circular deps) ---
+
+export type DecisionResult = string | { 
+    decision: string; 
+    reason?: string; 
+    score?: number;
+    domain?: string;
+    tags?: string[];
+};
+
+export interface Policy {
+    name?: string;
+    description?: string;
+    evaluate(proposal: any, event: any): DecisionResult;
+}

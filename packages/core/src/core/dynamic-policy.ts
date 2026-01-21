@@ -1,6 +1,7 @@
 import jsonLogic from 'json-logic-js';
-import { Policy, DecisionResult } from './policy-registry';
-import { DecisionProposal, EventEnvelope, PolicyRule } from './schemas';
+import { Policy, DecisionResult } from './interfaces';
+import { DecisionProposal, EventEnvelope } from './schemas';
+import { PolicyRule } from './schemas/policy-definition';
 
 export class DynamicPolicy implements Policy {
     public name: string;

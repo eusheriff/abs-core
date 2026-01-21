@@ -1,27 +1,12 @@
-import { PolicyEngine } from './interfaces';
+import { PolicyEngine, Policy, DecisionResult } from './interfaces';
 import { SimplePolicyEngine } from './policy';
 import { BotOperationalPolicy } from './policy-bot-operational';
 import { WhatsAppBotPolicy } from './policy-whatsapp-bot';
 import { DynamicPolicy } from './dynamic-policy';
-import { PolicyRule } from './schemas';
+import { PolicyRule } from './schemas/policy-definition';
 
 // Re-export types for convenience
-export type { PolicyEngine, PolicyResult } from './interfaces';
-
-// Define DecisionResult compatibility type if not in interfaces
-export type DecisionResult = string | { 
-    decision: string; 
-    reason?: string; 
-    score?: number;
-    domain?: string;
-    tags?: string[];
-};
-
-export interface Policy {
-    name?: string;
-    description?: string;
-    evaluate(proposal: any, event: any): DecisionResult;
-}
+export type { PolicyEngine, PolicyResult, Policy, DecisionResult } from './interfaces';
 
 export class PolicyRegistry {
     private static policies: Map<string, Policy> = new Map();

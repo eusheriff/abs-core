@@ -1,4 +1,4 @@
-import { Policy } from "../core/policy-registry";
+import { Policy } from "../../core/interfaces";
 
 /**
  * Simple glob-like pattern matcher (no external dependencies)
