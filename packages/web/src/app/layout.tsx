@@ -16,8 +16,9 @@ export const metadata: Metadata = {
   title: "ABS Core - The Immune System for AI Agents",
   description: "Governance, observability, and policy enforcement for autonomous AI systems. Protect your AI agents with ABS Core.",
   icons: {
-    icon: "/icon.png?v=2",
-    apple: "/icon.png?v=2",
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/icon.png",
   },
   openGraph: {
     title: "ABS Core - AI Governance & Security",
