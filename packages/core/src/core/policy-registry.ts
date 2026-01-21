@@ -67,4 +67,46 @@ export class PolicyRegistry {
         }
         return this.defaultPolicy;
     }
+
+    /**
+     * Aggregates risk from multiple policy results.
+     * @param results Array of DecisionResult objects
+     * @returns Aggregated score (0-100) and combined reasoning
+     */
+    static aggregateRisk(results: DecisionResult[]): { score: number, decision: string, reason: string } {
+        let totalScore = 0;
+        const reasons: string[] = [];
+        let forceDeny = false;
+
+        for (const res of results) {
+            if (typeof res === 'string') {
+                if (res === 'DENY') {
+                    totalScore += 100;
+                    forceDeny = true;
+                    reasons.push('Explicit DENY');
+                } else if (res === 'ESCALATE') {
+                    totalScore += 50;
+                    reasons.push('Explicit ESCALATE');
+                }
+            } else {
+                totalScore += (res.score || 0);
+                if (res.decision === 'DENY') forceDeny = true;
+                if (res.reason) reasons.push(res.reason);
+            }
+        }
+
+        // Cap at 100
+        const finalScore = Math.min(100, totalScore);
+        
+        // Determine final decision based on score or explicit flags
+        let decision = 'ALLOW';
+        if (forceDeny || finalScore >= 80) decision = 'DENY';
+        else if (finalScore >= 30) decision = 'ESCALATE';
+
+        return {
+            score: finalScore,
+            decision,
+            reason: reasons.join('; ') || 'Aggregated Risk Score'
+        };
+    }
 }

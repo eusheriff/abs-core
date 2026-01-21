@@ -198,6 +198,7 @@ export class EventProcessor {
                         trace_id: traceId,
                         latency_breakdown: breakdown
                     },
+                    riskScore: 100, // Injection is critical risk
                     latency: Date.now() - start
                 });
                 
@@ -236,19 +237,33 @@ export class EventProcessor {
             const policy = PolicyRegistry.getPolicy(validEvent.event_type);
             const rawDecision = policy.evaluate(validProposal, validEvent);
             
+            // Normalize Decision
             let decisionStr = typeof rawDecision === 'string' ? rawDecision : rawDecision.decision || 'unknown';
-            const decisionScore = typeof rawDecision === 'object' && rawDecision.score ? rawDecision.score : 0;
+            let decisionScore = typeof rawDecision === 'object' && rawDecision.score !== undefined ? rawDecision.score : 0;
             let decisionReason = typeof rawDecision === 'object' && rawDecision.reason ? rawDecision.reason : 'Policy Evaluation';
 
+            // New: Handle Legacy String Returns (Implicit Scoring)
+            if (typeof rawDecision === 'string') {
+                if (rawDecision === 'DENY') decisionScore = 100;
+                else if (rawDecision === 'ESCALATE') decisionScore = 50;
+            }
+
             // Global Risk Thresholds (Safety Net)
-            if (decisionScore >= 80 && decisionStr !== 'DENY') {
-                logger.warn(`[Risk Protection] Score ${decisionScore} >= 80. Overriding to DENY.`);
-                decisionStr = 'DENY';
-                decisionReason += ` (Risk Score: ${decisionScore} - Critical)`;
-            } else if (decisionScore >= 50 && decisionStr === 'ALLOW') {
-                logger.warn(`[Risk Protection] Score ${decisionScore} >= 50. Overriding to ESCALATE.`);
-                decisionStr = 'ESCALATE';
-                decisionReason += ` (Risk Score: ${decisionScore} - High)`;
+            // Low (< 30) = ALLOW
+            // Medium (30-79) = ESCALATE
+            // High (>= 80) = DENY
+            if (decisionScore >= 80) {
+                if (decisionStr !== 'DENY') {
+                    logger.warn(`[Risk Protection] Score ${decisionScore} >= 80. Overriding to DENY.`);
+                    decisionStr = 'DENY';
+                    decisionReason += ` (Risk Score: ${decisionScore} - Critical)`;
+                }
+            } else if (decisionScore >= 30) {
+                 if (decisionStr === 'ALLOW') {
+                    logger.warn(`[Risk Protection] Score ${decisionScore} >= 30. Overriding to ESCALATE.`);
+                    decisionStr = 'ESCALATE';
+                    decisionReason += ` (Risk Score: ${decisionScore} - Medium Risk)`;
+                }
             }
             
             breakdown.policy_ms = tick();
@@ -286,8 +301,10 @@ export class EventProcessor {
                         input_event: validEvent, 
                         review_id: reviewId, 
                         trace_id: traceId,
-                        latency_breakdown: breakdown
+                        latency_breakdown: breakdown,
+                        risk_score: decisionScore
                     },
+                    riskScore: decisionScore,
                     latency
                 });
 
@@ -355,6 +372,7 @@ export class EventProcessor {
                         trace_id: traceId,
                         latency_breakdown: { ...breakdown, db_ms: Date.now() - dbStart } // Capture final DB write time
                     },
+                    riskScore: decisionScore,
                     latency
                 });
 
@@ -426,12 +444,13 @@ export class EventProcessor {
         decision: string;
         reason: string;
         metadata: object;
+        riskScore?: number;
         latency: number;
     }): Promise<{ success: boolean }> {
         try {
             const result = await this.db.run(`
-                INSERT INTO decision_logs (decision_id, tenant_id, event_id, policy_name, provider, decision, execution_response, full_log_json, timestamp)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO decision_logs (decision_id, tenant_id, event_id, policy_name, provider, decision, risk_score, execution_response, full_log_json, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
                 params.decisionId,
                 params.tenantId,
@@ -439,6 +458,7 @@ export class EventProcessor {
                 params.policyName,
                 params.provider,
                 params.decision,
+                params.riskScore || 0,
                 params.reason,
                 JSON.stringify(params.metadata),
                 new Date().toISOString()

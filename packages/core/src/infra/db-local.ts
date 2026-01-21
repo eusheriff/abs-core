@@ -18,6 +18,35 @@ export class LocalDBAdapter implements DatabaseAdapter {
         // Lazy load to avoid crash if not needed (e.g. CLI client mode)
         const { default: DatabaseConstructor } = await import('better-sqlite3');
         this.db = new DatabaseConstructor(fullPath); // Sync instantiation
+
+        // Schema Initialization (Same as SQLiteAdapter for consistency in tests)
+        this.db.exec(`
+            CREATE TABLE IF NOT EXISTS decision_logs (
+                decision_id TEXT PRIMARY KEY,
+                tenant_id TEXT,
+                event_id TEXT,
+                policy_name TEXT,
+                provider TEXT,
+                decision TEXT,
+                risk_score INTEGER DEFAULT 0,
+                execution_status TEXT DEFAULT 'pending',
+                execution_response TEXT,
+                full_log_json TEXT,
+                timestamp TEXT,
+                signature TEXT,
+                latency_ms INTEGER DEFAULT 0
+            );
+            CREATE TABLE IF NOT EXISTS pending_reviews (
+                review_id TEXT PRIMARY KEY,
+                event_id TEXT,
+                tenant_id TEXT,
+                decision_id TEXT,
+                status TEXT DEFAULT 'pending',
+                escalation_reason TEXT,
+                created_at TEXT
+            );
+        `);
+        
         return Promise.resolve();
     }
 
