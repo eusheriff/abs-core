@@ -196,4 +196,16 @@
 - 2026-01-20: Release v2.8.0-rc1 (Final Pipeline)
   - **Meta**: Updated Author to `Engº Rodrigo Gomes <dev@oconnector.tech>` throughout.
   - **Deployed**: Cloudflare Workers (abs-core) updated successfully.
+  - **Messaging**: Refined "IDE Gatekeeper" and "Blockchain Integrity" (Web + README).
+  - **Security**: Implemented RBAC for MCP Server (Community vs Enterprise tool visibility).
   - **Git**: Branch `main` up to date with all fixes.
+
+
+- 2026-01-21: Advanced Policy - Risk Scoring (Phase 12)
+  - **Feature**: Implemented "Risk Engine" with 0-100 scoring.
+  - **Logic**:
+    - `PolicyRegistry.aggregateRisk`: Sums scores from multiple rules.
+    - `EventProcessor`: Applies thresholds (30=ESCALATE, 80=DENY).
+  - **DB**: Added `risk_score` to `decision_logs` schema.
+  - **Test**: Added `test/risk_scoring.test.ts` (Pass).
+  - **Status**: Implemented & Verified.
