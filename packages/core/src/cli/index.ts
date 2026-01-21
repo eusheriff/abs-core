@@ -302,11 +302,6 @@ registerAuditCommand(program);
 import { registerPoliciesCommand } from './commands/policies';
 registerPoliciesCommand(program);
 
-policies
-    .command('check')
-    .description('Static analysis of policies (Placeholder)')
-    .action(() => {
-        console.log('✅ Policy integrity check passed (Mock).');
-    });
+
 
 program.parse();

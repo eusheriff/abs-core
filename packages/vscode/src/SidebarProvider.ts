@@ -28,7 +28,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     
                     // In a real implementation, we would pass 'files' to the CLI command.
                     // For now, we trigger the default scan to prove connectivity.
-                    vscode.commands.executeCommand('abs.scanFile'); 
+                    vscode.commands.executeCommand('abs.scanFile', files); 
                     break;
                 }
                 case 'onInfo': {
@@ -61,7 +61,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             vscode.Uri.joinPath(this._extensionUri, 'media', 'vscode.css')
         );
 
-        // ArmorIQ Style (Dark + Orange #E65100)
+        // ABS Core Style (Dark + Orange #E65100)
         // Using inline styles for simplicity in this artifact, but ideally would be in a separate CSS file
         return `<!DOCTYPE html>
             <html lang="en">
@@ -91,7 +91,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         margin-right: 10px;
                     }
                     .header span {
-                        color: #E65100; /* ArmorIQ Orange */
+                        color: #E65100; /* ABS Core Orange */
                         font-size: 1.1em;
                         letter-spacing: 0.5px;
                     }
@@ -209,8 +209,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             </head>
             <body>
                 <div class="header">
-                     <!-- Suggestion: Local Icon or Text -->
-                     <span>ARMORIQ</span>
+                     <!-- ABS Core Shield Icon (SVG) -->
+                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                        <path d="M12 2L3 7V12C3 17.52 6.84 22.74 12 24C17.16 22.74 21 17.52 21 12V7L12 2Z" fill="#E65100"/>
+                        <path d="M12 6L5.5 9.6V12.6C5.5 16.4 8.3 19.8 12 20.9C15.7 19.8 18.5 16.4 18.5 12.6V9.6L12 6Z" fill="white" fill-opacity="0.3"/>
+                     </svg>
+                     <span>ABS Core</span>
                 </div>
 
                 <div class="section">

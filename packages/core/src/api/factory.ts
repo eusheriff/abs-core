@@ -33,14 +33,18 @@ export function createApp(envOverrides?: Partial<Bindings>) {
 
     // Env Injection (Node.js / Local Fallback / Overrides)
     app.use('*', async (c, next) => {
-        if (!c.env && typeof process !== 'undefined' && process.env) {
-            // @ts-ignore
-            c.env = {
-                ...process.env,
-                LLM_PROVIDER: process.env.LLM_PROVIDER || 'mock',
-                LOG_LEVEL: process.env.LOG_LEVEL || 'info',
-                ABS_MODE: (process.env.ABS_MODE || 'runtime') as 'scanner' | 'runtime'
-            };
+        try {
+            if (!c.env && typeof process !== 'undefined' && process.env) {
+                // @ts-ignore
+                c.env = {
+                    ...process.env,
+                    LLM_PROVIDER: process.env.LLM_PROVIDER || 'mock',
+                    LOG_LEVEL: process.env.LOG_LEVEL || 'info',
+                    ABS_MODE: (process.env.ABS_MODE || 'runtime') as 'scanner' | 'runtime'
+                };
+            }
+        } catch (e) {
+            console.error('Env Injection Error', e);
         }
         
         // Apply Overrides (e.g. Queue Adapter)

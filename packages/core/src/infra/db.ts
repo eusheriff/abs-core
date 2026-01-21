@@ -46,12 +46,15 @@ export const initSchema = async () => {
       policy_name TEXT,
       provider TEXT,
       decision TEXT,
+      risk_score INTEGER,
+      execution_status TEXT,
       execution_response TEXT,
       full_log_json TEXT NOT NULL,
       timestamp TEXT NOT NULL,
       correlation_id TEXT,
       previous_hash TEXT,
-      hash TEXT
+      hash TEXT,
+      signature TEXT
     );
   `);
 
@@ -64,6 +67,7 @@ export const initSchema = async () => {
       decision_id TEXT NOT NULL,
       status TEXT DEFAULT 'pending',
       escalation_reason TEXT,
+      review_note TEXT,
       reviewer_id TEXT,
       reviewed_at TEXT,
       created_at TEXT NOT NULL

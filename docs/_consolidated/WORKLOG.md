@@ -254,3 +254,16 @@
   - **Components**: `SidebarProvider.ts` (Webview), `package.json` (Views Contribution).
   - **Modes**: "Scanner (Local / Free)" (Quick Scan) vs "Scan Live Server (Enterprise)".
   - **Status**: ✅ IMPLEMENTED (Compiles Successfully).
+
+- 2026-01-21: Semantic Telemetry (v3.1)
+  - **Features**:
+    - `SessionManager`: Rastreio de sessão de agente (stateful).
+    - `SemanticTracer`: Captura de intenção, ação e drift.
+    - `EventProcessor`: Integração para injetar `sessionId` e gravar traces.
+  - **Validation**:
+    - Unit Tests: `semantic-tracer.test.ts` (Pass)
+    - Integration: Build running.
+
+- 2026-01-21: Governance & VS Code Fixes
+  - **VS Code**: Fixed "No active file to scan" bug. Updated icon.
+  - **Core**: Integrated SequenceAnalyzer, AgentMemory, ActionSanitizer.

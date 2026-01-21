@@ -6,8 +6,8 @@ import { v4 as uuidv4 } from 'uuid';
 async function runBenchmark() {
     console.log("🚀 Starting ABS Core Micro-Benchmark...");
 
-    // 1. Setup (In-Memory DB to measure CPU overhead)
-    const db = new LocalDBAdapter(':memory:');
+    // 1. Setup (File DB to persist for verification)
+    const db = new LocalDBAdapter('benchmark.db');
     await db.init();
     
     // Mock Policy

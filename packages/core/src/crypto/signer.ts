@@ -10,9 +10,33 @@ export class CryptoService {
   public init(secret?: string) {
     if (secret) {
       this.secret = secret;
-    } else if (!this.secret) {
-        console.warn('[CryptoService] No secret provided. Using insecure default. Set ABS_SECRET_KEY.');
-        this.secret = 'default-insecure-secret-do-not-use-in-prod';
+    } else {
+        let envSecret: string | undefined;
+        try {
+            if (typeof process !== 'undefined' && process.env) {
+                envSecret = process.env.ABS_SECRET_KEY;
+            }
+        } catch (e) {
+            // Ignore access errors in non-Node envs
+        }
+
+        if (envSecret) {
+            this.secret = envSecret;
+        } else {
+            // Check for production mode safely
+            let isProd = false;
+            try {
+                if (typeof process !== 'undefined' && process.env) {
+                    isProd = process.env.NODE_ENV === 'production';
+                }
+            } catch (e) {}
+
+            if (isProd) {
+                throw new Error('[CryptoService] ABS_SECRET_KEY is required in production.');
+            }
+            console.warn('[CryptoService] No secret provided. Using insecure dev default.');
+            this.secret = 'dev-secret-key';
+        }
     }
   }
 
@@ -21,7 +45,7 @@ export class CryptoService {
    * Uses a stable stringify to ensure consistent signatures.
    */
   public sign(data: unknown): string {
-    const key = this.secret || 'default-insecure-secret-do-not-use-in-prod';
+    const key = this.secret || 'dev-secret-key';
     const content = this.stableStringify(data);
     const hmac = createHmac('sha256', key);
     hmac.update(content);

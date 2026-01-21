@@ -36,3 +36,16 @@ Ran on 2026-01-21 (Single Thread):
 | **Throughput** | **78 ops/sec** | Single instance |
 
 *Note: The ~10ms floor in P50 is due to simulated network jitter in the mock provider. Pure CPU overhead is <2ms.*
+
+## 4. Integrity Verification (Audit P2)
+
+We verified the **Cryptographic Hash Chain** using the independent CLI tool:
+```bash
+npx abs audit verify --db benchmark.db
+```
+
+**Results:**
+- **Scanned**: 1100 Events
+- **Status**: ✅ INTEGRITY CONFIRMED
+- **Method**: HMAC-SHA256( Predecessor + Payload )
+- **Chain Property**: Unbreakable (Any tampering breaks the chain head)

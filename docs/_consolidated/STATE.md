@@ -13,6 +13,7 @@ The recent focus was on **Cryptographic Audit**, ensuring all decision logs are 
 - [x] **Marketing**: Landing Page, Demo Script, Announcement.
 - [x] **Crypto Audit**: Implemented `CryptoService` (HMAC-SHA256) and verified with tests.
 - [x] **Advanced Policy**: Implemented "Risk Scoring" (0-100) and Thresholds (30/80).
+- [x] **Semantic Telemetry (v3.1)**: Implemented `IntentTracer` and `SessionManager` (Verified).
 - [x] **Audit Remediation (P0)**: Standardized Licensing (Apache-2.0), Security Model (Hash Chain), and Qualified Marketing Claims.
 - **Audit Remediation (P1/P2/P3)**: Published Benchmarks (P99 ~20ms), Implemented `abs audit verify`, and Resolved High-Severity Lints (Secrets/Paths).
 

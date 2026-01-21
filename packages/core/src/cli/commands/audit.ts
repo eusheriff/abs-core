@@ -4,6 +4,7 @@ import { setDB, getDB } from '../../infra/db';
 import { LocalDBAdapter } from '../../infra/db-local';
 import { Integrity } from '../../core/integrity';
 import path from 'path';
+import { signer } from '../../crypto/signer';
 
 export function registerAuditCommand(program: Command) {
     const audit = program.command('audit').description('Audit Tools for Integrity Verification');
@@ -15,6 +16,9 @@ export function registerAuditCommand(program: Command) {
         .action(async (options) => {
             const dbPath = path.resolve(options.db);
             console.log(`🔍  Starting Integrity Verification on ${dbPath}...`);
+            
+            // Ensure signer is initialized (picks up ABS_SECRET_KEY or default)
+            signer.init(process.env.ABS_SECRET_KEY);
 
             try {
                 // Initialize DB Adapter

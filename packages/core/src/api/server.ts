@@ -1,5 +1,6 @@
 import { serve } from '@hono/node-server';
 import { config } from 'dotenv';
+import path from 'path';
 import { LocalDBAdapter } from '../infra/db-local';
 import { setDB, initSchema } from '../infra/db';
 import { createApp } from './factory';
@@ -28,7 +29,9 @@ export { app };
 
 const run = (port: number) => {
     // Inject Local Adapter when running the server
-    const dbPath = process.env.DATABASE_URL || 'abs_core.db';
+    // Sanitize DB Path to prevent traversal
+    const rawPath = process.env.DATABASE_URL || 'abs_core.db';
+    const dbPath = path.resolve(rawPath);
     
     // Initialize Signer
     signer.init(process.env.ABS_SECRET_KEY);

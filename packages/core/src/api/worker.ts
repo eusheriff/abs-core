@@ -38,7 +38,10 @@ export default {
             return await app.fetch(request, env, ctx);
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Unknown Worker Error';
-            return new Response(`Worker Error: ${errorMessage}\n${(err as Error).stack || ''}`, { status: 500 });
+            const safeErrorMessage = errorMessage.replace(/[\n\r]/g, ' '); // Prevent Log Injection
+            const isProd = (env.ABS_MODE || 'runtime') === 'runtime' && !(env.ABS_MODE || '').includes('dev');
+            const body = isProd ? `Worker Error: ${safeErrorMessage}` : `Worker Error: ${errorMessage}\n${(err as Error).stack || ''}`;
+            return new Response(body, { status: 500 });
         }
     },
 

@@ -12,6 +12,7 @@ export const EventEnvelopeSchema = z.object({
   metadata: z.object({
     channel: z.string().optional(),
     actor: z.string().optional(),
+    session_id: z.string().optional(),
     risk_hint: z.enum(['low', 'medium', 'high']).optional(),
   }).optional(),
 });
@@ -39,7 +40,7 @@ export type DecisionProposal = z.infer<typeof DecisionProposalSchema>;
 // Policy Decision
 export const PolicyDecisionSchema = z.object({
   decision_id: z.string().uuid().optional(), // Can be same as proposal or new
-  policy_decision: z.enum(['allow', 'deny', 'escalate']),
+  policy_decision: z.enum(['allow', 'deny', 'escalate', 'sanitize']),
   risk_score: z.number().min(0).max(100).default(0), // 0-100 Score
   policy_trace: z.object({
     matched_rules: z.array(z.string()),
@@ -67,3 +68,5 @@ export const DecisionLogSchema = z.object({
 });
 
 export type DecisionLog = z.infer<typeof DecisionLogSchema>;
+
+export * from './schemas/policy-definition';

@@ -43,6 +43,9 @@ export class LocalDBAdapter implements DatabaseAdapter {
                 decision_id TEXT,
                 status TEXT DEFAULT 'pending',
                 escalation_reason TEXT,
+                review_note TEXT,
+                reviewer_id TEXT,
+                reviewed_at TEXT,
                 created_at TEXT
             );
         `);

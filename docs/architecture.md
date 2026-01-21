@@ -74,3 +74,82 @@ O "cérebro racional". Kode-as-policy ou Rules Engine. Determinístico. Sua fun�
 
 ### Action Gateway
 O único ponto que toca o mundo externo. Implementa Rate Limiting, Circuit Breakers e Retries. Garante que nada executa sem um `policy_decision: allow`.
+
+---
+
+## 🔄 Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Agent as AI Agent
+    participant ABS as ABS Runtime
+    participant Policy as Policy Engine
+    participant Risk as Risk Scorer
+    participant Crypto as Crypto Service
+    participant DB as Decision Log
+    participant Exec as Executor
+
+    Agent->>ABS: proposeAction(event)
+    ABS->>Policy: evaluatePolicies(event)
+    Policy-->>ABS: matchedPolicies[]
+    
+    ABS->>Risk: calculateRiskScore(event, policies)
+    Risk-->>ABS: riskScore (0-100)
+    
+    alt riskScore > threshold
+        ABS->>DB: logDecision(BLOCKED, reason)
+        ABS-->>Agent: { allowed: false, reason }
+    else riskScore <= threshold
+        ABS->>Crypto: sign(decision)
+        Crypto-->>ABS: signature
+        ABS->>DB: logDecision(ALLOWED, signature)
+        ABS->>Exec: execute(event.action)
+        Exec-->>ABS: result
+        ABS-->>Agent: { allowed: true, result }
+    end
+```
+
+---
+
+## 🔌 LLM Framework Integration
+
+### LangChain (Planned Q1 2026)
+
+```typescript
+import { ABSCheckTool } from '@abs/langchain';
+
+const agent = new AgentExecutor({
+  tools: [new ABSCheckTool({ apiKey: process.env.ABS_TOKEN })],
+});
+```
+
+### Direct API
+
+```typescript
+POST /api/events
+{
+  "eventType": "file:delete",
+  "payload": { "path": "/etc/passwd" },
+  "agentId": "cursor-agent-1"
+}
+```
+
+---
+
+## 📊 Performance Characteristics
+
+| Layer | Latency | Notes |
+|-------|---------|-------|
+| Policy Evaluation | ~1ms | In-memory rule matching |
+| Risk Scoring | ~0.5ms | Weighted calculation |
+| Crypto Signing | ~0.3ms | HMAC-SHA256 |
+| DB Write | ~5-10ms | SQLite/D1 dependent |
+| **Total Overhead** | **~8-15ms** | P99 < 20ms |
+
+---
+
+## 🔗 Related Documentation
+
+- [PERFORMANCE.md](PERFORMANCE.md) - Benchmark methodology
+- [METRICS.md](METRICS.md) - Public KPIs
+- [SECURITY_MODEL.md](SECURITY_MODEL.md) - Threat model

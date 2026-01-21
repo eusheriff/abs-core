@@ -67,7 +67,7 @@ export function registerSuperviseCommand(program: Command) {
                     const rows = await db.all<any>(`
                         SELECT * FROM decision_logs 
                         WHERE execution_status = 'suspended' 
-                        ORDER BY created_at ASC 
+                        ORDER BY timestamp ASC 
                         LIMIT 1
                     `);
 
@@ -77,7 +77,7 @@ export function registerSuperviseCommand(program: Command) {
                         
                         console.log('\n🛑 INTERCEPTED HIGH RISK ACTION');
                         console.log(`   ID: ${task.decision_id}`);
-                        console.log(`   Event: ${task.event_type}`);
+                        console.log(`   Policy: ${task.policy_name || 'N/A'}`);
                         console.log(`   Reason: ${meta.policy_decision}`); // ESCALATE
                         console.log(`   Risk Score: ${meta.risk_score || 'N/A'}`);
                         console.log(`   Payload: ${JSON.stringify(meta.policy_trace?.computed_fields || {}).substring(0, 100)}...`);
@@ -85,8 +85,8 @@ export function registerSuperviseCommand(program: Command) {
                         // Pause polling
                         return task;
                     }
-                } catch (e) {
-                    // ignore db not ready errors
+                } catch (e: any) {
+                    console.error('Check loop error:', e.message);
                 }
                 return null;
             };
@@ -102,10 +102,7 @@ export function registerSuperviseCommand(program: Command) {
                                 method: 'POST',
                                 headers: { 
                                     'Content-Type': 'application/json',
-                                    'x-admin-key': 'admin' // Mock Auth for local
-                                    // ideally we use the signer or a real token, but for CLI loopback...
-                                    // factory.ts requireScope checks `auth` middleware.
-                                    // I need to check `middleware/auth.ts` to see what allows 'admin:write'.
+                                    'Authorization': 'Bearer sk-admin-abs-v0'
                                 },
                                 body: JSON.stringify({
                                     decision_id: task.decision_id,
@@ -114,9 +111,9 @@ export function registerSuperviseCommand(program: Command) {
                             });
                             
                             if (res.ok) {
-                                console.log(`   ✅ Action ${approved ? 'APPROVED' : 'REJECTED'}`);
+                                console.log(`\n   ✅ Action ${approved ? 'APPROVED' : 'REJECTED'}`);
                             } else {
-                                console.log(`   ❌ Error: ${res.status} ${await res.text()}`);
+                                console.log(`\n   ❌ Error: ${res.status} ${await res.text()}`);
                             }
                         } catch (err) {
                             console.log('   ❌ Failed to contact server.');

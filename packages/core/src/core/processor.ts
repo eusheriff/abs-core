@@ -9,8 +9,17 @@ import { LLMProvider, ProviderType } from './interfaces';
 import { sanitize } from './sanitizer';
 import { Logger } from './logger';
 import { TraceContext, createTraceId, createSpanId } from './context';
+import { signer } from '../crypto/signer';
 
 import { OrchestrationAdapter } from '../orchestration/interfaces';
+
+// Advanced Governance Modules
+import { getSequenceAnalyzer } from './sequence-analyzer';
+import { ActionSanitizer } from './action-sanitizer';
+import * as AgentMemory from './agent-memory';
+import { SessionManager } from './session-manager';
+import { SemanticTracer } from './semantic-tracer';
+
 
 export interface ProcessorConfig {
     llmProvider: string;
@@ -52,8 +61,7 @@ export class EventProcessor {
         );
         this.mode = config?.mode || 'runtime';
         this.orchestrator = config?.orchestrator;
-        this.interactive = config?.interactive_mode || false;
-        // Note: console.log here is fine for startup, or update to use global logger if available
+        this.interactive = config?.interactive_mode || (typeof process !== 'undefined' && process.env.ABS_INTERACTIVE === 'true') || false;
     }
 
     /**
@@ -230,8 +238,51 @@ export class EventProcessor {
                     evidence_refs: partialProposal.explanation?.evidence_refs || []
                 },
                 confidence: partialProposal.confidence || 0.5,
-                risk_level: (partialProposal.risk_level as any) || 'medium' // Safe cast for now, assuming provider validates or defaults safely
+                risk_level: (partialProposal.risk_level as any) || 'medium' // Safe cast for now
             };
+
+            // 3.5 ADVANCED GOVERNANCE (Sequence & Memory)
+            const agentId = validEvent.metadata?.actor || validEvent.source || 'unknown_agent';
+            
+            // SESSION MANAGEMENT (v3.1)
+            let session = SessionManager.getActiveSession(agentId);
+            if (!session) {
+                // Determine if we should start a new session or if it's stateless
+                session = SessionManager.startSession(agentId, {
+                    trigger_event: validEvent.event_type
+                });
+            } else {
+                SessionManager.touch(session.sessionId);
+            }
+
+            // A. Sequence Analysis
+            const sequenceAnalysis = getSequenceAnalyzer().analyze(agentId, {
+                eventType: validProposal.recommended_action,
+                timestamp: Date.now(),
+                riskScore: 0,
+                payload: {
+                   ...validEvent.payload as any,
+                   params: validProposal.action_params
+                }
+            });
+
+            if (sequenceAnalysis.matchedPatterns.length > 0) {
+                logger.warn(`[Governance] Dangerous Sequence Detected: ${sequenceAnalysis.matchedPatterns.join(', ')}`, { agentId });
+            }
+
+            // B. Agent Risk Profile
+            const agentProfile = AgentMemory.getAgentRiskProfile(agentId);
+            const trustModifier = agentProfile.baseRiskModifier;
+
+            // TRACK INTENT (v3.1)
+            SemanticTracer.capture({
+                sessionId: session.sessionId,
+                agentId,
+                intent: validProposal.explanation?.summary || 'auto',
+                action: validProposal.recommended_action,
+                outcome: 'success', // Provisional, updated if blocked
+                driftScore: 0 // Placeholder for LLM evaluation
+            });
 
             // 4. POLICY GATE (Governance)
             const policy = PolicyRegistry.getPolicy(validEvent.event_type);
@@ -246,6 +297,18 @@ export class EventProcessor {
             if (typeof rawDecision === 'string') {
                 if (rawDecision === 'DENY') decisionScore = 100;
                 else if (rawDecision === 'ESCALATE') decisionScore = 50;
+            }
+
+            // C. Combine Risk Scores (Adaptive Scoring)
+            // Base Policy Score + Sequence Risk + Agent Reputation Modifier
+            let adaptiveScore = decisionScore + sequenceAnalysis.sequenceRisk + trustModifier;
+            adaptiveScore = Math.max(0, Math.min(100, adaptiveScore)); // Clamp 0-100
+
+            if (adaptiveScore !== decisionScore) {
+                logger.info(`[Governance] Adaptive Score Adjusted: ${decisionScore} -> ${adaptiveScore}`, {
+                    reason: `Seq: +${sequenceAnalysis.sequenceRisk}, Trust: ${trustModifier}`
+                });
+                decisionScore = adaptiveScore;
             }
 
             // Global Risk Thresholds (Safety Net)
@@ -373,6 +436,7 @@ export class EventProcessor {
                         latency_breakdown: { ...breakdown, db_ms: Date.now() - dbStart } // Capture final DB write time
                     },
                     riskScore: decisionScore,
+                    executionStatus: executionStatus, // Pass actual status
                     latency
                 });
 
@@ -445,12 +509,26 @@ export class EventProcessor {
         reason: string;
         metadata: object;
         riskScore?: number;
+        executionStatus?: string;
         latency: number;
     }): Promise<{ success: boolean }> {
         try {
+
+
+            // 1. Fetch Previous Signature (for Chain)
+            const [prevRow] = await this.db.all<{ signature: string }>(
+                `SELECT signature FROM decision_logs ORDER BY timestamp DESC LIMIT 1`
+            );
+            const prevHash = prevRow?.signature || '0000000000000000000000000000000000000000000000000000000000000000'; // Genesis
+
+            // 2. Compute HMAC Chain
+            const fullLogJson = JSON.stringify(params.metadata);
+            const chainComponents = prevHash + fullLogJson;
+            const signature = signer.sign(chainComponents);
+
             const result = await this.db.run(`
-                INSERT INTO decision_logs (decision_id, tenant_id, event_id, policy_name, provider, decision, risk_score, execution_response, full_log_json, timestamp)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO decision_logs (decision_id, tenant_id, event_id, policy_name, provider, decision, risk_score, execution_status, execution_response, full_log_json, timestamp, signature)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
                 params.decisionId,
                 params.tenantId,
@@ -459,9 +537,11 @@ export class EventProcessor {
                 params.provider,
                 params.decision,
                 params.riskScore || 0,
+                params.executionStatus || params.decision,
                 params.reason,
-                JSON.stringify(params.metadata),
-                new Date().toISOString()
+                fullLogJson,
+                new Date().toISOString(),
+                signature
             );
             return { success: result.isSuccess !== false };
         } catch (error) {

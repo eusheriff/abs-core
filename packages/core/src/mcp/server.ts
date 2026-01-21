@@ -54,7 +54,12 @@ export async function createMCPServer(db: DatabaseAdapter, config?: ProcessorCon
     server.tool(
         'abs_evaluate',
         'Evaluate an AI interaction (prompt/response) against governance policies. Returns ALLOW, DENY, or ESCALATE.',
-        EvaluateInputSchema.shape,
+        {
+            input: z.string().describe('The user prompt or input to evaluate'),
+            output: z.string().describe('The AI response or output to evaluate'),
+            tenant_id: z.string().optional().describe('Tenant identifier for multi-tenant setups'),
+            metadata: z.record(z.any()).optional().describe('Additional metadata for the evaluation')
+        },
         async (args) => {
             const event = {
                 event_type: 'llm.completion',
@@ -99,7 +104,12 @@ export async function createMCPServer(db: DatabaseAdapter, config?: ProcessorCon
     server.tool(
         'abs_log',
         'Log an AI event for audit purposes (Scanner mode - fire-and-forget).',
-        LogInputSchema.shape,
+        {
+            input: z.string().describe('The user prompt'),
+            output: z.string().describe('The AI response'),
+            model: z.string().optional().describe('Model name used'),
+            metadata: z.record(z.any()).optional().describe('Additional metadata')
+        },
         async (args) => {
             const event = {
                 event_type: 'llm.completion',
@@ -143,7 +153,10 @@ export async function createMCPServer(db: DatabaseAdapter, config?: ProcessorCon
     server.tool(
         'abs_check_policy',
         'Check if a proposed action violates any policy (dry-run, no logging).',
-        CheckPolicyInputSchema.shape,
+        {
+            action: z.string().describe('The action to check'),
+            context: z.record(z.any()).describe('Context for policy evaluation')
+        },
         async (args) => {
             // Import PolicyRegistry for direct policy check
             const { PolicyRegistry } = await import('../core/policy-registry');
@@ -196,7 +209,10 @@ export async function createMCPServer(db: DatabaseAdapter, config?: ProcessorCon
     server.tool(
         'abs_get_decisions',
         'Retrieve recent decision logs for audit and review.',
-        GetDecisionsInputSchema.shape,
+        {
+            limit: z.number().optional().default(10).describe('Number of decisions to retrieve'),
+            tenant_id: z.string().optional().describe('Filter by tenant')
+        },
         async (args) => {
             try {
                 let query = `SELECT decision_id, event_id, tenant_id, policy_name, decision, timestamp FROM decision_logs ORDER BY timestamp DESC LIMIT ?`;
@@ -236,8 +252,8 @@ export async function createMCPServer(db: DatabaseAdapter, config?: ProcessorCon
         const CheckFileEditSchema = z.object({
             file_path: z.string().describe('Absolute path of the file to edit'),
             operation: z.enum(['create', 'modify', 'delete']).describe('Type of file operation'),
-            content_preview: z.string().optional().describe('Preview of content (first 500 chars)'),
-            line_count: z.number().optional().describe('Number of lines affected')
+            content_preview: z.string().optional().describe('Preview of content'),
+            line_count: z.number().optional().describe('Number of lines')
         });
 
         const CheckCommandSchema = z.object({
@@ -248,8 +264,13 @@ export async function createMCPServer(db: DatabaseAdapter, config?: ProcessorCon
         // Tool: abs_check_file_edit
         server.tool(
             'abs_check_file_edit',
-            'Check if a file edit operation is allowed by governance policies. Use before modifying files.',
-            CheckFileEditSchema.shape,
+            'Check if a file edit operation is allowed by governance policies.',
+            {
+                file_path: z.string().describe('Absolute path of the file to edit'),
+                operation: z.enum(['create', 'modify', 'delete']).describe('Type of file operation'),
+                content_preview: z.string().optional().describe('Preview of content'),
+                line_count: z.number().optional().describe('Number of lines')
+            },
             async (args) => {
                 const { CODE_SAFETY_POLICIES } = await import('../policies/library/code_safety');
                 
@@ -323,8 +344,11 @@ export async function createMCPServer(db: DatabaseAdapter, config?: ProcessorCon
         // Tool: abs_check_command
         server.tool(
             'abs_check_command',
-            'Check if a terminal command is allowed by governance policies. Use before running commands.',
-            CheckCommandSchema.shape,
+            'Check if a terminal command is allowed by governance policies.',
+            {
+                command: z.string().describe('Terminal command to execute'),
+                cwd: z.string().optional().describe('Working directory')
+            },
             async (args) => {
                 const { CODE_SAFETY_POLICIES } = await import('../policies/library/code_safety');
                 
