@@ -5,7 +5,7 @@
   "description": "Integrate ABS Core Scanner directly into VS Code.",
   "author": "Engº Rodrigo Gomes <dev@oconnector.tech>",
   "license": "Apache-2.0",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "icon": "icon.png",
   "repository": {
     "type": "git",
@@ -27,7 +27,25 @@
         "command": "abs.scanFile",
         "title": "ABS: Scan Current File"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "abs-explorer",
+          "title": "ABS Core",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "views": {
+      "abs-explorer": [
+        {
+          "type": "webview",
+          "id": "absSidebar",
+          "name": "HOME"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

@@ -5,8 +5,11 @@ exports.deactivate = deactivate;
 const vscode = require("vscode");
 const child_process_1 = require("child_process");
 const path = require("path");
+const SidebarProvider_1 = require("./SidebarProvider");
 function activate(context) {
     console.log('ABS Core extension is now active!');
+    const sidebarProvider = new SidebarProvider_1.SidebarProvider(context.extensionUri);
+    context.subscriptions.push(vscode.window.registerWebviewViewProvider("absSidebar", sidebarProvider));
     let disposable = vscode.commands.registerCommand('abs.scanFile', () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {

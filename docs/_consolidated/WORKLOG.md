@@ -96,6 +96,12 @@
   - **Version**: Bumped `@abs/core` to `2.7.0`.
   - **Status**: Stable.
 
+- **2026-01-21 09:30**: Completed Audit Remediation P0 (Licensing/Security Docs).
+- **2026-01-21 09:50**: [Feature] Implemented HMAC Hash Chain in `EventProcessor` (Audit P2).
+- **2026-01-21 10:00**: [Benchmark] Ran Micro-benchmark: 77 ops/sec, P99 ~20ms.
+- **2026-01-21 10:30**: [Security] Resolved L3 Lints (CRED-002, TOOL-002). Hardened `signer.ts` (Env-only secrets) and `server.ts` (Path sanitization).
+- **2026-01-21 10:35**: [Regression] Regenerated `benchmark.db` with new secret key. Verified Integrity.
+
 - 2026-01-20: Audit Remediation (Pipeline 10/10)
   - **Issue**: External audit report (8.2/10) highlighted opacity and lock-in risks.
   - **Fixes**:
@@ -218,3 +224,33 @@
     - Created `docs/SECURITY_MODEL.md` (Hash Chain explanation).
     - Updated Landing Page: "Latency < 10ms" -> "Low Latency Architecture".
   - **Deploy**: `packages/web` deployed to Cloudflare Pages.
+
+- 2026-01-21: Audit Remediation P3 & Supervise Formalization
+  - **Security**: Resolved High Severity Lints (`SAFE-MCP-101`, `TOOL-002`) in `api/factory.ts` and `api/worker.ts`.
+  - **Gatekeeper**: Formalized `abs supervise` CLI.
+    - Updated Auth to use `Bearer` tokens (`sk-admin-abs-v0`).
+    - Fixed schema mismatches (`review_note`).
+    - Verified End-to-End interactive flow (Trigger -> Suspend -> Approve).
+  - **Verification**: `npm run build` passed.
+  - **Status**: Ready for Deploy.
+
+- 2026-01-21: Deployment (v2.7.0)
+  - **Action**: Deployed `abs-core` to Cloudflare Workers via Wrangler.
+  - **Credentials**: Used Global API Key (dev.oconnector).
+  - **Bindings**: DB (abs-core-db), Queue (abs-events-queue).
+  - **Status**: ✅ DEPLOYED.
+
+- 2026-01-21: Deployment Fix (Hotfix)
+  - **Issue**: `Worker Error: process is not defined` (Crash on startup).
+  - **Cause**: `signer.ts` accessed `process.env` without checking for `process` existence (Workers runtime difference).
+  - **Fix**: Updated `CryptoService.init` with `typeof process !== 'undefined'` checks.
+  - **Verification**: 
+    - `GET /health` -> 200 OK (`{"status":"ok",...}`).
+    - `GET /` -> 200 OK (`ABS Core v2.2...`).
+  - **Status**: ✅ STABLE.
+
+- 2026-01-21: VS Code Sidebar GUI
+  - **Feature**: Implemented "ArmorIQ Style" Sidebar Panel in `abs-vscode`.
+  - **Components**: `SidebarProvider.ts` (Webview), `package.json` (Views Contribution).
+  - **Modes**: "Scanner (Local / Free)" (Quick Scan) vs "Scan Live Server (Enterprise)".
+  - **Status**: ✅ IMPLEMENTED (Compiles Successfully).

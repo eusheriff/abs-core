@@ -1,9 +1,18 @@
 import * as vscode from 'vscode';
 import { exec } from 'child_process';
 import * as path from 'path';
+import { SidebarProvider } from './SidebarProvider';
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('ABS Core extension is now active!');
+
+    const sidebarProvider = new SidebarProvider(context.extensionUri);
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider(
+            "absSidebar",
+            sidebarProvider
+        )
+    );
 
 	let disposable = vscode.commands.registerCommand('abs.scanFile', () => {
         const editor = vscode.window.activeTextEditor;
