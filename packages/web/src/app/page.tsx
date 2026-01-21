@@ -105,7 +105,7 @@ export default function Home() {
             <div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center mb-4">
               <Zap className="w-8 h-8 text-orange-500" />
             </div>
-            <h3 className="text-lg font-bold">Latency &lt; 10ms</h3>
+            <h3 className="text-lg font-bold">Low Latency Architecture</h3>
             <p className="text-sm text-zinc-500 mt-2">
               Powered by Cloudflare Workers & D1 on the Edge.
             </p>
@@ -239,7 +239,7 @@ export default function Home() {
                 check={true}
                 highlight
               />
-              <FeatureItem text="Blockchain Forensic Logs" check={true} highlight />
+              <FeatureItem text="Tamper-proof Log Integrity" check={true} highlight />
               <FeatureItem
                 text="Coding Agent Safeguards 🛡️"
                 check={true}

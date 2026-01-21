@@ -209,3 +209,12 @@
   - **DB**: Added `risk_score` to `decision_logs` schema.
   - **Test**: Added `test/risk_scoring.test.ts` (Pass).
   - **Status**: Implemented & Verified.
+
+- 2026-01-21: Audit Remediation (Phase 13)
+  - **Findings (P0)**: License inconsistency, Undocumented Security Model, Unqualified Claims.
+  - **Actions**:
+    - Standardized `license: "Apache-2.0"` in all packages.
+    - Created `LICENSING.md` matrix.
+    - Created `docs/SECURITY_MODEL.md` (Hash Chain explanation).
+    - Updated Landing Page: "Latency < 10ms" -> "Low Latency Architecture".
+  - **Deploy**: `packages/web` deployed to Cloudflare Pages.
