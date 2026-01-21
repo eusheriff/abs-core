@@ -22,6 +22,9 @@ Thumbs.db
 **/d1/
 .sqlite
 *.sqlite3
+:memory:
+*.log
+
 
 # ABS Specific
 abs_core.db
