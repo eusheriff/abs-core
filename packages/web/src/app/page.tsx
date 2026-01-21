@@ -46,8 +46,8 @@ export default function Home() {
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
           Execution Governance <br /> for AI Agents.
         </h1>
-        ABS Core is a <b>runtime safety layer</b> that prevents LLMs from executing
-        dangerous actions.
+        ABS Core is a <b>runtime safety layer</b> with <b>Blockchain-backed Integrity</b><br />
+        that prevents LLMs from executing dangerous actions.
         <br className="hidden md:block" />
         Protects Business Agents <b>AND</b> Coding Assistants (Cursor, Copilot)
         from destruction.
@@ -76,7 +76,7 @@ export default function Home() {
       <section className="px-6 max-w-6xl mx-auto mb-32">
         <div className="grid md:grid-cols-3 gap-6">
           <div className="md:col-span-2 rounded-xl border border-zinc-800 bg-zinc-900/30 p-8 flex flex-col justify-center">
-            <h3 className="text-2xl font-bold mb-2">Available for VS Code</h3>
+            <h3 className="text-2xl font-bold mb-2">Gatekeeper for IDEs</h3>
             <p className="text-zinc-400 mb-6 max-w-md">
               Install the official extension to supervise your AI Coding Agents
               (Cursor, Copilot) directly in the editor.
@@ -239,7 +239,7 @@ export default function Home() {
                 check={true}
                 highlight
               />
-              <FeatureItem text="Forensic Audit Logs" check={true} highlight />
+              <FeatureItem text="Blockchain Forensic Logs" check={true} highlight />
               <FeatureItem
                 text="Coding Agent Safeguards 🛡️"
                 check={true}

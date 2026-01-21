@@ -38,7 +38,7 @@
 
 ## 2026-01-19 — v1.1: Production Enterprise Release (2026-01-19)
 - **Status**: ✅ DEPLOYED (Production)
-- **URL**: `https://abs.oconnector.tech`
+- **URL**: `https://abscore.app` (Frontend) / `https://abs.oconnector.tech` (API)
 - **Infrastructure**: Cloudflare Workers + D1 (Remote)
 - **Key Changes**:
   - `Process Polyfill`: Added `globalThis.process` support for Workers.
@@ -188,5 +188,12 @@
   - **Governance L3**: Added Domain (`FINANCIAL`, `PII`) and Tags to Policy Schema.
   - **Integration**: Added `RedisQueueAdapter` (`ioredis`) for scalable async processing (Enterprise).
   - **Tests**: Verified Integrity, Gatekeeper, and Redis Integration.
-  - **Status**: Ready for Production Deploy.
+  - **Audit**: Fixed license inconsistencies (Apache 2.0 everywhere) and updated Author info to `Engº Rodrigo Gomes <dev@oconnector.tech>`.
+- **Status**: Ready for Production Deploy.
 
+
+
+- 2026-01-20: Release v2.8.0-rc1 (Final Pipeline)
+  - **Meta**: Updated Author to `Engº Rodrigo Gomes <dev@oconnector.tech>` throughout.
+  - **Deployed**: Cloudflare Workers (abs-core) updated successfully.
+  - **Git**: Branch `main` up to date with all fixes.

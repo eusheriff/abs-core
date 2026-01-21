@@ -54,8 +54,10 @@ ABS Core acts as the **runtime policy gate** for these autonomous executions.
 *   A runtime that enforces **Decision Integrity** for autonomous business processes.
 *   The LLM **Proposes** actions.
 *   The Policy Engine **Decides** (Allow/Deny).
-*   The System **Logs** (Immutable Audit Trail).
-*   Only then, the System **Executes**.
+-   The Policy Engine **Decides** (Allow/Deny).
+-   The System **Logs** (Immutable Audit Trail via `abs audit verify`).
+-   **Blockchain Lite**: Every decision is cryptographically chained (SHA-256).
+-   Only then, the System **Executes**.
 
 ## Non-Goals
 To avoid confusion, this project is explicitly:
