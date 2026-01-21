@@ -1,31 +1,24 @@
-# Commercial Licensing
+# Licensing Matrix
 
-## Overview
-ABS Core follows an "Open Core" commercial model designed to balance community adoption with enterprise sustainability.
+The **ABS Core** project is an Open Source initiative licensed under **Apache License 2.0**. This ensures that enterprise users can modify and distribute the software with patent protection, while maintaining the freedom to use it in commercial products.
 
-### 1. ABS Scanner SDK (`@abs/scan`)
-- **License**: **MIT (Open Source)**
-- **Cost**: Free
-- **Use Case**: Local development, CI/CD pipelines, "Shadow Mode" auditing.
-- **Restrictions**: None. You can use, fork, and modify freely.
+## Component Licenses
 
-### 2. ABS Runtime Server (MCP)
-- **License**: **Commercial (Proprietary Source Available)**
-- **Cost**: Paid Subscription / Enterprise License
-- **Use Case**: Production enforcement, Real-time blocking, IDE Integration (Cursor/VSCode), Centralized Governance.
-- **Requirement**: An active license key is required to activate the MCP Server in production mode.
-
----
-
-## Pricing Model (MCP Runtime)
-
-We offer the Runtime purely as a managed or self-hosted commercial product.
-
-| Plan | Target | Price | Features |
+| Component | Package | License | Description |
 | :--- | :--- | :--- | :--- |
-| **Professional** | Freelancers / Solo Devs | **$299** / year | • Single User License<br>• Access to MCP Binary/Docker<br>• Standard Updates |
-| **Team** | AI Squads needed Governance | **$899** / month | • Up to 10 Seats<br>• Centralized Policy Server<br>• Audit Dashboard Access<br>• Priority Support |
-| **Enterprise** | Regulated Industries | **$2,500** / month | • Unlimited Seats<br>• VPC / On-Prem Deployment<br>• SLA & Custom MSAs<br>• Forensic Audit Export |
+| **Core Runtime** | `@abs/core` | **Apache-2.0** | The main governance engine, policy evaluator, and API server. |
+| **Scanner SDK** | `@abs/scan` | **Apache-2.0** | Lightweight client SDK for scanning logs and events. |
+| **VS Code Ext** | `abs-vscode` | **Apache-2.0** | IDE extension for developers. |
+| **Web Dashboard** | `packages/web` | **Apache-2.0** | Administrative dashboard and landing page. |
 
-## How to Buy
-Visit [oconnector.tech/abs](https://oconnector.tech/abs) to purchase a license key.
+## Why Apache 2.0?
+
+We chose Apache 2.0 to provide:
+1.  **Commercial Friendliness**: You can use ABS in proprietary software.
+2.  **Patent Grant**: Explicit grant of patent rights from contributors to users.
+3.  **Enterprise Trust**: A standard, well-understood license for critical infrastructure.
+
+## Governance
+
+This project is maintained by **Engº Rodrigo Gomes** (<dev@oconnector.tech>).
+Contributions are welcome and will be licensed under the same terms.

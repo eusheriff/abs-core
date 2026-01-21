@@ -3,6 +3,7 @@
   "version": "2.7.0",
   "description": "ABS Core Runtime",
   "author": "Engº Rodrigo Gomes <dev@oconnector.tech>",
+  "license": "Apache-2.0",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",

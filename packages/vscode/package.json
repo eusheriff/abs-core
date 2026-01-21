@@ -4,6 +4,7 @@
   "publisher": "oconnector",
   "description": "Integrate ABS Core Scanner directly into VS Code.",
   "author": "Engº Rodrigo Gomes <dev@oconnector.tech>",
+  "license": "Apache-2.0",
   "version": "0.0.3",
   "icon": "icon.png",
   "repository": {
