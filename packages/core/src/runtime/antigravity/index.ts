@@ -2,6 +2,7 @@ import { RuntimePack, HeartbeatResult, ToolDefinition } from '../../core/runtime
 import { ABSContext } from '../../core/context';
 import { walWrite, walVerify } from './wal';
 import { runHeartbeat, initHeartbeat, setSafeMode, isSafeMode } from './daemon';
+import { materializeState } from './materializer';
 
 export interface AntigravityRuntimeOptions {
   workspacePath?: string;
@@ -123,6 +124,15 @@ export class AntigravityRuntime implements RuntimePack {
             message: input.enabled ? 'Safe mode ENABLED - operations halted' : 'Safe mode disabled',
           };
         },
+      },
+      {
+        name: 'abs_state_materialize',
+        description: 'Consolidate WAL entries into STATE.md snapshot (freeze memory)',
+        inputSchema: {
+          type: 'object',
+          properties: {},
+        },
+        handler: async (_, ctx) => materializeState(ctx),
       },
     ];
   }
