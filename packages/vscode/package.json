@@ -1,11 +1,11 @@
 {
   "name": "abs-vscode",
-  "displayName": "ABS Core - Gatekeeper for IDEs",
+  "displayName": "ABS Kernel - Authorized Agent Governance",
   "publisher": "oconnector",
-  "description": "Supervise AI Coding Agents (Cursor, Copilot, Windsurf, Cline) with governance and policy enforcement.",
+  "description": "Authorized Agent Governance (CHI) for Cursor, Copilot, Windsurf, and VS Code. Enforce policies, audit trails (WAL), and layer separation.",
   "author": "Engº Rodrigo Gomes <dev@oconnector.tech>",
   "license": "Apache-2.0",
-  "version": "0.0.17",
+  "version": "0.1.0",
   "icon": "icon.png",
   "repository": {
     "type": "git",
@@ -57,7 +57,7 @@
       "activitybar": [
         {
           "id": "abs-explorer",
-          "title": "ABS Core",
+          "title": "ABS Kernel",
           "icon": "icon.svg"
         }
       ]
@@ -67,12 +67,12 @@
         {
           "type": "webview",
           "id": "absSidebar",
-          "name": "Gatekeeper"
+          "name": "Governance Config"
         }
       ]
     },
     "configuration": {
-      "title": "ABS Core",
+      "title": "ABS Kernel",
       "properties": {
         "abs.apiUrl": {
           "type": "string",

@@ -1,13 +1,23 @@
-# ABS Core - Gatekeeper for IDEs 🛡️
+# ABS Kernel - Authorized Agent Governance 🛡️
 
 [![Visual Studio Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-blue?logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=oconnector.abs-vscode)
 [![Open VSX](https://img.shields.io/badge/Open%20VSX-Registry-purple?logo=eclipse)](https://open-vsx.org/extension/oconnector/abs-vscode)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.0.7-orange)](https://github.com/eusheriff/abs-core)
+[![Version](https://img.shields.io/badge/version-0.1.0-orange)](https://github.com/eusheriff/abs-core)
 
-> **The Immune System for AI Coding Agents.**
+> **Governance Layer for AI Coding Agents.**
 
-Install the official extension to supervise your AI Coding Agents (Cursor, Copilot, Windsurf, Cline) directly in the editor.
+Install the official **ABS Kernel** extension to supervise your AI Coding Agents (Cursor, Copilot, Windsurf, Cline) with the **Cognitive Host Interface (CHI)**.
+
+---
+
+## 🚀 New: ABS Kernel & CHI
+
+This extension implements **ADR-004 (Cognitive Host Interface)** and **ADR-005 (Layer Separation)**:
+
+- **Governance, Not Execution**: ABS governs *how* agents exist, without running them.
+- **WAL (Write-Ahead Log)**: Immutable audit trail for all agent actions.
+- **Layer Separation**: Kernel (Trusted) > Profile > Workspace > Input (Untrusted).
 
 ---
 
@@ -29,10 +39,10 @@ Install the official extension to supervise your AI Coding Agents (Cursor, Copil
 
 | Feature | Description |
 |---------|-------------|
-| 🔍 **Scan Files & Folders** | Check code for policy violations before AI agents execute. |
+| 🔍 **Scan & Audit** | Check code for policy violations and maintain a Write-Ahead Log (WAL). |
 | 🛡️ **Coding Agent Safeguards** | Block dangerous patterns like `rm -rf`, `git reset --hard`, secret exposure. |
 | 📊 **Real-time Feedback** | View scan results instantly in the Output panel. |
-| 🔗 **Cloud API Integration** | Connect to `api.abscore.app` for centralized governance. |
+| 🔗 **ABS Kernel Integration** | Connect to local or cloud ABS Kernel for centralized governance. |
 | 🎛️ **Sidebar Panel** | Visual interface to select files and trigger scans. |
 
 ---
@@ -41,7 +51,7 @@ Install the official extension to supervise your AI Coding Agents (Cursor, Copil
 
 ### VS Code / Codespaces
 1. Install from [Marketplace](https://marketplace.visualstudio.com/items?itemName=oconnector.abs-vscode)
-2. Open the **ABS Core** sidebar (shield icon)
+2. Open the **ABS Kernel** sidebar (shield icon)
 3. Select files and click **"Scan Selected Files"**
 
 ### Cursor / Windsurf / VSCodium
@@ -55,10 +65,10 @@ Install the official extension to supervise your AI Coding Agents (Cursor, Copil
 **Or via CLI:**
 ```bash
 # Cursor
-cursor --install-extension abs-vscode-0.0.7.vsix
+cursor --install-extension abs-vscode-0.1.0.vsix
 
 # VS Code
-code --install-extension abs-vscode-0.0.7.vsix
+code --install-extension abs-vscode-0.1.0.vsix
 ```
 
 ---
@@ -68,13 +78,13 @@ code --install-extension abs-vscode-0.0.7.vsix
 - **Supervise AI Agents**: Monitor what Cursor, Copilot, Cline, and other agents are doing in your codebase.
 - **Block Destructive Commands**: Prevent `rm -rf`, `git push --force`, and credential leaks.
 - **Enforce Team Policies**: Define rules like "No hardcoded secrets" or "No direct DB writes".
-- **Audit Trail**: Every scan is logged to `api.abscore.app` for forensic analysis.
+- **Audit Trail (WAL)**: Every significant action is hashed and logged to `WORKLOG.wal`.
 
 ---
 
 ## ⚙️ Configuration
 
-The extension connects to the ABS Core API by default:
+The extension connects to the ABS Kernel API by default:
 
 ```
 API Endpoint: https://api.abscore.app
