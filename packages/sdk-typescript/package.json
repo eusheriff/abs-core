@@ -1,0 +1,42 @@
+{
+  "name": "@abs/sdk-typescript",
+  "version": "0.1.0",
+  "description": "Official ABS SDK for TypeScript - The executable contract for AI agent governance",
+  "author": "Engº Rodrigo Gomes <dev@oconnector.tech>",
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.2.0",
+    "vitest": "^0.34.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eusheriff/abs-core.git",
+    "directory": "packages/sdk-typescript"
+  },
+  "keywords": [
+    "abs",
+    "ai-governance",
+    "agent-safety",
+    "decision-envelope",
+    "execution-receipt"
+  ]
+}
