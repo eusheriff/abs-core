@@ -228,6 +228,112 @@ Any PR that violates these invariants MUST be rejected citing this ADR.
 
 ---
 
+## 6. CHI Analysis Output (Auditable Artifact)
+
+CHI MUST produce structured, auditable analysis output.
+
+### Schema
+
+```yaml
+chi_analysis:
+  # Detected intents from workflow/action
+  detected_intents:
+    - fs.write:_consolidated/STATE.md
+    - tool.execute:abs_wal_append
+  
+  # Inferred risks
+  inferred_risks:
+    - irreversible_state_mutation
+    - audit_log_modification
+  
+  # Suggested constraints
+  suggested_constraints:
+    - require_wal_event
+    - require_approval
+    - max_scope:project
+  
+  # Confidence level
+  confidence: high | medium | low
+  
+  # Reasoning trace (for auditing)
+  reasoning:
+    - "Detected fs.write to _consolidated/ → irreversible state change"
+    - "Cross-referenced with cognition_profile.requires_approval_on"
+    - "Suggested constraint: require_approval"
+```
+
+### Purpose
+
+This structured output:
+- Enables **auditing** of CHI decisions
+- Facilitates **testing** of introspection logic
+- Provides **explainability** for humans
+
+---
+
+## 7. Risk Forecast Integration
+
+### Principle
+
+> **CHI MAY request risk assessment, but MUST NOT produce final verdicts.**
+
+### Integration with Risk Analysis
+
+CHI can signal that prospective (forward-looking) risk analysis is needed:
+
+```yaml
+chi_analysis:
+  request_risk_forecast: true
+  risk_forecast_context:
+    action: fs.write
+    target: _consolidated/STATE.md
+    scope: project
+```
+
+The Risk Forecast layer (separate from CHI) then:
+- Analyzes historical patterns
+- Predicts potential outcomes
+- Enriches the Decision Envelope
+
+### Separation of Concerns
+
+| Layer | Responsibility |
+|-------|---------------|
+| CHI | Introspection, constraint suggestion |
+| Risk Forecast | Predictive analysis |
+| PDP | Final verdict |
+| PEP | Enforcement |
+
+---
+
+## 8. Conformance Requirements
+
+Any implementation of CHI (internal or third-party) MUST prove:
+
+### Mandatory Proofs
+
+| ID | Requirement | Verification |
+|----|-------------|--------------|
+| CHI-C1 | No code execution | Static analysis + runtime checks |
+| CHI-C2 | No external calls | Network monitoring |
+| CHI-C3 | Structured output only | Schema validation |
+| CHI-C4 | Stateless operation | No persistent state |
+| CHI-C5 | Deterministic analysis | Same input → same output |
+
+### Conformance Suite (Future)
+
+A conformance test suite will verify:
+- Input: known workflow/profile
+- Expected output: deterministic chi_analysis
+- Invariant checks: no side effects
+
+This prepares ABS for:
+- **Enterprise certification**
+- **Regulatory compliance**
+- **Third-party integrations**
+
+---
+
 ## 6. Consequences
 
 ### Positive
