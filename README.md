@@ -66,6 +66,66 @@ To avoid confusion, this project is explicitly:
 *   **NOT** Robotic Process Automation (RPA).
 *   **NOT** a promise of "Full Autonomy" without supervision.
 
+---
+
+## 🚀 New: Antigravity Runtime (AGR)
+
+The **Antigravity Runtime Pack** provides governed autonomy for AI coding agents:
+
+```
+┌─────────────────────────────────────────────┐
+│  ABS GOVERNANCE LAYER  ← ← ← ← ← ← ← ← ← ← │  ★ AGR acts here
+│  ┌───────────────────────────────────────┐  │
+│  │  IDE (VS Code, Cursor, Claude Code)   │  │
+│  │  ┌─────────────────────────────────┐  │  │
+│  │  │  LLM Coding Agent               │  │  │
+│  │  └─────────────────────────────────┘  │  │
+│  └───────────────────────────────────────┘  │
+└─────────────────────────────────────────────┘
+```
+
+### AGR Features
+| Feature | Description |
+|---------|-------------|
+| **WAL (Write-Ahead Log)** | Immutable audit log with SHA-256 hash chain |
+| **Kill Switch** | Halt all operations instantly with safe mode |
+| **Materializer** | Consolidate WAL to STATE.md snapshot |
+| **5 MCP Tools** | `abs_wal_append`, `abs_wal_verify`, `abs_runtime_heartbeat`, `abs_runtime_safe_mode`, `abs_state_materialize` |
+
+### Governance Header
+Every AGR response includes a structured header:
+```json
+{"abs":{"mode":"governed","verdict":"ALLOW","policy":"antigravity_integrity","risk_score":5}}
+---
+{response body}
+```
+
+### AGR CLI
+```bash
+npm run agr run      # Start governed session
+npm run agr status   # Check runtime health
+npm run agr verify   # Verify WAL integrity
+npm run agr freeze   # Materialize WAL to STATE.md
+npm run agr audit    # Display decision log
+```
+
+---
+
+## 🛡️ Skills Library (29 Skills)
+
+ABS includes 29 curated skills for security, agent patterns, and code quality:
+
+| Category | Skills | Examples |
+|----------|--------|----------|
+| **Security** | 9 | SQL injection, XSS, IDOR, pentest checklist |
+| **Agents** | 7 | Memory systems, evaluation, autonomous patterns |
+| **Development** | 7 | Clean code, code review, API patterns |
+| **Operations** | 5 | Docker, Git workflows, deployment |
+
+See [`.agent/skills/README.md`](.agent/skills/README.md) for full list.
+
+---
+
 ## Architecture (The Governance Loop)
 
 ```mermaid
