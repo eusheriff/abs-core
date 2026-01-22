@@ -1,4 +1,4 @@
-# @abs/sdk-typescript
+# @oconnector/abs-sdk-typescript
 
 The official ABS SDK for TypeScript — **governance for AI agents that actually works**.
 
@@ -18,7 +18,7 @@ This SDK makes incorrect integration **impossible** by design.
 ## Installation
 
 ```bash
-npm install @abs/sdk-typescript
+npm install @oconnector/abs-sdk-typescript
 ```
 
 ## Quickstart (5 minutes)
@@ -28,7 +28,7 @@ import {
   ABSClient, 
   DecisionEnvelopeBuilder,
   guardExecutable 
-} from '@abs/sdk-typescript';
+} from '@oconnector/abs-sdk-typescript';
 
 // 1. Create client
 const client = new ABSClient({
@@ -135,7 +135,7 @@ builder.addGateSkipped('TENANT_ACTIVE', 'admin', {
 Validate the full chain from decision to execution:
 
 ```typescript
-import { validateChain } from '@abs/sdk-typescript';
+import { validateChain } from '@oconnector/abs-sdk-typescript';
 
 const result = validateChain(envelope, [receipt]);
 

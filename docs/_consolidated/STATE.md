@@ -14,19 +14,21 @@ constraints:
 
 # STATE — ABS Kernel
 
-> **Status**: 🟢 Architecture Freeze (Audit 008 Closed)
-> **Mode**: Verification (Forensic Hardening Complete)
-> **Focus**: Testing & Policy Migration
+> **Status**: 🟢 ABS Integration Complete (Memory + Governance)
+> **Mode**: Operational
+> **Focus**: Monitoring & Optimization
 
 ## Current Context
-We have successfully **rebranded to ABS Kernel** and implemented the **Cognitive Host Interface (CHI)** (ADR-004).
-The system is now structured around the "ABS Triangle": Governance (Kernel), Cognition (CHI), and Layers (Profile/Workspace).
-The VS Code extension has been updated to v0.1.0 to reflect this new architecture.
+We have successfully **integrated ABS Kernel Governance** with Manú (agent-hub).
+The system now features **Persistent Long-Term Memory** (D1) and **Real-time Policy Evaluation** (ABS).
+ABS Kernel is running at `https://api.abscore.app`.
 
 ## Recent Achievements
-- [x] **Architecture**: Implemented **CHI** (Cognitive Host Interface) for introspection (ADR-004).
-- [x] **Security**: Formalized **Layer Separation** (Kernel > Profile > Workspace > Input) (ADR-005).
-- [x] **Rebranding**: Renamed "Antigravity Runtime" to **ABS Kernel** across config/docs.
+- [x] **Memory**: Implemented `LongTermMemory` (D1 + Vectorize + Summarization).
+- [x] **Governance**: Deployed `ABSConnector` with `ABS_ENABLED=true`.
+- [x] **Infrastructure**: Deployed ABS Kernel to Cloudflare (`api.abscore.app`).
+- [x] **Security**: ABS Scan Passed (85 files clean).
+- [x] **Audit**: Implemented decision logging (WAL) and audit trail.
 - [x] **CLI**: Renamed `agr` to `abs`.
 - [x] **Integration**: Wired up `CHIPolicy` to the main Policy Registry.
 - [x] **Distribution**: Bumped VS Code Extension to **v0.1.0** and generated VSIX.

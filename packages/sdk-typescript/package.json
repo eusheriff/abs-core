@@ -1,5 +1,5 @@
 {
-  "name": "@abs/sdk-typescript",
+  "name": "@oconnector/abs-sdk-typescript",
   "version": "0.1.0",
   "description": "Official ABS SDK for TypeScript - The executable contract for AI agent governance",
   "author": "Engº Rodrigo Gomes <dev@oconnector.tech>",
