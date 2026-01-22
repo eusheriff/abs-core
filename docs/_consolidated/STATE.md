@@ -38,6 +38,7 @@ The VS Code extension has been updated to v0.1.0 to reflect this new architectur
 - **ADR-004**: Cognitive Host Interface (CHI) — Gov ≠ Exec.
 - **ADR-005**: Layer Separation & Trust Hierarchy.
 - **ADR-006 (Implicit)**: VS Code "Smart Scan" (limits to 100 config files).
+- **ADR-007**: ABS System Notification (Governance Receipt).
 
 ## Roadmap (Next 3 Steps)
 - **Immediate**:
