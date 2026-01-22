@@ -56,7 +56,7 @@ export function createApp(envOverrides?: Partial<Bindings>) {
     });
 
     // Root - Status Check
-    app.get('/', (c) => c.text(`ABS Core v2.2: Active (${c.env?.LLM_PROVIDER || 'unknown'}) [Mode: ${c.env?.ABS_MODE || 'runtime'}]`));
+    app.get('/', (c) => c.text(`ABS Core v3.1: Active (${c.env?.LLM_PROVIDER || 'unknown'}) [Mode: ${c.env?.ABS_MODE || 'runtime'}]`));
 
     // Health Check
     app.get('/health', (c) => c.json({ 

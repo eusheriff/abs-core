@@ -44,6 +44,44 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     vscode.window.showErrorMessage(data.value);
                     break;
                 }
+                case 'onScanLive': {
+                    // Test the ABS API health endpoint
+                    const config = vscode.workspace.getConfiguration('abs');
+                    const apiUrl = config.get<string>('apiUrl') || 'https://api.abscore.app';
+                    
+                    vscode.window.withProgress(
+                        {
+                            location: vscode.ProgressLocation.Notification,
+                            title: 'ABS: Testing Live Server Connection...',
+                            cancellable: false,
+                        },
+                        async () => {
+                            try {
+                                const response = await fetch(`${apiUrl}/health`);
+                                if (response.ok) {
+                                    const data = await response.json();
+                                    vscode.window.showInformationMessage(
+                                        `✅ ABS Server OK: ${data.status || 'healthy'}`
+                                    );
+                                } else {
+                                    vscode.window.showWarningMessage(
+                                        `⚠️ ABS Server returned ${response.status}`
+                                    );
+                                }
+                            } catch (err) {
+                                vscode.window.showErrorMessage(
+                                    `❌ Could not reach ABS Server: ${err}`
+                                );
+                            }
+                        }
+                    );
+                    break;
+                }
+                case 'onOpenDashboard': {
+                    // Open the ABS Dashboard in the browser
+                    vscode.env.openExternal(vscode.Uri.parse('https://abscore.app'));
+                    break;
+                }
             }
         });
     }
@@ -310,7 +348,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     }
                     
                     function openLink(target) {
-                         vscode.postMessage({ type: 'onInfo', value: 'Opening: ' + target });
+                         if (target === 'server') {
+                             vscode.postMessage({ type: 'onScanLive' });
+                         } else if (target === 'history') {
+                             vscode.postMessage({ type: 'onOpenDashboard' });
+                         } else {
+                             vscode.postMessage({ type: 'onInfo', value: 'Opening: ' + target });
+                         }
                     }
                 </script>
             </body>

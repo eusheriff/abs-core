@@ -309,3 +309,15 @@
   - **Record**: `_visual-studio-marketplace-oconnector.abscore.app` -> `c9722c56...`
   - **Verification**: `dig` confirmed propagation. User submitted to Marketplace.
 
+- 2026-01-21: API 500 Fix (Production Migration)
+  - **Issue**: VS Code Extension received 500 Internal Server Error for all files.
+  - **Root Cause**: Production D1 database was missing `0003_multi_tenant.sql` migration (missing `tenant_id` column), causing INSERT failures in `events_store`.
+  - **Fix**: Executed `wrangler d1 migrations apply abs-core-db --remote`.
+  - **Verification**: Smart Scan (v0.0.15) now returns `[OK]` for all 100 files.
+
+- 2026-01-21: Distribution - Version Bump (v0.0.16)
+  - **Context**: Marketplace requires unique version numbers; v0.0.15 was already uploaded.
+  - **Action**: Bumped version to `0.0.16` and repackaged.
+  - **Artifact**: `packages/vscode/abs-vscode-0.0.16.vsix`.
+
+

@@ -5,7 +5,7 @@
   "description": "Supervise AI Coding Agents (Cursor, Copilot, Windsurf, Cline) with governance and policy enforcement.",
   "author": "Engº Rodrigo Gomes <dev@oconnector.tech>",
   "license": "Apache-2.0",
-  "version": "0.0.15",
+  "version": "0.0.17",
   "icon": "icon.png",
   "repository": {
     "type": "git",
