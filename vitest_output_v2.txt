@@ -1,0 +1,57 @@
+
+ RUN  v0.34.6 /Volumes/LexarAPFS/ABS
+
+stdout | unknown test
+[PolicyRegistry] Registered policy for prefix 'whatsapp': WhatsAppBotPolicy
+[PolicyRegistry] Registered policy for prefix 'bot': BotOperationalPolicy
+[PolicyRegistry] Registered policy for prefix 'chi': chi_policy
+
+stdout | packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should generate a valid DecisionEnvelope v1 from a SimplePolicy ALLOW
+{"timestamp":"2026-01-22T15:50:46.780Z","severity":"INFO","message":"Processing Event: system.log","trace_id":"corr-123","span_id":"f38b4c83-c84c-47","tenant_id":"test-tenant","event_id":"580cd330-9086-45ef-9689-d6e838f61530","provider":"mock","signature":"88e60a04d29ff00ae404bd731607ed66f1568aedd02df9b44dbd17d380e2934a"}
+
+stdout | packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should generate a valid DecisionEnvelope v1 from a SimplePolicy ALLOW
+🛡️ Policy: DENY (Action 'approve' not in whitelist)
+{"timestamp":"2026-01-22T15:50:46.792Z","severity":"INFO","message":"Decision Logged: DENY","trace_id":"corr-123","span_id":"f38b4c83-c84c-47","tenant_id":"test-tenant","executed_as":"DENY","latency_ms":12,"breakdown":{"validation_ms":0,"idempotency_ms":1,"sanitization_ms":0,"llm_ms":10,"policy_ms":1,"db_ms":0,"overhead_ms":0},"signature":"5306382b79012670a66ca8f6a11ef69caca6a703498f8a35fa6067cde439263b"}
+
+stdout | packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should generate a valid DecisionEnvelope v1 from BotPolicy DENY
+{"timestamp":"2026-01-22T15:50:46.795Z","severity":"INFO","message":"Processing Event: bot.message","trace_id":"corr-bot-1","span_id":"e9e5a99f-af7c-43","tenant_id":"test-tenant","event_id":"580cd330-9086-45ef-9689-d6e838f61531","provider":"mock","signature":"231456e30b2af9129dd9e9a13821797e10afe00e9dd463a01e23a4c23aab9d9f"}
+
+stdout | packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should generate a valid DecisionEnvelope v1 from BotPolicy DENY
+{"timestamp":"2026-01-22T15:50:46.806Z","severity":"INFO","message":"[Governance] Adaptive Score Adjusted: 0 -> 5","trace_id":"corr-bot-1","span_id":"e9e5a99f-af7c-43","tenant_id":"test-tenant","reason":"Seq: +0, Trust: 5","signature":"7eb8000a1076a9daa4d7662957c13d12f8d04dfa7812318ae858607f87ece693"}
+{"timestamp":"2026-01-22T15:50:46.806Z","severity":"INFO","message":"Decision Logged: ALLOW","trace_id":"corr-bot-1","span_id":"e9e5a99f-af7c-43","tenant_id":"test-tenant","executed_as":"ALLOW","latency_ms":11,"breakdown":{"validation_ms":0,"idempotency_ms":0,"sanitization_ms":0,"llm_ms":11,"policy_ms":0,"db_ms":0,"overhead_ms":0},"signature":"ff64c7442f5e72ed7a5a29ce3af462f6ce92a568a4d94c762f3dda6d094a471b"}
+
+stdout | packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should persist the decision log with hash chain
+{"timestamp":"2026-01-22T15:50:46.806Z","severity":"INFO","message":"Processing Event: system.chain","trace_id":"corr-chain-1","span_id":"8375539b-7453-4d","tenant_id":"test-tenant","event_id":"580cd330-9086-45ef-9689-d6e838f61532","provider":"mock","signature":"428255d5f760e131ae2d2edf00837781deda2002c5c1b57ad7b281b80727a56c"}
+
+ ❯ packages/core/src/tests/integration-custody.test.ts  (3 tests | 2 failed) 39ms
+   ❯ packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should generate a valid DecisionEnvelope v1 from a SimplePolicy ALLOW
+     → expected 'DENY' to be 'ALLOW' // Object.is equality
+   ❯ packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should persist the decision log with hash chain
+     → expected +0 to be 1 // Object.is equality
+stdout | packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should persist the decision log with hash chain
+🛡️ Policy: DENY (Action 'approve' not in whitelist)
+{"timestamp":"2026-01-22T15:50:46.818Z","severity":"INFO","message":"Decision Logged: DENY","trace_id":"corr-chain-1","span_id":"8375539b-7453-4d","tenant_id":"test-tenant","executed_as":"DENY","latency_ms":12,"breakdown":{"validation_ms":0,"idempotency_ms":0,"sanitization_ms":0,"llm_ms":12,"policy_ms":0,"db_ms":0,"overhead_ms":0},"signature":"d6e43a53ed2dc17fe9f19788f5b704dc3784a3dab45945c5e0140c419c94f1ce"}
+Test 3 Logs Count: [33m0[39m
+DB Logs (Dump): [
+  {
+    "decision_id": "93af1fcd-abb0-4f76-bbab-fe290558547b",
+    "tenant_id": "default",
+    "event_id": "corr-chain-1",
+    "policy_name": "SimplePolicy",
+    "provider": "abs-kernel",
+    "decision": "DENY",
+    "risk_score": 100,
+    "execution_status": "DENY",
+    "execution_response": "Action 'approve' is not whitelisted.",
+    "full_log_json": "{\"contract_version\":\"1.0.0\",\"decision_id\":\"93af1fcd-abb0-4f76-bbab-fe290558547b\",\"trace_id\":\"corr-chain-1\",\"timestamp\":\"2026-01-22T15:50:46.818Z\",\"signature\":{\"alg\":\"HMAC-SHA256\",\"key_id\":\"abs-kernel-v0\",\"value\":\"3c8dc3583bc7d7d11a2fbdc56f5c1bfeb6306a0fde62ddefa8020704efaf9c64\"},\"decision_type\":\"GOVERNANCE\",\"verdict\":\"DENY\",\"reason_code\":\"RISK.EXCEEDED\",\"reason_human\":\"Action 'approve' is not whitelisted.\",\"risk_score\":100,\"authority\":{\"type\":\"POLICY\",\"id\":\"SimplePolicy\"},\"jurisdiction\":\"ABS_KERNEL_DEFAULT\",\"policy_id\":\"SimplePolicy\",\"policy_version\":\"v0.0.0\",\"monitor_mode\":false,\"constraints\":[],\"required_actions\":[]}",
+    "timestamp": "2026-01-22T15:50:46.818Z",
+    "signature": "3c8dc3583bc7d7d11a2fbdc56f5c1bfeb6306a0fde62ddefa8020704efaf9c64"
+  }
+]
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  12:50:46
+   Duration  409ms (transform 116ms, setup 0ms, collect 163ms, tests 39ms, environment 0ms, prepare 59ms)
+

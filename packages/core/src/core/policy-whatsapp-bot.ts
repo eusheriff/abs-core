@@ -66,17 +66,18 @@ const COMMERCIAL_PATTERNS = [
 export class WhatsAppBotPolicy {
     name = 'WhatsAppBotPolicy';
     
-    evaluate(event: { payload?: BotActionPayload }, proposal: DecisionProposal): PolicyResult {
+    evaluate(event: { payload?: BotActionPayload }, proposal: DecisionProposal): any {
         const payload = event?.payload;
         
         // Safe guard: if payload doesn't match expected structure, fall back to LLM proposal
         if (!payload || !payload.context) {
             console.log('[WhatsAppBotPolicy] Payload não segue schema esperado, usando proposta do LLM');
             return {
-                decision: (proposal.recommended_action || 'escalate') as PolicyResult['decision'],
-                reason: proposal.explanation?.summary || 'Payload não segue schema WhatsApp',
-                policy_id: 'WB-FALLBACK',
-                risk_level: (proposal.risk_level || 'medium') as PolicyResult['risk_level']
+                verdict: 'REQUIRE_APPROVAL',
+                reason_code: 'INPUT.MALFORMED',
+                reason_human: proposal.explanation?.summary || 'Payload não segue schema WhatsApp',
+                risk_score: 50,
+                authority: { type: 'POLICY', id: 'WB-FALLBACK' }
             };
         }
         
@@ -85,30 +86,36 @@ export class WhatsAppBotPolicy {
         // WB-01: Business hours check
         if (!context.is_business_hours && action !== 'handoff_human') {
             return {
-                decision: 'handoff',
-                reason: 'Ação fora do horário comercial (7h-22h BRT)',
-                policy_id: 'WB-01',
-                risk_level: 'medium'
+                verdict: 'REQUIRE_APPROVAL',
+                reason_code: 'POLICY.VIOLATION',
+                reason_human: 'Ação fora do horário comercial (7h-22h BRT)',
+                risk_score: 40,
+                authority: { type: 'POLICY', id: 'WB-01' },
+                required_checks: ['POLICY_ACTIVE']
             };
         }
         
         // WB-02: Commercial promise detection
         if (content?.message && this.containsCommercialPromise(content.message)) {
             return {
-                decision: 'handoff',
-                reason: 'Mensagem contém promessa comercial - requer validação humana',
-                policy_id: 'WB-02',
-                risk_level: 'high'
+                verdict: 'REQUIRE_APPROVAL',
+                reason_code: 'RISK.EXCEEDED',
+                reason_human: 'Mensagem contém promessa comercial - requer validação humana',
+                risk_score: 80,
+                authority: { type: 'POLICY', id: 'WB-02' },
+                required_checks: ['POLICY_ACTIVE']
             };
         }
         
         // WB-03: Low confidence block
         if (typeof context.confidence_score === 'number' && context.confidence_score < 0.7) {
             return {
-                decision: 'deny',
-                reason: `Confiança insuficiente: ${(context.confidence_score * 100).toFixed(0)}% (mínimo 70%)`,
-                policy_id: 'WB-03',
-                risk_level: 'high'
+                verdict: 'DENY',
+                reason_code: 'RISK.EXCEEDED',
+                reason_human: `Confiança insuficiente: ${(context.confidence_score * 100).toFixed(0)}% (mínimo 70%)`,
+                risk_score: 90,
+                authority: { type: 'POLICY', id: 'WB-03' },
+                required_checks: ['POLICY_ACTIVE']
             };
         }
         
@@ -121,19 +128,23 @@ export class WhatsAppBotPolicy {
         // WB-06: Spam protection
         if (typeof context.daily_interactions === 'number' && context.daily_interactions > 50) {
             return {
-                decision: 'deny',
-                reason: `Limite diário excedido: ${context.daily_interactions}/50 interações`,
-                policy_id: 'WB-06',
-                risk_level: 'high'
+                verdict: 'DENY',
+                reason_code: 'OPS.RATE_LIMIT',
+                reason_human: `Limite diário excedido: ${context.daily_interactions}/50 interações`,
+                risk_score: 85,
+                authority: { type: 'POLICY', id: 'WB-06' },
+                required_checks: ['POLICY_ACTIVE']
             };
         }
         
         // Default: use LLM proposal
         return {
-            decision: (proposal.recommended_action || 'allow') as PolicyResult['decision'],
-            reason: proposal.explanation?.summary || 'Aprovado pela política',
-            policy_id: 'DEFAULT',
-            risk_level: (proposal.risk_level || 'low') as PolicyResult['risk_level']
+            verdict: 'ALLOW',
+            reason_code: 'OPS.MAINTENANCE',
+            reason_human: proposal.explanation?.summary || 'Aprovado pela política',
+            risk_score: 10,
+            authority: { type: 'POLICY', id: 'DEFAULT' },
+            required_checks: ['POLICY_ACTIVE', 'TENANT_ACTIVE']
         };
     }
     
@@ -141,14 +152,15 @@ export class WhatsAppBotPolicy {
         return COMMERCIAL_PATTERNS.some(pattern => pattern.test(message));
     }
     
-    private evaluateDiscount(percent: number, tier: string): PolicyResult | null {
+    private evaluateDiscount(percent: number, tier: string): any | null {
         // Regular customers: max 20%
         if (tier === 'regular' && percent > 20) {
             return {
-                decision: 'escalate',
-                reason: `Desconto ${percent}% excede limite para cliente regular (máx 20%)`,
-                policy_id: 'WB-04',
-                risk_level: 'high'
+                verdict: 'REQUIRE_APPROVAL',
+                reason_code: 'POLICY.VIOLATION',
+                reason_human: `Desconto ${percent}% excede limite para cliente regular (máx 20%)`,
+                risk_score: 70,
+                authority: { type: 'POLICY', id: 'WB-04' }
             };
         }
         
@@ -156,18 +168,20 @@ export class WhatsAppBotPolicy {
         if (tier === 'vip') {
             if (percent <= 40) {
                 return {
-                    decision: 'allow',
-                    reason: `Desconto ${percent}% aprovado para cliente VIP`,
-                    policy_id: 'WB-05',
-                    risk_level: 'medium',
-                    allowed_modifications: { max_discount: 40 }
+                    verdict: 'ALLOW',
+                    reason_code: 'OPS.MAINTENANCE',
+                    reason_human: `Desconto ${percent}% aprovado para cliente VIP`,
+                    risk_score: 20,
+                    authority: { type: 'POLICY', id: 'WB-05' },
+                    constraints: [`max_discount:${40}`]
                 };
             } else {
                 return {
-                    decision: 'escalate',
-                    reason: `Desconto ${percent}% excede limite VIP (máx 40%)`,
-                    policy_id: 'WB-04',
-                    risk_level: 'high'
+                    verdict: 'REQUIRE_APPROVAL',
+                    reason_code: 'POLICY.VIOLATION',
+                    reason_human: `Desconto ${percent}% excede limite VIP (máx 40%)`,
+                    risk_score: 70,
+                    authority: { type: 'POLICY', id: 'WB-04' }
                 };
             }
         }
@@ -176,18 +190,20 @@ export class WhatsAppBotPolicy {
         if (tier === 'enterprise') {
             if (percent <= 50) {
                 return {
-                    decision: 'allow',
-                    reason: `Desconto ${percent}% aprovado para cliente Enterprise`,
-                    policy_id: 'WB-05',
-                    risk_level: 'low',
-                    allowed_modifications: { max_discount: 50 }
+                    verdict: 'ALLOW',
+                    reason_code: 'OPS.MAINTENANCE',
+                    reason_human: `Desconto ${percent}% aprovado para cliente Enterprise`,
+                    risk_score: 10,
+                    authority: { type: 'POLICY', id: 'WB-05' },
+                    constraints: [`max_discount:${50}`]
                 };
             } else {
                 return {
-                    decision: 'escalate',
-                    reason: `Desconto ${percent}% excede limite Enterprise (máx 50%)`,
-                    policy_id: 'WB-04',
-                    risk_level: 'high'
+                    verdict: 'REQUIRE_APPROVAL',
+                    reason_code: 'POLICY.VIOLATION',
+                    reason_human: `Desconto ${percent}% excede limite Enterprise (máx 50%)`,
+                    risk_score: 75,
+                    authority: { type: 'POLICY', id: 'WB-04' }
                 };
             }
         }

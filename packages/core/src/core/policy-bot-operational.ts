@@ -1,51 +1,18 @@
 import { DecisionProposal } from "./schemas";
-import { PolicyEngine, PolicyResult } from "./interfaces";
+import { PolicyEngine } from "./interfaces";
 
 /**
- * Decision Envelope v0 for Bot Operations
- * Based on ADR-003 and Policy Pack v0
- */
-export interface DecisionEnvelope {
-  id: string;
-  timestamp: string;
-  environment: "runtime";
-  actor: {
-    type: "bot";
-    name: string;
-    channel: "whatsapp" | "telegram" | "api";
-  };
-  intent: string;
-  proposal: {
-    action: string;
-    parameters: Record<string, any>;
-  };
-  context: {
-    lead_id?: string;
-    conversation_id?: string;
-    confidence?: number;
-    signals?: string[];
-    last_action_at?: string;
-    message_content?: string;
-  };
-  risk_level: "low" | "medium" | "high";
-}
-
-export interface PolicyDecisionResult {
-  outcome: "allow" | "deny" | "handoff";
-  policy_id: string;
-  reason: string;
-}
-
-/**
- * Policy Pack v0 - Bot Operational Policies
+ * Policy Pack v0 - Bot Operational Policies (Migrated to ADR-008)
  *
- * P-01: Ação Fora de Horário → handoff
- * P-02: Promessa Implícita de Valor → handoff
- * P-03: Baixa Confiança → deny
- * P-04: Escalada Automática de Lead → allow/deny
- * P-05: Repetição de Ação → deny
+ * P-01: Ação Fora de Horário → REQUIRE_APPROVAL
+ * P-02: Promessa Implícita de Valor → REQUIRE_APPROVAL
+ * P-03: Baixa Confiança → DENY
+ * P-04: Escalada Automática de Lead → ALLOW/DENY
+ * P-05: Repetição de Ação → DENY
  */
 export class BotOperationalPolicy implements PolicyEngine {
+  name = 'BotOperationalPolicy';
+  
   // Configurable business hours (default: 8am-8pm)
   private businessHoursStart = 8;
   private businessHoursEnd = 20;
@@ -59,109 +26,81 @@ export class BotOperationalPolicy implements PolicyEngine {
 
   // Keywords that indicate commercial promises
   private promiseKeywords = [
-    "desconto",
-    "reservar",
-    "reserva",
-    "garantir",
-    "garantia",
-    "entrada",
-    "financiamento",
-    "parcela",
-    "condição especial",
-    "posso verificar",
-    "vou verificar",
-    "consigo",
+    "desconto", "reservar", "reserva", "garantir", "garantia", 
+    "entrada", "financiamento", "parcela", "condição especial", 
+    "posso verificar", "vou verificar", "consigo"
   ];
 
   // Minimum signals required for lead escalation
   private minSignalsForEscalation = 2;
 
-  evaluate(proposal: DecisionProposal, context: any): PolicyResult {
-    // Convert to envelope format if needed
-    const envelope = this.toEnvelope(proposal, context);
-    const decision = this.evaluateEnvelope(envelope);
+  evaluate(proposal: DecisionProposal, context: any): any {
+      // P-01: Ação Fora de Horário
+      const p01 = this.checkBusinessHours();
+      if (p01) return p01;
 
-    // Map to legacy PolicyResult
-    if (decision.outcome === "allow") return "ALLOW";
-    if (decision.outcome === "handoff") return "MANUAL_REVIEW";
-    return "DENY";
+      // P-05: Repetição de Ação (check early to prevent spam)
+      const p05 = this.checkRepetition(proposal, context);
+      if (p05) return p05;
+
+      // P-02: Promessa Implícita de Valor
+      const p02 = this.checkCommercialPromise(context);
+      if (p02) return p02;
+
+      // P-03: Baixa Confiança
+      const p03 = this.checkConfidence(proposal);
+      if (p03) return p03;
+
+      // P-04: Escalada Automática de Lead
+      const p04 = this.checkLeadEscalation(proposal, context);
+      if (p04) return p04;
+
+      // Default: ALLOW
+      this.recordAction(proposal, context);
+      return {
+          verdict: 'ALLOW',
+          reason_code: 'OPS.MAINTENANCE',
+          reason_human: 'Nenhuma política operacional violada.',
+          risk_score: 0,
+          required_checks: ['POLICY_ACTIVE']
+      };
   }
 
   /**
-   * Main evaluation method using Decision Envelope v0
+   * P-01: Ação Fora de Horário → REQUIRE_APPROVAL
    */
-  evaluateEnvelope(envelope: DecisionEnvelope): PolicyDecisionResult {
-    // P-01: Ação Fora de Horário
-    const p01 = this.checkBusinessHours(envelope);
-    if (p01) return p01;
-
-    // P-05: Repetição de Ação (check early to prevent spam)
-    const p05 = this.checkRepetition(envelope);
-    if (p05) return p05;
-
-    // P-02: Promessa Implícita de Valor
-    const p02 = this.checkCommercialPromise(envelope);
-    if (p02) return p02;
-
-    // P-03: Baixa Confiança
-    const p03 = this.checkConfidence(envelope);
-    if (p03) return p03;
-
-    // P-04: Escalada Automática de Lead
-    const p04 = this.checkLeadEscalation(envelope);
-    if (p04) return p04;
-
-    // Default: ALLOW
-    this.recordAction(envelope);
-    return {
-      outcome: "allow",
-      policy_id: "DEFAULT",
-      reason: "Nenhuma política violada",
-    };
-  }
-
-  /**
-   * P-01: Ação Fora de Horário → handoff
-   */
-  private checkBusinessHours(
-    envelope: DecisionEnvelope,
-  ): PolicyDecisionResult | null {
+  private checkBusinessHours(): any | null {
     const now = new Date();
     const hour = now.getHours();
 
     if (hour < this.businessHoursStart || hour >= this.businessHoursEnd) {
       console.log(`🛡️ P-01: HANDOFF (Fora de horário: ${hour}h)`);
       return {
-        outcome: "handoff",
-        policy_id: "P-01",
-        reason: `Ação fora do horário comercial (${hour}h, permitido ${this.businessHoursStart}-${this.businessHoursEnd}h)`,
+        verdict: 'REQUIRE_APPROVAL',
+        reason_code: 'POLICY.VIOLATION',
+        reason_human: `Ação fora do horário comercial (${hour}h, permitido ${this.businessHoursStart}-${this.businessHoursEnd}h)`,
+        risk_score: 40,
+        required_checks: ['POLICY_ACTIVE']
       };
     }
     return null;
   }
 
   /**
-   * P-02: Promessa Implícita de Valor → handoff
+   * P-02: Promessa Implícita de Valor → REQUIRE_APPROVAL
    */
-  private checkCommercialPromise(
-    envelope: DecisionEnvelope,
-  ): PolicyDecisionResult | null {
-    const messageContent =
-      envelope.context.message_content?.toLowerCase() || "";
-    const actionParams = JSON.stringify(
-      envelope.proposal.parameters,
-    ).toLowerCase();
-    const combined = messageContent + " " + actionParams;
-
+  private checkCommercialPromise(context: any): any | null {
+    const messageContent = context?.message_content?.toLowerCase() || "";
+    // Check message content primarily
     for (const keyword of this.promiseKeywords) {
-      if (combined.includes(keyword)) {
-        console.log(
-          `🛡️ P-02: HANDOFF (Promessa comercial detectada: "${keyword}")`,
-        );
+      if (messageContent.includes(keyword)) {
+        console.log(`🛡️ P-02: HANDOFF (Promessa comercial detectada: "${keyword}")`);
         return {
-          outcome: "handoff",
-          policy_id: "P-02",
-          reason: `Promessa comercial detectada: "${keyword}"`,
+          verdict: 'REQUIRE_APPROVAL',
+          reason_code: 'RISK.EXCEEDED',
+          reason_human: `Promessa comercial detectada: "${keyword}"`,
+          risk_score: 75,
+          required_checks: ['POLICY_ACTIVE', 'INCIDENT_CLEAR']
         };
       }
     }
@@ -169,55 +108,50 @@ export class BotOperationalPolicy implements PolicyEngine {
   }
 
   /**
-   * P-03: Baixa Confiança → deny
+   * P-03: Baixa Confiança → DENY
    */
-  private checkConfidence(
-    envelope: DecisionEnvelope,
-  ): PolicyDecisionResult | null {
-    const confidence = envelope.context.confidence;
+  private checkConfidence(proposal: DecisionProposal): any | null {
+    const confidence = proposal.confidence;
 
     // Undefined confidence = treat as low
     if (confidence === undefined || confidence < 0.7) {
-      console.log(
-        `🛡️ P-03: DENY (Baixa confiança: ${confidence ?? "undefined"})`,
-      );
+      console.log(`🛡️ P-03: DENY (Baixa confiança: ${confidence ?? "undefined"})`);
       return {
-        outcome: "deny",
-        policy_id: "P-03",
-        reason: `Confiança insuficiente: ${confidence ?? "não informada"} (mínimo: 0.70)`,
+        verdict: 'DENY',
+        reason_code: 'RISK.EXCEEDED',
+        reason_human: `Confiança insuficiente: ${confidence ?? "não informada"} (mínimo: 0.70)`,
+        risk_score: 85,
+        required_checks: ['POLICY_ACTIVE']
       };
     }
     return null;
   }
 
   /**
-   * P-04: Escalada Automática de Lead → allow/deny
+   * P-04: Escalada Automática de Lead → ALLOW/DENY
    */
-  private checkLeadEscalation(
-    envelope: DecisionEnvelope,
-  ): PolicyDecisionResult | null {
-    if (
-      envelope.intent === "escalar_humano" ||
-      envelope.proposal.action === "handoff_to_human"
-    ) {
-      const signals = envelope.context.signals || [];
+  private checkLeadEscalation(proposal: DecisionProposal, context: any): any | null {
+    if (proposal.recommended_action === "handoff_to_human" || proposal.recommended_action === "escalar_humano") {
+      const signals = context?.signals || [];
 
       if (signals.length >= this.minSignalsForEscalation) {
         console.log(`🛡️ P-04: ALLOW (Escalada com ${signals.length} sinais)`);
-        this.recordAction(envelope);
+        this.recordAction(proposal, context);
         return {
-          outcome: "allow",
-          policy_id: "P-04",
-          reason: `Escalada permitida com ${signals.length} sinais: ${signals.join(", ")}`,
+            verdict: 'ALLOW',
+            reason_code: 'OPS.MAINTENANCE',
+            reason_human: `Escalada permitida com ${signals.length} sinais: ${signals.join(", ")}`,
+            risk_score: 0,
+            required_checks: ['POLICY_ACTIVE']
         };
       } else {
-        console.log(
-          `🛡️ P-04: DENY (Escalada sem sinais suficientes: ${signals.length})`,
-        );
+        console.log(`🛡️ P-04: DENY (Escalada sem sinais suficientes: ${signals.length})`);
         return {
-          outcome: "deny",
-          policy_id: "P-04",
-          reason: `Escalada negada: apenas ${signals.length} sinais (mínimo: ${this.minSignalsForEscalation})`,
+            verdict: 'DENY',
+            reason_code: 'POLICY.VIOLATION',
+            reason_human: `Escalada negada: apenas ${signals.length} sinais (mínimo: ${this.minSignalsForEscalation})`,
+            risk_score: 60,
+            required_checks: ['POLICY_ACTIVE']
         };
       }
     }
@@ -225,78 +159,38 @@ export class BotOperationalPolicy implements PolicyEngine {
   }
 
   /**
-   * P-05: Repetição de Ação → deny
+   * P-05: Repetição de Ação → DENY
    */
-  private checkRepetition(
-    envelope: DecisionEnvelope,
-  ): PolicyDecisionResult | null {
-    const key = envelope.context.conversation_id || envelope.actor.name;
+  private checkRepetition(proposal: DecisionProposal, context: any): any | null {
+    const key = context?.conversation_id || context?.actor_name || 'unknown';
     const last = this.lastActions.get(key);
 
     if (last) {
       const timeSinceLastMs = Date.now() - last.timestamp;
 
       if (
-        last.action === envelope.proposal.action &&
+        last.action === proposal.recommended_action &&
         timeSinceLastMs < this.cooldownMs
       ) {
-        const remainingSeconds = Math.ceil(
-          (this.cooldownMs - timeSinceLastMs) / 1000,
-        );
-        console.log(
-          `🛡️ P-05: DENY (Ação repetida: ${envelope.proposal.action})`,
-        );
+        const remainingSeconds = Math.ceil((this.cooldownMs - timeSinceLastMs) / 1000);
+        console.log(`🛡️ P-05: DENY (Ação repetida: ${proposal.recommended_action})`);
         return {
-          outcome: "deny",
-          policy_id: "P-05",
-          reason: `Ação "${envelope.proposal.action}" repetida muito rapidamente (aguardar ${remainingSeconds}s)`,
+            verdict: 'DENY',
+            reason_code: 'OPS.RATE_LIMIT',
+            reason_human: `Ação "${proposal.recommended_action}" repetida muito rapidamente (aguardar ${remainingSeconds}s)`,
+            risk_score: 50,
+            required_checks: ['POLICY_ACTIVE']
         };
       }
     }
     return null;
   }
 
-  /**
-   * Record action for repetition tracking
-   */
-  private recordAction(envelope: DecisionEnvelope): void {
-    const key = envelope.context.conversation_id || envelope.actor.name;
+  private recordAction(proposal: DecisionProposal, context: any): void {
+    const key = context?.conversation_id || context?.actor_name || 'unknown';
     this.lastActions.set(key, {
-      action: envelope.proposal.action,
+      action: proposal.recommended_action,
       timestamp: Date.now(),
     });
-  }
-
-  /**
-   * Convert legacy DecisionProposal to DecisionEnvelope
-   */
-  private toEnvelope(
-    proposal: DecisionProposal,
-    context: any,
-  ): DecisionEnvelope {
-    return {
-      id: proposal.proposal_id,
-      timestamp: new Date().toISOString(),
-      environment: "runtime",
-      actor: {
-        type: "bot",
-        name: context?.actor_name || "unknown",
-        channel: context?.channel || "api",
-      },
-      intent: proposal.recommended_action,
-      proposal: {
-        action: proposal.recommended_action,
-        parameters: proposal.action_params,
-      },
-      context: {
-        lead_id: context?.lead_id,
-        conversation_id: context?.conversation_id,
-        confidence: proposal.confidence,
-        signals: context?.signals || [],
-        last_action_at: context?.last_action_at,
-        message_content: context?.message_content,
-      },
-      risk_level: proposal.risk_level,
-    };
   }
 }

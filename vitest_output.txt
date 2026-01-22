@@ -1,0 +1,28 @@
+
+ RUN  v0.34.6 /Volumes/LexarAPFS/ABS
+
+stdout | unknown test
+[PolicyRegistry] Registered policy for prefix 'whatsapp': WhatsAppBotPolicy
+[PolicyRegistry] Registered policy for prefix 'bot': BotOperationalPolicy
+[PolicyRegistry] Registered policy for prefix 'chi': chi_policy
+
+stdout | packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should generate a valid DecisionEnvelope v1 from a SimplePolicy ALLOW
+{"timestamp":"2026-01-22T15:47:34.623Z","severity":"ERROR","message":"Event validation failed","trace_id":"corr-123","span_id":"bf1477e0-4e5b-4d","tenant_id":"test-tenant","error":"[\n  {\n    \"validation\": \"uuid\",\n    \"code\": \"invalid_string\",\n    \"message\": \"Invalid uuid\",\n    \"path\": [\n      \"event_id\"\n    ]\n  }\n]","signature":"5715a1aa09fc41ada6a95efc4c0f3ae0e7e7db289475bb6c3db63a6e6ea7c407"}
+
+stdout | packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should generate a valid DecisionEnvelope v1 from BotPolicy DENY
+{"timestamp":"2026-01-22T15:47:34.626Z","severity":"ERROR","message":"Event validation failed","trace_id":"corr-bot-1","span_id":"e8ebabc9-6549-46","tenant_id":"test-tenant","error":"[\n  {\n    \"validation\": \"uuid\",\n    \"code\": \"invalid_string\",\n    \"message\": \"Invalid uuid\",\n    \"path\": [\n      \"event_id\"\n    ]\n  }\n]","signature":"162f5dad0d00d9a6373a42a272db644ec4d321589fb0c43786415ddbc6cbed55"}
+
+ ❯ packages/core/src/tests/integration-custody.test.ts  (3 tests | 2 failed) 6ms
+   ❯ packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should generate a valid DecisionEnvelope v1 from a SimplePolicy ALLOW
+     → expected 'rejected' to be 'processed' // Object.is equality
+   ❯ packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should persist the decision log with hash chain
+     → expected +0 to be 1 // Object.is equality
+stdout | packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should persist the decision log with hash chain
+{"timestamp":"2026-01-22T15:47:34.627Z","severity":"ERROR","message":"Event validation failed","trace_id":"corr-chain-1","span_id":"700234d5-cf55-46","tenant_id":"test-tenant","error":"[\n  {\n    \"validation\": \"uuid\",\n    \"code\": \"invalid_string\",\n    \"message\": \"Invalid uuid\",\n    \"path\": [\n      \"event_id\"\n    ]\n  }\n]","signature":"d598575ebad14241ef015dc4f2d1cca1b4f3f8c09068820842a1e8a85e1653a2"}
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  12:47:34
+   Duration  304ms (transform 99ms, setup 0ms, collect 109ms, tests 6ms, environment 0ms, prepare 65ms)
+

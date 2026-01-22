@@ -14,9 +14,9 @@ constraints:
 
 # STATE — ABS Kernel
 
-> **Status**: 🟢 Architecture Freeze (v0.1.0 Kernel + CHI)
-> **Mode**: Governed (ABS Kernel v0.1.0)
-> **Focus**: Governance, CHI Introspection, Layer Separation
+> **Status**: 🟢 Architecture Freeze (Audit 008 Closed)
+> **Mode**: Verification (Forensic Hardening Complete)
+> **Focus**: Testing & Policy Migration
 
 ## Current Context
 We have successfully **rebranded to ABS Kernel** and implemented the **Cognitive Host Interface (CHI)** (ADR-004).
@@ -39,6 +39,7 @@ The VS Code extension has been updated to v0.1.0 to reflect this new architectur
 - **ADR-005**: Layer Separation & Trust Hierarchy.
 - **ADR-006 (Implicit)**: VS Code "Smart Scan" (limits to 100 config files).
 - **ADR-007**: ABS System Notification (Governance Receipt).
+- **ADR-008**: Decision Envelope v1 (Public Contract).
 
 ## Roadmap (Next 3 Steps)
 - **Immediate**:

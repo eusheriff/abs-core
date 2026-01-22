@@ -1,0 +1,39 @@
+
+ RUN  v0.34.6 /Volumes/LexarAPFS/ABS
+
+stdout | unknown test
+[PolicyRegistry] Registered policy for prefix 'whatsapp': WhatsAppBotPolicy
+[PolicyRegistry] Registered policy for prefix 'bot': BotOperationalPolicy
+[PolicyRegistry] Registered policy for prefix 'chi': chi_policy
+
+stdout | packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should generate a valid DecisionEnvelope v1 from a SimplePolicy ALLOW
+{"timestamp":"2026-01-22T15:53:50.244Z","severity":"INFO","message":"Processing Event: system.log","trace_id":"corr-123","span_id":"a7d8d46c-a6ab-4a","tenant_id":"test-tenant","event_id":"580cd330-9086-45ef-9689-d6e838f61530","provider":"mock","signature":"bc75eb61410e2cf0e371baf765e4f52b143b7344b746b707197ceb8ccee3047a"}
+
+stdout | packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should generate a valid DecisionEnvelope v1 from a SimplePolicy ALLOW
+🛡️ Policy: DENY (Action 'approve' not in whitelist)
+{"timestamp":"2026-01-22T15:53:50.255Z","severity":"INFO","message":"Decision Logged: DENY","trace_id":"corr-123","span_id":"a7d8d46c-a6ab-4a","tenant_id":"test-tenant","executed_as":"DENY","latency_ms":12,"breakdown":{"validation_ms":1,"idempotency_ms":0,"sanitization_ms":1,"llm_ms":10,"policy_ms":0,"db_ms":0,"overhead_ms":0},"signature":"54a7f2a40f7dc81edb883285f95811035c1142921eba5c49e9f8acee7061dcd1"}
+
+stdout | packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should generate a valid DecisionEnvelope v1 from BotPolicy DENY
+{"timestamp":"2026-01-22T15:53:50.259Z","severity":"INFO","message":"Processing Event: bot.message","trace_id":"corr-bot-1","span_id":"11547098-2f51-47","tenant_id":"test-tenant","event_id":"580cd330-9086-45ef-9689-d6e838f61531","provider":"mock","signature":"7304e58773f0d7bac77c1fd2b71fb72ed150999f6ae1e50c67dc9adf957f7408"}
+
+stdout | packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should generate a valid DecisionEnvelope v1 from BotPolicy DENY
+{"timestamp":"2026-01-22T15:53:50.270Z","severity":"INFO","message":"[Governance] Adaptive Score Adjusted: 0 -> 5","trace_id":"corr-bot-1","span_id":"11547098-2f51-47","tenant_id":"test-tenant","reason":"Seq: +0, Trust: 5","signature":"40c4bdbebb57e03f73d1a3d3360ecee94efdf6b66755d63276d7055de6b4750b"}
+{"timestamp":"2026-01-22T15:53:50.271Z","severity":"INFO","message":"Decision Logged: ALLOW","trace_id":"corr-bot-1","span_id":"11547098-2f51-47","tenant_id":"test-tenant","executed_as":"ALLOW","latency_ms":13,"breakdown":{"validation_ms":1,"idempotency_ms":0,"sanitization_ms":0,"llm_ms":11,"policy_ms":1,"db_ms":0,"overhead_ms":0},"signature":"024ae62b1e18e9fdbfe667baee9bd5e9e5875cee894c2abc675e061dfd230bd4"}
+
+stdout | packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should persist the decision log with hash chain
+{"timestamp":"2026-01-22T15:53:50.271Z","severity":"INFO","message":"Processing Event: system.chain","trace_id":"corr-chain-1","span_id":"2a51a991-c868-4d","tenant_id":"test-tenant","event_id":"580cd330-9086-45ef-9689-d6e838f61532","provider":"mock","signature":"162e09f8246a301d2bb7a37ab13d0ca5c13ec01018fa8ae9beccb057cdd922eb"}
+
+ ❯ packages/core/src/tests/integration-custody.test.ts  (3 tests | 1 failed) 40ms
+   ❯ packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should generate a valid DecisionEnvelope v1 from a SimplePolicy ALLOW
+     → expected 'RISK.EXCEEDED' to be 'POLICY.VIOLATION' // Object.is equality
+stdout | packages/core/src/tests/integration-custody.test.ts > Integration: Chain of Custody (Event -> Decision -> Receipt) > should persist the decision log with hash chain
+🛡️ Policy: DENY (Action 'approve' not in whitelist)
+{"timestamp":"2026-01-22T15:53:50.281Z","severity":"INFO","message":"Decision Logged: DENY","trace_id":"corr-chain-1","span_id":"2a51a991-c868-4d","tenant_id":"test-tenant","executed_as":"DENY","latency_ms":10,"breakdown":{"validation_ms":0,"idempotency_ms":0,"sanitization_ms":0,"llm_ms":10,"policy_ms":0,"db_ms":0,"overhead_ms":0},"signature":"59ab95259ce66b59b9e221b8716354d660baeacd34a21ca11d86862f9086257d"}
+Test 3 Logs Count: [33m1[39m
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  12:53:49
+   Duration  400ms (transform 118ms, setup 0ms, collect 168ms, tests 40ms, environment 0ms, prepare 58ms)
+

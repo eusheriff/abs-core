@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { PolicyRegistry } from './policy-registry';
-import { DecisionProposal, EventEnvelopeSchema, EventEnvelope } from './schemas';
+import { DecisionProposal, EventEnvelopeSchema, EventEnvelope, DecisionEnvelope, Verdict, ReasonCode } from './schemas';
 import { Metrics } from './metrics';
 import { DatabaseAdapter } from '../infra/db-adapter';
 import { getProvider } from './provider-factory';
@@ -31,15 +31,8 @@ export interface ProcessorConfig {
 }
 
 export interface ProcessResult {
-    decision_id: string;
+    envelope: DecisionEnvelope; // ADR-008: Return full envelope
     status: 'processed' | 'rejected' | 'failed' | 'processed_duplicate' | 'duplicate' | 'pending_review' | 'queued' | 'suspended';
-    decision: string;
-    provider: string;
-    latency_ms: number;
-    policy_id?: string;
-    review_id?: string;
-    trace_id?: string;
-    task_id?: string;
 }
 
 export class EventProcessor {
@@ -138,13 +131,27 @@ export class EventProcessor {
             Metrics.recordError('validation');
             const latency = Date.now() - start;
             logger.error('Event validation failed', { error: validationResult.error.message });
+            // Construct Failure Envelope
+            const envelope: DecisionEnvelope = {
+                contract_version: "1.0.0",
+                decision_id: uuidv4(),
+                trace_id: traceId,
+                timestamp: new Date().toISOString(),
+                signature: { alg: "HMAC-SHA256", key_id: "abs-kernel-v0", value: "unsigned_error" },
+                decision_type: 'SYSTEM_ERROR',
+                verdict: 'SYSTEM_FAILURE',
+                reason_code: 'INPUT.MALFORMED',
+                reason_human: validationResult.error.message,
+                risk_score: 100,
+                authority: { type: 'SYSTEM', id: 'schema-validator' },
+                jurisdiction: 'ABS_KERNEL_DEFAULT',
+                policy_id: 'schema-validation',
+                monitor_mode: false
+            };
+            
             return {
-                decision_id: 'validation-failed',
-                status: 'rejected',
-                decision: 'DENY',
-                provider: 'validator',
-                latency_ms: latency,
-                trace_id: traceId
+                envelope,
+                status: 'rejected'
             };
         }
         const validEvent: EventEnvelope = validationResult.data;
@@ -165,14 +172,26 @@ export class EventProcessor {
             if (existing) {
                 logger.info(`Skipping duplicate event`, { event_id: validEvent.event_id });
                 const logData = JSON.parse(existing.full_log_json || '{}');
+                // Re-hydrate envelope from DB if possible, or construct legacy wrapper
+                const envelope: DecisionEnvelope = logData.contract_version ? logData : {
+                    contract_version: "1.0.0",
+                    decision_id: existing.decision_id,
+                    trace_id: traceId,
+                    timestamp: new Date().toISOString(),
+                    signature: { alg: "HMAC-SHA256", key_id: "legacy", value: "cached" },
+                    decision_type: 'GOVERNANCE',
+                    verdict: existing.execution_status as any || 'ALLOW',
+                    reason_code: 'OPS.RATE_LIMIT', // Cache hit proxy
+                    reason_human: 'Idempotency Cache Hit',
+                    risk_score: 0,
+                    authority: { type: 'SYSTEM', id: 'idempotency-cache' },
+                    policy_id: 'idempotency',
+                    monitor_mode: false
+                };
+
                 return {
-                    decision_id: existing.decision_id || 'duplicate',
-                    status: 'processed_duplicate', 
-                    decision: logData.decision || existing.execution_status,
-                    provider: 'cache',
-                    latency_ms: 0,
-                    policy_id: logData.policy_id,
-                    trace_id: traceId
+                    envelope,
+                    status: 'processed_duplicate'
                 };
             }
         } catch (e) {
@@ -192,32 +211,29 @@ export class EventProcessor {
                 
                 // Log the attempt (for security audit)
                 const decisionId = uuidv4();
-                await this.logDecision({
-                    decisionId,
-                    eventId: validEvent.event_id,
-                    tenantId: validEvent.tenant_id,
-                    policyName: 'INJECTION_BLOCKED',
-                    provider: 'sanitizer',
-                    decision: 'DENY',
-                    reason: `Prompt injection detected: ${sanitizeResult.flags.join(', ')}`,
-                    metadata: { 
-                        sanitize_result: sanitizeResult, 
-                        event: validEvent, 
-                        trace_id: traceId,
-                        latency_breakdown: breakdown
-                    },
-                    riskScore: 100, // Injection is critical risk
-                    latency: Date.now() - start
-                });
+                // Create Injection Envelope
+                const envelope: DecisionEnvelope = {
+                    contract_version: "1.0.0",
+                    decision_id: uuidv4(),
+                    trace_id: traceId,
+                    timestamp: new Date().toISOString(),
+                    signature: { alg: "HMAC-SHA256", key_id: "abs-kernel-v0", value: "pending" },
+                    decision_type: 'GOVERNANCE',
+                    verdict: 'DENY',
+                    reason_code: 'INPUT.INJECTION',
+                    reason_human: `Prompt injection: ${sanitizeResult.flags.join(', ')}`,
+                    risk_score: 100,
+                    authority: { type: 'SYSTEM', id: 'sanitizer' },
+                    jurisdiction: 'ABS_KERNEL_DEFAULT',
+                    policy_id: 'injection-protection',
+                    monitor_mode: this.mode === 'scanner'
+                };
+
+                await this.logDecision(envelope, breakdown);
                 
                 return {
-                    decision_id: decisionId,
-                    status: 'rejected',
-                    decision: 'DENY',
-                    provider: 'sanitizer',
-                    latency_ms: Date.now() - start,
-                    policy_id: 'INJECTION_BLOCKED',
-                    trace_id: traceId
+                    envelope,
+                    status: 'rejected'
                 };
             }
 
@@ -286,27 +302,48 @@ export class EventProcessor {
 
             // 4. POLICY GATE (Governance)
             const policy = PolicyRegistry.getPolicy(validEvent.event_type);
-            const rawDecision = policy.evaluate(validProposal, validEvent);
+            const evaluation = await policy.evaluate(validProposal, validEvent);
             
-            // Normalize Decision
-            let decisionStr = typeof rawDecision === 'string' ? rawDecision : rawDecision.decision || 'unknown';
-            let decisionScore = typeof rawDecision === 'object' && rawDecision.score !== undefined ? rawDecision.score : 0;
-            let decisionReason = typeof rawDecision === 'object' && rawDecision.reason ? rawDecision.reason : 'Policy Evaluation';
+            // Normalize Decision (ADR-008 Adapter Layer)
+            let decisionStr: string = 'UNKNOWN';
+            let decisionScore = 0;
+            let decisionReason = 'Policy Evaluation';
+            let partialEnvelope: Partial<DecisionEnvelope> = {};
 
-            // New: Handle Legacy String Returns (Implicit Scoring)
-            if (typeof rawDecision === 'string') {
-                if (rawDecision === 'DENY') decisionScore = 100;
-                else if (rawDecision === 'ESCALATE') decisionScore = 50;
+            // Helper: Check if result is an Envelope (has verdict)
+            const isEnvelope = (res: any): res is Partial<DecisionEnvelope> => {
+                return typeof res === 'object' && 'verdict' in res;
+            };
+
+            if (typeof evaluation === 'string') {
+                // LEGACY: String return
+                decisionStr = evaluation;
+                if (decisionStr === 'DENY') decisionScore = 100;
+                else if (decisionStr === 'ESCALATE') decisionScore = 50;
+            } else if (isEnvelope(evaluation)) {
+                // V1: Decision Envelope
+                partialEnvelope = evaluation;
+                decisionStr = evaluation.verdict || 'UNKNOWN';
+                decisionScore = evaluation.risk_score || 0;
+                decisionReason = evaluation.reason_human || 'Policy Evaluation';
+            } else {
+                // LEGACY: Object return (DecisionResult)
+                const legacy = evaluation as any;
+                decisionStr = legacy.decision || 'UNKNOWN';
+                decisionScore = legacy.score || 0;
+                decisionReason = legacy.reason || 'Policy Evaluation';
             }
 
             // C. Combine Risk Scores (Adaptive Scoring)
-            // Base Policy Score + Sequence Risk + Agent Reputation Modifier
-            let adaptiveScore = decisionScore + sequenceAnalysis.sequenceRisk + trustModifier;
+            const sequenceRisk = sequenceAnalysis?.sequenceRisk || 0;
+            const trustRisk = trustModifier || 0;
+            
+            let adaptiveScore = decisionScore + sequenceRisk + trustRisk;
             adaptiveScore = Math.max(0, Math.min(100, adaptiveScore)); // Clamp 0-100
 
             if (adaptiveScore !== decisionScore) {
                 logger.info(`[Governance] Adaptive Score Adjusted: ${decisionScore} -> ${adaptiveScore}`, {
-                    reason: `Seq: +${sequenceAnalysis.sequenceRisk}, Trust: ${trustModifier}`
+                    reason: `Seq: +${sequenceRisk}, Trust: ${trustRisk}`
                 });
                 decisionScore = adaptiveScore;
             }
@@ -350,28 +387,29 @@ export class EventProcessor {
                     ? rawDecision.reason 
                     : validProposal.explanation.summary;
 
-                // Log the decision first
-                await this.logDecision({
-                    decisionId,
-                    tenantId: validEvent.tenant_id,
-                    eventId: validEvent.event_id,
-                    policyName: policy.name || 'default',
-                    provider: this.provider.name,
-                    decision: 'ESCALATE',
-                    reason: escalationReason,
-                    metadata: { 
-                        ai_proposal: validProposal, 
-                        input_event: validEvent, 
-                        review_id: reviewId, 
-                        trace_id: traceId,
-                        latency_breakdown: breakdown,
-                        risk_score: decisionScore
-                    },
-                    riskScore: decisionScore,
-                    latency
-                });
+                // Create Envelope for ESCALATE (Provisional)
+                const envelope: DecisionEnvelope = {
+                    contract_version: "1.0.0",
+                    decision_id: decisionId,
+                    trace_id: traceId,
+                    timestamp: new Date().toISOString(),
+                    signature: { alg: "HMAC-SHA256", key_id: "abs-kernel-v0", value: "pending" },
+                    decision_type: 'GOVERNANCE',
+                    verdict: 'REQUIRE_APPROVAL',
+                    reason_code: 'RISK.EXCEEDED',
+                    reason_human: escalationReason + (this.interactive ? ' [Interactive: Suspended]' : ' [Pending Review]'),
+                    risk_score: decisionScore,
+                    authority: { type: 'POLICY', id: policy.name || 'default' },
+                    jurisdiction: 'ABS_KERNEL_DEFAULT',
+                    policy_id: policy.name || 'default',
+                    monitor_mode: false,
+                    required_actions: ['human_review']
+                };
 
-                // Create pending review
+                // Log the decision
+                await this.logDecision(envelope, { ...breakdown, latency });
+
+                // Create pending review record
                 await this.createPendingReview({
                     reviewId,
                     eventId: validEvent.event_id,
@@ -383,83 +421,91 @@ export class EventProcessor {
                 Metrics.recordDecision('escalate', latency, policy.name);
                 logger.info(`Decision ESCALATE: Pending human review`, { review_id: reviewId, event_id: validEvent.event_id });
 
-                // INTERACTIVE GATEKEEPER
-                // If we are in interactive mode, and the decision is not explicit ALLOW,
-                // or if it's ESCALATE, we suspend and wait (in a real CLI this might block or return suspended).
-                // For now, if interactive and ESCALATE, we return 'suspended' to let CLI prompt user.
-                if (this.interactive) {
-                     return {
-                        decision_id: decisionId,
-                        status: 'suspended', // CLI should catch this and prompt user
-                        decision: 'ESCALATE',
-                        provider: this.provider.name,
-                        latency_ms: latency,
-                        policy_id: policy.name,
-                        review_id: reviewId,
-                        trace_id: traceId
-                    };
-                }
-
                 return {
-                    decision_id: decisionId,
-                    status: 'pending_review',
-                    decision: 'ESCALATE',
-                    provider: this.provider.name,
-                    latency_ms: latency,
-                    policy_id: policy.name,
-                    review_id: reviewId,
-                    trace_id: traceId
+                    envelope,
+                    status: this.interactive ? 'suspended' : 'pending_review'
                 };
             }
             
-            // 5. IMMUTABLE DECISION LOG
+            // 5. IMMUTABLE DECISION ENVELOPE (ADR-008)
             const decisionId = uuidv4();
             const latency = Date.now() - start;
             breakdown.overhead_ms = latency - (breakdown.validation_ms + breakdown.idempotency_ms + breakdown.sanitization_ms + breakdown.llm_ms + breakdown.policy_ms);
 
+            // Construct Verdict & ReasonCode
+            let verdict: Verdict;
+            let reasonCode: ReasonCode;
+            
+            if (decisionStr === 'ALLOW') verdict = 'ALLOW';
+            else if (decisionStr === 'DENY') verdict = 'DENY';
+            else if (decisionStr === 'ESCALATE') verdict = 'REQUIRE_APPROVAL';
+            else verdict = 'REQUIRE_APPROVAL'; // Default fallthrough safety
+            
+            // Map legacy reasons/scores to ReasonCode (Heuristic if not provided by Policy)
+            if (partialEnvelope.reason_code) {
+                reasonCode = partialEnvelope.reason_code;
+            } else if (verdict === 'DENY' && decisionScore >= 80) {
+                reasonCode = 'RISK.EXCEEDED';
+            } else if (verdict === 'REQUIRE_APPROVAL') {
+                reasonCode = 'POLICY.VIOLATION'; 
+            } else {
+                reasonCode = 'OPS.MAINTENANCE'; // Valid Allow code
+            }
+
+            // Create Envelope
+            const envelope: DecisionEnvelope = {
+                contract_version: "1.0.0",
+                decision_id: decisionId,
+                trace_id: traceId,
+                timestamp: new Date().toISOString(),
+                // valid_until: ... (calculated by policy, optional)
+                
+                signature: {
+                    alg: "HMAC-SHA256",
+                    key_id: "abs-kernel-v0", // TODO: Get from env
+                    value: "pending" // Will be signed in logDecision
+                },
+
+                decision_type: 'GOVERNANCE',
+                verdict: verdict,
+                
+                reason_code: reasonCode,
+                reason_human: decisionReason + scannerNote,
+                risk_score: decisionScore,
+
+                authority: {
+                    type: 'POLICY',
+                    id: policy.name || 'default'
+                },
+
+                jurisdiction: 'ABS_KERNEL_DEFAULT',
+                policy_id: policy.name || 'default',
+                policy_version: 'v0.0.0', // TODO: Policy versioning
+                monitor_mode: this.mode === 'scanner',
+
+                constraints: [],
+                required_actions: verdict === 'REQUIRE_APPROVAL' ? ['human_review'] : []
+            };
+
             try {
                 const dbStart = Date.now();
-                await this.logDecision({
-                    decisionId,
-                    tenantId: validEvent.tenant_id,
-                    eventId: validEvent.event_id,
-                    policyName: policy.name || 'default',
-                    provider: this.provider.name,
-                    decision: decisionStr, // Log REAL intent
-                    reason: decisionReason + scannerNote,
-                    metadata: { 
-                        ai_proposal: validProposal, 
-                        input_event: validEvent, 
-                        scanner_override: executionStatus !== decisionStr,
-                        risk_score: decisionScore,
-                        trace_id: traceId,
-                        latency_breakdown: { ...breakdown, db_ms: Date.now() - dbStart } // Capture final DB write time
-                    },
-                    riskScore: decisionScore,
-                    executionStatus: executionStatus, // Pass actual status
-                    latency
-                });
+                await this.logDecision(envelope, { ...breakdown, db_ms: Date.now() - dbStart });
 
                 Metrics.recordDecision(
-                    decisionStr.toLowerCase() as any,
+                    verdict.toLowerCase() as any,
                     latency,
                     policy.name
                 );
 
-                logger.info(`Decision Logged: ${decisionStr}`, { 
+                logger.info(`Decision Logged: ${verdict}`, { 
                     executed_as: executionStatus, 
                     latency_ms: latency,
                     breakdown 
                 });
 
                 return {
-                    decision_id: decisionId,
-                    status: 'processed',
-                    decision: executionStatus,
-                    provider: this.provider.name,
-                    latency_ms: latency,
-                    policy_id: policy.name,
-                    trace_id: traceId
+                    envelope,
+                    status: 'processed'
                 };
             } catch (err: any) {
                 // Handle Race Condition (Unique Constraint Violation)
@@ -476,13 +522,25 @@ export class EventProcessor {
 
                     if (existing) {
                         const logData = JSON.parse(existing.full_log_json || '{}');
-                        return {
+                        const envelope: DecisionEnvelope = logData.contract_version ? logData : {
+                            contract_version: "1.0.0",
                             decision_id: existing.decision_id,
-                            status: 'processed_duplicate',
-                            decision: logData.decision || existing.execution_status,
-                            provider: 'race_condition_winner',
-                            latency_ms: latency,
-                            trace_id: traceId
+                            trace_id: traceId,
+                            timestamp: new Date().toISOString(),
+                            signature: { alg: "HMAC-SHA256", key_id: "legacy", value: "cached" },
+                            decision_type: 'GOVERNANCE',
+                            verdict: existing.execution_status as any,
+                            reason_code: 'OPS.RATE_LIMIT',
+                            reason_human: 'Race Condition Winner',
+                            risk_score: 0,
+                            authority: { type: 'SYSTEM', id: 'race-winner' },
+                            policy_id: 'unknown',
+                            monitor_mode: false
+                        };
+
+                        return {
+                            envelope,
+                            status: 'processed_duplicate'
                         };
                     }
                 }
@@ -499,49 +557,48 @@ export class EventProcessor {
         }
     }
 
-    private async logDecision(params: {
-        decisionId: string;
-        tenantId: string;
-        eventId: string;
-        policyName: string;
-        provider: string;
-        decision: string;
-        reason: string;
-        metadata: object;
-        riskScore?: number;
-        executionStatus?: string;
-        latency: number;
-    }): Promise<{ success: boolean }> {
+    private async logDecision(envelope: DecisionEnvelope, breakdown: any): Promise<{ success: boolean }> {
         try {
-
-
             // 1. Fetch Previous Signature (for Chain)
             const [prevRow] = await this.db.all<{ signature: string }>(
                 `SELECT signature FROM decision_logs ORDER BY timestamp DESC LIMIT 1`
             );
             const prevHash = prevRow?.signature || '0000000000000000000000000000000000000000000000000000000000000000'; // Genesis
 
-            // 2. Compute HMAC Chain
-            const fullLogJson = JSON.stringify(params.metadata);
-            const chainComponents = prevHash + fullLogJson;
-            const signature = signer.sign(chainComponents);
+            // 2. Compute HMAC Chain (Sign the Envelope Content + PrevHash)
+            const canonicalContent = JSON.stringify({
+                // Fields that must be immutable
+                id: envelope.decision_id,
+                verdict: envelope.verdict,
+                reason: envelope.reason_code,
+                score: envelope.risk_score,
+                auth: envelope.authority,
+                ts: envelope.timestamp,
+                prev: prevHash
+            });
+            
+            const signature = signer.sign(canonicalContent);
+            envelope.signature.value = signature; // Seal the envelope
 
+            const fullLogJson = JSON.stringify(envelope);
+
+            // 3. Persist
             const result = await this.db.run(`
                 INSERT INTO decision_logs (decision_id, tenant_id, event_id, policy_name, provider, decision, risk_score, execution_status, execution_response, full_log_json, timestamp, signature)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
-                params.decisionId,
-                params.tenantId,
-                params.eventId,
-                params.policyName,
-                params.provider,
-                params.decision,
-                params.riskScore || 0,
-                params.executionStatus || params.decision,
-                params.reason,
-                fullLogJson,
-                new Date().toISOString(),
-                signature
+                envelope.decision_id, // decision_id
+                'default', // tenant_id (TODO: extract from trace_id or context)
+                envelope.trace_id, // event_id mapping
+                envelope.policy_id, // policy_name
+                'abs-kernel', // provider
+                envelope.verdict, // decision
+                envelope.risk_score, // risk_score
+                envelope.verdict, // execution_status
+                envelope.reason_human, // execution_response
+                fullLogJson, // full_log_json
+                envelope.timestamp, // timestamp
+                signature // signature
             );
             return { success: result.isSuccess !== false };
         } catch (error) {

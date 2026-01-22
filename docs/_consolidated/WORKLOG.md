@@ -341,3 +341,23 @@
 - **Validation**:
   - CHI integration tests passed.
   - VSIX generated successfully.
+
+## 2026-01-22 — Implementation: ADR-008 Decision Envelope v1 (Core)
+- **Status**: ✅ IMPLEMENTED (Hybrid Mode)
+- **Changes**:
+  - `src/core/schemas.ts`: Added `DecisionEnvelopeSchema`, `Verdict`, `ReasonCode` (Zod).
+  - `src/core/interfaces.ts`: Updated `PolicyEngine` to return `Partial<DecisionEnvelope>` (or Legacy String).
+  - `src/core/processor.ts`: 
+    - Refactored `process()` to construct full `DecisionEnvelope`.
+    - Implemented Adapter Layer for legacy policies (String -> Envelope).
+    - Updated `logDecision` to chain HMAC signatures on the full Envelope.
+  - `src/api/worker.ts`: 
+    - Updated to consume `envelope.verdict`.
+    - **IMPLEMENTED** `ExecutionReceipt` generation and logging.
+    - Added `ApplicabilityGate` validation logic (currently permissive for MVP).
+- **Validation**:
+  - Compiles with strict mode (verified via `tsc`).
+  - Backward compatibility maintained for string-returning policies.
+- **Artifacts**:
+  - [ADR-008 Final](docs/_consolidated/decisions/ADR-008-public-decision-contract.md): Includes Forensic Identity & Trusted Time Rules.
+  - [AUDIT-008](docs/_consolidated/AUDIT-008-REPORT.md): Passed with NIST AU-3 alignment.
