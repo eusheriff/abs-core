@@ -26,7 +26,7 @@ import {
   resolveConfig,
   DEFAULT_PROFILE,
   DEFAULT_WORKSPACE,
-} from '../layers';
+} from '../layers/config-core';
 
 // ============================================
 // CHI POLICY
@@ -236,24 +236,14 @@ export class CHIPolicy implements Policy {
 
 /**
  * Create a CHI policy with workspace configuration
+ * Note: For Worker environments, workspace loading is not supported (no FS).
+ * Use createCHIPolicyWithProfile for custom configurations in Workers.
  */
 export function createCHIPolicy(
-  workspacePath?: string,
   profile?: ABSProfile,
+  workspace?: ABSWorkspace,
 ): CHIPolicy {
-  // Load workspace config if path provided
-  let workspace = DEFAULT_WORKSPACE;
-  if (workspacePath) {
-    try {
-      // Import lazily to avoid circular deps
-      const { loadWorkspace } = require('../layers');
-      workspace = loadWorkspace(workspacePath);
-    } catch (e) {
-      console.warn('[CHI] Could not load workspace config:', e);
-    }
-  }
-  
-  return new CHIPolicy(profile || DEFAULT_PROFILE, workspace);
+  return new CHIPolicy(profile || DEFAULT_PROFILE, workspace || DEFAULT_WORKSPACE);
 }
 
 /**
