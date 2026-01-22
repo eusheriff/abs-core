@@ -50,9 +50,7 @@ flowchart LR
 ### 1. Install ABS CLI
 
 ```bash
-npm install -g @abs/core
-# or
-npx @abs/core scan
+npm install @oconnector/abs-sdk-typescript
 ```
 
 ### 2. Configure a Policy (Profile Layer)
@@ -118,16 +116,18 @@ See [SECURITY.md](docs/SECURITY.md) for the full threat model.
 ## 📦 Commercial & Licensing
 
 - **ABS Scanner (CLI/SDK)**: Open Source (**Apache 2.0**). Free forever.
-- **ABS Runtime (Enforcement)**: Enterprise/Volume-based licensing for production fleets.
+- **ABS Runtime (@oconnector/abs-sdk-typescript)**: Official Runtime SDK. Apache 2.0.
+- **ABS Enterprise**: Volume-based licensing for production fleets (SLA, Support).
 
-[Contact Sales](https://abscore.app) for Enterprise Runtime details.
+[Contact Sales](https://abscore.app) for Enterprise details.
 
 ---
 
 ### Code Map
 
 - `packages/core`: The ABS Kernel.
-- `packages/vscode`: VS Code Extension (Connector).
-- `packages/scanner`: Lightweight analysis SDK.
+- `packages/sdk-typescript`: Official Runtime SDK (Node.js).
+- `packages/vscode`: VS Code Extension.
+- `packages/scanner`: Legacy Analysis SDK.
 
 &copy; 2026 OConnector Technology.
