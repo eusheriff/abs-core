@@ -4,6 +4,7 @@ import { BotOperationalPolicy } from './policy-bot-operational';
 import { WhatsAppBotPolicy } from './policy-whatsapp-bot';
 import { DynamicPolicy } from './dynamic-policy';
 import { PolicyRule } from './schemas/policy-definition';
+import { CHIPolicy } from '../policies/chi-policy';
 
 // Re-export types for convenience
 export type { PolicyEngine, PolicyResult, Policy, DecisionResult } from './interfaces';
@@ -18,6 +19,9 @@ export class PolicyRegistry {
         this.register('whatsapp', new WhatsAppBotPolicy() as unknown as Policy);
         // Generic bot policy (5 rules)
         this.register('bot', new BotOperationalPolicy() as any);
+        
+        // CHI Policy (ADR-004) - Default governance layer
+        this.register('chi', new CHIPolicy() as any);
     }
 
     static register(eventTypePrefix: string, policy: Policy) {
