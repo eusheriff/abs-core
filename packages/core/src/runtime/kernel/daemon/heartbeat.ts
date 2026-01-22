@@ -1,7 +1,7 @@
 import { ABSContext } from '../../../core/context';
 import { HeartbeatResult } from '../../../core/runtime-pack';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 interface HeartbeatState {
   startTime: Date;

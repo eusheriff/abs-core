@@ -1,6 +1,6 @@
 import { serve } from '@hono/node-server';
 import { config } from 'dotenv';
-import path from 'path';
+import path from 'node:path';
 import { LocalDBAdapter } from '../infra/db-local';
 import { setDB, initSchema } from '../infra/db';
 import { createApp } from './factory';

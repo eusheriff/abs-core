@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { DatabaseAdapter } from './db-adapter';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 export class SQLiteAdapter implements DatabaseAdapter {
     private db: Database.Database;

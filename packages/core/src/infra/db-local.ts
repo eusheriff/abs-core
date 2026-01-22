@@ -1,5 +1,5 @@
 import type Database from 'better-sqlite3';
-import path from 'path';
+import path from 'node:path';
 import { DatabaseAdapter } from './db-adapter';
 
 export class LocalDBAdapter implements DatabaseAdapter {
