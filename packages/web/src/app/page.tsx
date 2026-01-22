@@ -55,7 +55,7 @@ export default function Home() {
         <div className="flex flex-col md:flex-row items-center justify-center gap-4">
           <div className="flex items-center gap-0 rounded-lg bg-zinc-900 border border-zinc-800 p-1 pl-4 pr-1">
             <span className="text-zinc-400 font-mono text-sm mr-4">
-              $ npm install @abs/scan
+              $ npm install @oconnector/abs-sdk-typescript
             </span>
             <button
               className="bg-zinc-800 hover:bg-zinc-700 text-white p-2 rounded transition-colors"
