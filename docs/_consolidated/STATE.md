@@ -12,38 +12,38 @@ constraints:
   forbidden_paths: ["/etc/*", "*.pem", "*.key"]
 ---
 
-# STATE — ABS Core
+# STATE — ABS Kernel
 
-> **Status**: 🟢 Stable (v2.7.0 + Crypto Audit)
-> **Mode**: Governed (Antigravity Runtime v1.0.0)
-> **Focus**: Security, Orchestration, Policy Depth
+> **Status**: 🟢 Architecture Freeze (v0.1.0 Kernel + CHI)
+> **Mode**: Governed (ABS Kernel v0.1.0)
+> **Focus**: Governance, CHI Introspection, Layer Separation
 
 ## Current Context
-We have successfully launched ABS Core v2.7.0 and are now in **Phase 12: Enterprise Hardening**.
-The recent focus was on **Cryptographic Audit**, ensuring all decision logs are signed with HMAC-SHA256 for tamper evidence.
+We have successfully **rebranded to ABS Kernel** and implemented the **Cognitive Host Interface (CHI)** (ADR-004).
+The system is now structured around the "ABS Triangle": Governance (Kernel), Cognition (CHI), and Layers (Profile/Workspace).
+The VS Code extension has been updated to v0.1.0 to reflect this new architecture.
 
 ## Recent Achievements
+- [x] **Architecture**: Implemented **CHI** (Cognitive Host Interface) for introspection (ADR-004).
+- [x] **Security**: Formalized **Layer Separation** (Kernel > Profile > Workspace > Input) (ADR-005).
+- [x] **Rebranding**: Renamed "Antigravity Runtime" to **ABS Kernel** across config/docs.
+- [x] **CLI**: Renamed `agr` to `abs`.
+- [x] **Integration**: Wired up `CHIPolicy` to the main Policy Registry.
+- [x] **Distribution**: Bumped VS Code Extension to **v0.1.0** and generated VSIX.
+- [x] **Compliance**: Extension branding updated to "Authorized Agent Governance".
 - [x] **Launch**: Released v2.7.0 (Scanner, Runtime, VS Code Ext).
-- [x] **Marketing**: Landing Page, Demo Script, Announcement.
 - [x] **Crypto Audit**: Implemented `CryptoService` (HMAC-SHA256) and verified with tests.
-- [x] **Advanced Policy**: Implemented "Risk Scoring" (0-100) and Thresholds (30/80).
-- [x] **Semantic Telemetry (v3.1)**: Implemented `IntentTracer` and `SessionManager` (Verified).
-- [x] **Audit Remediation (P0)**: Standardized Licensing (Apache-2.0), Security Model (Hash Chain), and Qualified Marketing Claims.
-- [x] **Fix VS Code Scan**: Resolved 404/401 API errors (v0.0.11) and added Smart Scan (v0.0.12).
-- [x] **Marketplace DNS**: Verified `abscore.app` domain for Visual Studio Marketplace.
 
 ## Active Decisions (ADR)
-- **ADR-005 (Implicit)**: Use `node:crypto` via `nodejs_compat` for Workers to ensure cross-runtime signing compatibility.
-- **ADR-006 (Implicit)**: VS Code "Smart Scan" (limits to 100 config files) vs MCP "Enterprise" (unlimited local).
+- **ADR-004**: Cognitive Host Interface (CHI) — Gov ≠ Exec.
+- **ADR-005**: Layer Separation & Trust Hierarchy.
+- **ADR-006 (Implicit)**: VS Code "Smart Scan" (limits to 100 config files).
 
 ## Roadmap (Next 3 Steps)
 - **Immediate**:
-  - [x] ~~Audit Remediation (P0/P1/P2/P3)~~ (DONE)
-  - [x] **Formalize `abs supervise`** (CLI)
-  - [x] **Deploy to Production** (Workers) - `abscore.app` ✅
-  - [x] **Implement VS Code Sidebar GUI** (ArmorIQ Style)
-  - [x] **Verify VS Code Extension** (User Acceptance - Scan OK)
-  - [x] **Publish VS Code Extension** (Ready for Upload v0.0.16)
+  - [ ] **Publish VS Code Extension v0.1.0** to Marketplace.
+  - [ ] **Deploy ABS Kernel** (Backend) with CHI enabled.
+  - [ ] **Implement Risk Forecast** integration for CHI.
 
 ## Known Risks
 - **Key Management**: `ABS_SECRET_KEY` rotation is not yet automated.

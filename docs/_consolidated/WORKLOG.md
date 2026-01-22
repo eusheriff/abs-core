@@ -321,3 +321,23 @@
   - **Artifact**: `packages/vscode/abs-vscode-0.0.16.vsix`.
 
 
+
+## 2026-01-22 — v0.1.0: ABS Kernel Rebrand & CHI Architecture
+- **Status**: ✅ IMPLEMENTED
+- **Context**: 
+  - Strategic pivot from "Gatekeeper" to "Authorized Agent Governance".
+  - Need to prevent "ABS becoming an Agent Framework" (ADR-004).
+- **Key Changes**:
+  - **Rebrand**: `AntigravityRuntime` -> **`ABSKernel`**. CLI `agr` -> **`abs`**.
+  - **ADR-004 (CHI)**: Implemented Cognitive Host Interface.
+    - `src/chi/`: Introspection engine (Intent Detection, Risk Inference).
+    - `src/policies/chi-policy.ts`: Governance layer that enforces CHI constraints.
+  - **ADR-005 (Layers)**: Implemented Trust Hierarchy.
+    - `src/layers/`: Config resolution (Kernel > Profile > Workspace).
+  - **VS Code Extension**: Bumped to **v0.1.0**.
+    - Rebranded to "ABS Kernel".
+    - Updated description to emphasize WAL and Governance.
+    - Generated `abs-vscode-0.1.0.vsix` for marketplace updates.
+- **Validation**:
+  - CHI integration tests passed.
+  - VSIX generated successfully.
