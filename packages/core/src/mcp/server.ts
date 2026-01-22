@@ -7,7 +7,7 @@ import { EventProcessor, ProcessorConfig } from '../core/processor';
 import { DatabaseAdapter } from '../infra/db-adapter';
 import { createABSContext, ABSContext } from '../core/context';
 import { RuntimePackRegistry } from '../core/runtime-pack';
-import { AntigravityRuntime } from '../runtime/antigravity';
+import { ABSKernel } from '../runtime/kernel';
 import { createLogger } from '../core/logger';
 
 // Tool Input Schemas
@@ -54,7 +54,7 @@ export async function createMCPServer(db: DatabaseAdapter, config?: ProcessorCon
         version: '2.7.0'
     });
 
-    // --- Antigravity Runtime Pack Integration ---
+    // --- ABS Kernel Integration ---
     const logger = options.logger || createLogger('abs-mcp');
     const absContext = createABSContext(
         db,
@@ -64,12 +64,12 @@ export async function createMCPServer(db: DatabaseAdapter, config?: ProcessorCon
         process.cwd()
     );
     
-    const antigravityRuntime = new AntigravityRuntime({ workspacePath: process.cwd() });
-    await antigravityRuntime.init(absContext);
+    const absKernel = new ABSKernel({ workspacePath: process.cwd() });
+    await absKernel.init(absContext);
     
-    // Register Antigravity tools with MCP server
-    const agrTools = antigravityRuntime.getTools();
-    for (const tool of agrTools) {
+    // Register ABS Kernel tools with MCP server
+    const kernelTools = absKernel.getTools();
+    for (const tool of kernelTools) {
         server.tool(
             tool.name,
             tool.description,
@@ -95,7 +95,7 @@ export async function createMCPServer(db: DatabaseAdapter, config?: ProcessorCon
             }
         );
     }
-    logger.info(`[ABS] Registered ${agrTools.length} Antigravity tools`);
+    logger.info(`[ABS] Registered ${kernelTools.length} Antigravity tools`);
     // --- End Antigravity Runtime Pack ---
 
     // Tool: abs_evaluate

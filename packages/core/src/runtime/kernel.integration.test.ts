@@ -1,7 +1,7 @@
 /**
- * AGR Integration Tests
+ * ABS Kernel Integration Tests
  * 
- * Tests for Antigravity Runtime Pack functionality:
+ * Tests for ABS Kernel functionality:
  * - WAL write/verify
  * - Heartbeat
  * - Safe mode
@@ -13,7 +13,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
-import { AntigravityRuntime } from '../runtime/antigravity';
+import { ABSKernel } from '../runtime/kernel';
 import { createABSContext, ABSContext } from '../core/context';
 import { Logger } from '../core/logger';
 
@@ -35,8 +35,8 @@ function parseABSResponse(formatted: string): { header: any; body: any } {
   };
 }
 
-describe('Antigravity Runtime Pack', () => {
-  let runtime: AntigravityRuntime;
+describe('ABS Kernel', () => {
+  let runtime: ABSKernel;
   let ctx: ABSContext;
   const testWorkspace = path.join(__dirname, '__test_workspace__');
   const consolidatedDir = path.join(testWorkspace, '_consolidated');
@@ -53,7 +53,7 @@ describe('Antigravity Runtime Pack', () => {
     ctx = createABSContext(mockDb, logger, { mode: 'runtime' }, 'test-tenant', testWorkspace);
 
     // Create runtime
-    runtime = new AntigravityRuntime({ workspacePath: testWorkspace });
+    runtime = new ABSKernel({ workspacePath: testWorkspace });
     await runtime.init(ctx);
   });
 
@@ -69,7 +69,7 @@ describe('Antigravity Runtime Pack', () => {
 
   describe('Initialization', () => {
     it('should initialize runtime with correct name and version', () => {
-      expect(runtime.name).toBe('antigravity');
+      expect(runtime.name).toBe('abs-kernel');
       expect(runtime.version).toBe('1.0.0');
     });
 
@@ -95,7 +95,7 @@ describe('Antigravity Runtime Pack', () => {
       // Check governance header
       expect(header.abs).toBeDefined();
       expect(header.abs.verdict).toBe('ALLOW');
-      expect(header.abs.policy).toBe('antigravity_integrity');
+      expect(header.abs.policy).toBe('kernel_integrity');
       
       // Check body
       expect(body.success).toBe(true);
@@ -202,7 +202,7 @@ describe('Antigravity Runtime Pack', () => {
       
       // Check governance header
       expect(header.abs.verdict).toBe('ALLOW');
-      expect(header.abs.policy).toBe('antigravity_integrity');
+      expect(header.abs.policy).toBe('kernel_integrity');
       
       // Check body
       expect(body.success).toBe(true);

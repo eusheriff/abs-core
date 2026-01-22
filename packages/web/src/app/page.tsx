@@ -8,6 +8,7 @@ import {
   X,
   ArrowRight,
 } from "lucide-react";
+import IdeSupport from "../components/IdeSupport";
 
 export default function Home() {
   return (
@@ -72,7 +73,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Protection Everywhere */}
       <section className="px-6 max-w-6xl mx-auto mb-32">
         <div className="grid md:grid-cols-3 gap-6">
           <div className="md:col-span-2 rounded-xl border border-zinc-800 bg-zinc-900/30 p-8 flex flex-col justify-center">
@@ -81,7 +81,7 @@ export default function Home() {
               Install the official extension to supervise your AI Coding Agents
               (Cursor, Copilot) directly in the editor.
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-4 mb-8">
               <a
                 href="https://marketplace.visualstudio.com/items?itemName=oconnector.abs-vscode"
                 className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2"
@@ -100,6 +100,8 @@ export default function Home() {
                 View Source
               </a>
             </div>
+            
+            <IdeSupport />
           </div>
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-8 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center mb-4">

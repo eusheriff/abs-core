@@ -1,1 +1,1 @@
-export { AntigravityRuntime, type AntigravityRuntimeOptions } from './antigravity/index';
+export { ABSKernel, type ABSKernelOptions } from './kernel/index';

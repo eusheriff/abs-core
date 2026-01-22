@@ -68,13 +68,13 @@ To avoid confusion, this project is explicitly:
 
 ---
 
-## 🚀 New: Antigravity Runtime (AGR)
+## 🚀 New: ABS Kernel
 
-The **Antigravity Runtime Pack** provides governed autonomy for AI coding agents:
+The **ABS Kernel** provides governed autonomy for AI coding agents:
 
 ```
 ┌─────────────────────────────────────────────┐
-│  ABS GOVERNANCE LAYER  ← ← ← ← ← ← ← ← ← ← │  ★ AGR acts here
+│  ABS GOVERNANCE LAYER  ← ← ← ← ← ← ← ← ← ← │  ★ ABS Kernel
 │  ┌───────────────────────────────────────┐  │
 │  │  IDE (VS Code, Cursor, Claude Code)   │  │
 │  │  ┌─────────────────────────────────┐  │  │
@@ -84,7 +84,7 @@ The **Antigravity Runtime Pack** provides governed autonomy for AI coding agents
 └─────────────────────────────────────────────┘
 ```
 
-### AGR Features
+### ABS Kernel Features
 | Feature | Description |
 |---------|-------------|
 | **WAL (Write-Ahead Log)** | Immutable audit log with SHA-256 hash chain |
@@ -93,20 +93,20 @@ The **Antigravity Runtime Pack** provides governed autonomy for AI coding agents
 | **5 MCP Tools** | `abs_wal_append`, `abs_wal_verify`, `abs_runtime_heartbeat`, `abs_runtime_safe_mode`, `abs_state_materialize` |
 
 ### Governance Header
-Every AGR response includes a structured header:
+Every kernel response includes a structured header:
 ```json
-{"abs":{"mode":"governed","verdict":"ALLOW","policy":"antigravity_integrity","risk_score":5}}
+{"abs":{"mode":"governed","verdict":"ALLOW","policy":"kernel_integrity","risk_score":5}}
 ---
 {response body}
 ```
 
-### AGR CLI
+### ABS CLI
 ```bash
-npm run agr run      # Start governed session
-npm run agr status   # Check runtime health
-npm run agr verify   # Verify WAL integrity
-npm run agr freeze   # Materialize WAL to STATE.md
-npm run agr audit    # Display decision log
+npm run abs run      # Start governed session
+npm run abs status   # Check runtime health
+npm run abs verify   # Verify WAL integrity
+npm run abs freeze   # Materialize WAL to STATE.md
+npm run abs audit    # Display decision log
 ```
 
 ---

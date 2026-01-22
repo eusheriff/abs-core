@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
- * AGR CLI - Antigravity Runtime Command Line Interface
+ * ABS CLI - ABS Kernel Command Line Interface
  * 
  * Usage:
- *   agr run     - Start governed session
- *   agr freeze  - Snapshot memory (materialize WAL to STATE.md)
- *   agr audit   - Replay and display decision logs
- *   agr verify  - Verify WAL integrity
- *   agr status  - Show runtime health
+ *   abs run     - Start governed session
+ *   abs freeze  - Snapshot memory (materialize WAL to STATE.md)
+ *   abs audit   - Replay and display decision logs
+ *   abs verify  - Verify WAL integrity
+ *   abs status  - Show runtime health
  */
 
 import { Command } from 'commander';
@@ -18,8 +18,8 @@ import * as crypto from 'crypto';
 const program = new Command();
 
 program
-  .name('agr')
-  .description('Antigravity Runtime CLI - Governed Autonomy for AI Agents')
+  .name('abs')
+  .description('ABS Kernel CLI - Governed Autonomy for AI Agents')
   .version('1.0.0');
 
 // Helper: Get workspace paths
@@ -40,10 +40,10 @@ function readWAL(walPath: string): any[] {
   return content.split('\n').filter(l => l.trim()).map(l => JSON.parse(l));
 }
 
-// Command: agr run
+// Command: abs run
 program
   .command('run')
-  .description('Start a governed session (initialize AGR)')
+  .description('Start a governed session (initialize ABS Kernel)')
   .option('-w, --workspace <path>', 'Workspace path', process.cwd())
   .action((options) => {
     const paths = getPaths(options.workspace);
@@ -72,7 +72,7 @@ constraints:
 
 # STATE
 
-> Initialized by AGR CLI at ${new Date().toISOString()}
+> Initialized by ABS CLI at ${new Date().toISOString()}
 `;
       fs.writeFileSync(paths.state, initialState);
       console.log(`✅ Created ${paths.state}`);
@@ -81,14 +81,14 @@ constraints:
     // Check WAL
     const entries = readWAL(paths.wal);
     
-    console.log('\n🚀 Antigravity Runtime Session Started');
+    console.log('\n🚀 ABS Kernel Session Started');
     console.log(`   Workspace: ${options.workspace}`);
     console.log(`   WAL Entries: ${entries.length}`);
     console.log(`   Mode: governed`);
     console.log('\n   Use MCP tools or agr commands to interact.\n');
   });
 
-// Command: agr freeze
+// Command: abs freeze
 program
   .command('freeze')
   .description('Snapshot memory (materialize WAL to STATE.md)')
@@ -130,7 +130,7 @@ program
     console.log(`   Context Lock: ${lastHash.slice(0, 16)}...`);
   });
 
-// Command: agr audit
+// Command: abs audit
 program
   .command('audit')
   .description('Replay and display decision logs')
@@ -146,7 +146,7 @@ program
       return;
     }
     
-    console.log(`\n📋 Antigravity Audit Log (${entries.length} total, showing last ${limit})\n`);
+    console.log(`\n📋 ABS Audit Log (${entries.length} total, showing last ${limit})\n`);
     console.log('─'.repeat(80));
     
     entries.slice(-limit).forEach((e, i) => {
@@ -160,7 +160,7 @@ program
     });
   });
 
-// Command: agr verify
+// Command: abs verify
 program
   .command('verify')
   .description('Verify WAL hash chain integrity')
@@ -211,7 +211,7 @@ program
     }
   });
 
-// Command: agr status
+// Command: abs status
 program
   .command('status')
   .description('Show runtime health status')
@@ -223,7 +223,7 @@ program
     const walExists = fs.existsSync(paths.wal);
     const entries = readWAL(paths.wal);
     
-    console.log('\n📊 Antigravity Runtime Status\n');
+    console.log('\n📊 ABS Kernel Status\n');
     console.log(`   Workspace:     ${options.workspace}`);
     console.log(`   STATE.md:      ${stateExists ? '✅ exists' : '❌ missing'}`);
     console.log(`   WORKLOG.wal:   ${walExists ? '✅ exists' : '❌ missing'}`);

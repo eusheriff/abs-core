@@ -5,15 +5,15 @@ import { runHeartbeat, initHeartbeat, setSafeMode, isSafeMode } from './daemon';
 import { materializeState } from './materializer';
 import { absAllow, absDeny, absSafeMode } from '../../core/governance-header';
 
-export interface AntigravityRuntimeOptions {
+export interface ABSKernelOptions {
   workspacePath?: string;
   heartbeatIntervalMs?: number;
 }
 
 /**
- * Antigravity Runtime Pack
+ * ABS Kernel
  * 
- * Provides governed autonomy capabilities:
+ * Core runtime for governed autonomy:
  * - WAL (Write-Ahead Log) with hash-chain integrity
  * - Heartbeat daemon for health monitoring
  * - Safe mode (kill switch)
@@ -21,15 +21,15 @@ export interface AntigravityRuntimeOptions {
  * All operations go through ABS policy engine.
  * All responses include ABS Governance Header.
  */
-export class AntigravityRuntime implements RuntimePack {
-  name = 'antigravity';
+export class ABSKernel implements RuntimePack {
+  name = 'abs-kernel';
   version = '1.0.0';
   
   private ctx?: ABSContext;
   private heartbeatInterval?: NodeJS.Timeout;
-  private options: AntigravityRuntimeOptions;
+  private options: ABSKernelOptions;
   
-  constructor(options: AntigravityRuntimeOptions = {}) {
+  constructor(options: ABSKernelOptions = {}) {
     this.options = {
       heartbeatIntervalMs: 60000, // 1 minute default
       ...options,
@@ -52,15 +52,15 @@ export class AntigravityRuntime implements RuntimePack {
       this.options.heartbeatIntervalMs
     );
     
-    ctx.logger.info('[AGR] Antigravity Runtime initialized');
-    ctx.logger.info(`[AGR] Registered ${this.getTools().length} Antigravity tools`);
+    ctx.logger.info('[ABS-K] ABS Kernel initialized');
+    ctx.logger.info(`[ABS-K] Registered ${this.getTools().length} kernel tools`);
   }
   
   async shutdown(): Promise<void> {
     if (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval);
     }
-    this.ctx?.logger.info('[AGR] Antigravity Runtime shutdown');
+    this.ctx?.logger.info('[ABS-K] ABS Kernel shutdown');
   }
   
   async heartbeat(): Promise<HeartbeatResult> {
@@ -95,7 +95,7 @@ export class AntigravityRuntime implements RuntimePack {
           }
           const result = await walWrite(input as any, ctx);
           return absAllow(result, {
-            policy: 'antigravity_integrity',
+            policy: 'kernel_integrity',
             walEntry: result.hash?.slice(0, 8),
             traceId: ctx.correlationId,
           }).formatted;
@@ -112,13 +112,13 @@ export class AntigravityRuntime implements RuntimePack {
           const result = await walVerify(ctx);
           if (result.valid) {
             return absAllow(result, {
-              policy: 'antigravity_integrity',
+              policy: 'kernel_integrity',
               riskScore: 0,
               traceId: ctx.correlationId,
             }).formatted;
           } else {
             return absDeny('WAL integrity compromised', {
-              policy: 'antigravity_integrity',
+              policy: 'kernel_integrity',
               riskScore: 100,
               traceId: ctx.correlationId,
             }).formatted;
@@ -127,7 +127,7 @@ export class AntigravityRuntime implements RuntimePack {
       },
       {
         name: 'abs_runtime_heartbeat',
-        description: 'Get Antigravity Runtime health status',
+        description: 'Get ABS Kernel health status',
         inputSchema: {
           type: 'object',
           properties: {},
@@ -185,7 +185,7 @@ export class AntigravityRuntime implements RuntimePack {
           }
           const result = await materializeState(ctx);
           return absAllow(result, {
-            policy: 'antigravity_integrity',
+            policy: 'kernel_integrity',
             walEntry: result.newContextLock?.slice(0, 8),
             traceId: ctx.correlationId,
           }).formatted;
