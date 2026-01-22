@@ -5,6 +5,10 @@ import { z } from 'zod';
 // Import core ABS types and processor
 import { EventProcessor, ProcessorConfig } from '../core/processor';
 import { DatabaseAdapter } from '../infra/db-adapter';
+import { createABSContext, ABSContext } from '../core/context';
+import { RuntimePackRegistry } from '../core/runtime-pack';
+import { AntigravityRuntime } from '../runtime/antigravity';
+import { createLogger } from '../core/logger';
 
 // Tool Input Schemas
 const EvaluateInputSchema = z.object({
@@ -49,6 +53,50 @@ export async function createMCPServer(db: DatabaseAdapter, config?: ProcessorCon
         name: 'abs-governance',
         version: '2.7.0'
     });
+
+    // --- Antigravity Runtime Pack Integration ---
+    const logger = options.logger || createLogger('abs-mcp');
+    const absContext = createABSContext(
+        db,
+        logger,
+        { mode: isEnterprise ? 'runtime' : 'scanner' },
+        'default',
+        process.cwd()
+    );
+    
+    const antigravityRuntime = new AntigravityRuntime({ workspacePath: process.cwd() });
+    await antigravityRuntime.init(absContext);
+    
+    // Register Antigravity tools with MCP server
+    const agrTools = antigravityRuntime.getTools();
+    for (const tool of agrTools) {
+        server.tool(
+            tool.name,
+            tool.description,
+            tool.inputSchema as any,
+            async (args: any) => {
+                try {
+                    const result = await tool.handler(args, absContext);
+                    return {
+                        content: [{
+                            type: 'text',
+                            text: JSON.stringify(result, null, 2)
+                        }]
+                    };
+                } catch (error) {
+                    return {
+                        content: [{
+                            type: 'text',
+                            text: JSON.stringify({ error: String(error) })
+                        }],
+                        isError: true
+                    };
+                }
+            }
+        );
+    }
+    logger.info(`[ABS] Registered ${agrTools.length} Antigravity tools`);
+    // --- End Antigravity Runtime Pack ---
 
     // Tool: abs_evaluate
     server.tool(

@@ -1,7 +1,21 @@
+---
+schema_version: "1.0.0"
+session_id: "6e5d8194-1bc6-4f9c-bd5d-2c4085e05344"
+mode: "governed"
+context_lock: null
+current_objective:
+  id: "adr-002-implementation"
+  status: "in_progress"
+  owner: "antigravity-gemini"
+constraints:
+  allowed_tools: ["abs_evaluate", "abs_wal_append", "abs_wal_verify", "abs_runtime_heartbeat"]
+  forbidden_paths: ["/etc/*", "*.pem", "*.key"]
+---
+
 # STATE — ABS Core
 
 > **Status**: 🟢 Stable (v2.7.0 + Crypto Audit)
-> **Mode**: Enterprise Hardening
+> **Mode**: Governed (Antigravity Runtime v1.0.0)
 > **Focus**: Security, Orchestration, Policy Depth
 
 ## Current Context
