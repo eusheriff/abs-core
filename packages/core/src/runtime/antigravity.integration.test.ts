@@ -6,6 +6,8 @@
  * - Heartbeat
  * - Safe mode
  * - State materialization
+ * 
+ * All responses now include ABS Governance Header.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
@@ -20,6 +22,18 @@ const mockDb = {
   query: async () => [],
   execute: async () => ({ success: true }),
 } as any;
+
+/**
+ * Parse formatted ABS response (header + body)
+ * Format: {"abs":{...}}\n---\n{body}
+ */
+function parseABSResponse(formatted: string): { header: any; body: any } {
+  const parts = formatted.split('\n---\n');
+  return {
+    header: JSON.parse(parts[0]),
+    body: JSON.parse(parts[1]),
+  };
+}
 
 describe('Antigravity Runtime Pack', () => {
   let runtime: AntigravityRuntime;
@@ -71,30 +85,43 @@ describe('Antigravity Runtime Pack', () => {
   });
 
   describe('WAL Operations (Invariants I3, I5)', () => {
-    it('should append entry to WAL with hash chain', async () => {
+    it('should append entry to WAL with hash chain and return governance header', async () => {
       const tools = runtime.getTools();
       const walAppend = tools.find(t => t.name === 'abs_wal_append')!;
 
-      const result = await walAppend.handler({ entry: 'Test entry 1' }, ctx) as any;
+      const formatted = await walAppend.handler({ entry: 'Test entry 1' }, ctx) as string;
+      const { header, body } = parseABSResponse(formatted);
       
-      expect(result.success).toBe(true);
-      expect(result.entryId).toBeDefined();
-      expect(result.hash).toBeDefined();
-      expect(result.hash.length).toBe(64); // SHA-256 hex
+      // Check governance header
+      expect(header.abs).toBeDefined();
+      expect(header.abs.verdict).toBe('ALLOW');
+      expect(header.abs.policy).toBe('antigravity_integrity');
+      
+      // Check body
+      expect(body.success).toBe(true);
+      expect(body.entryId).toBeDefined();
+      expect(body.hash).toBeDefined();
+      expect(body.hash.length).toBe(64); // SHA-256 hex
     });
 
-    it('should verify WAL integrity', async () => {
+    it('should verify WAL integrity with governance header', async () => {
       const tools = runtime.getTools();
       const walVerify = tools.find(t => t.name === 'abs_wal_verify')!;
 
-      const result = await walVerify.handler({}, ctx) as any;
+      const formatted = await walVerify.handler({}, ctx) as string;
+      const { header, body } = parseABSResponse(formatted);
       
-      expect(result.valid).toBe(true);
-      expect(result.entriesChecked).toBeGreaterThan(0);
-      expect(result.errors).toEqual([]);
+      // Check governance header
+      expect(header.abs.verdict).toBe('ALLOW');
+      expect(header.abs.risk_score).toBe(0);
+      
+      // Check body
+      expect(body.valid).toBe(true);
+      expect(body.entriesChecked).toBeGreaterThan(0);
+      expect(body.errors).toEqual([]);
     });
 
-    it('should detect tampered WAL (I5)', async () => {
+    it('should detect tampered WAL and return DENY (I5)', async () => {
       // Append second entry
       const tools = runtime.getTools();
       const walAppend = tools.find(t => t.name === 'abs_wal_append')!;
@@ -108,12 +135,15 @@ describe('Antigravity Runtime Pack', () => {
       lines[0] = JSON.stringify(tamperedEntry);
       fs.writeFileSync(walPath, lines.join('\n') + '\n');
 
-      // Verify should fail
+      // Verify should fail with DENY
       const walVerify = tools.find(t => t.name === 'abs_wal_verify')!;
-      const result = await walVerify.handler({}, ctx) as any;
+      const formatted = await walVerify.handler({}, ctx) as string;
+      const { header, body } = parseABSResponse(formatted);
       
-      expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThan(0);
+      // Check governance header shows DENY
+      expect(header.abs.verdict).toBe('DENY');
+      expect(header.abs.risk_score).toBe(100);
+      expect(body.blocked).toBe(true);
 
       // Restore WAL for remaining tests
       fs.unlinkSync(walPath);
@@ -122,47 +152,61 @@ describe('Antigravity Runtime Pack', () => {
   });
 
   describe('Heartbeat (Invariant I4)', () => {
-    it('should return healthy status', async () => {
+    it('should return healthy status with governance header', async () => {
       const tools = runtime.getTools();
       const heartbeat = tools.find(t => t.name === 'abs_runtime_heartbeat')!;
 
-      const result = await heartbeat.handler({}, ctx) as any;
+      const formatted = await heartbeat.handler({}, ctx) as string;
+      const { header, body } = parseABSResponse(formatted);
       
-      expect(result.healthy).toBe(true);
-      expect(result.lastCheck).toBeDefined();
-      expect(result.metrics).toBeDefined();
+      // Check governance header
+      expect(header.abs.verdict).toBe('ALLOW');
+      expect(header.abs.risk_score).toBe(0);
+      
+      // Check body
+      expect(body.healthy).toBe(true);
+      expect(body.lastCheck).toBeDefined();
     });
 
-    it('should toggle safe mode (kill switch)', async () => {
+    it('should toggle safe mode and return SAFE_MODE verdict', async () => {
       const tools = runtime.getTools();
       const safeMode = tools.find(t => t.name === 'abs_runtime_safe_mode')!;
 
       // Enable safe mode
-      const enableResult = await safeMode.handler({ enabled: true }, ctx) as any;
-      expect(enableResult.success).toBe(true);
-      expect(enableResult.safeMode).toBe(true);
+      const enableFormatted = await safeMode.handler({ enabled: true }, ctx) as string;
+      const { header: enableHeader } = parseABSResponse(enableFormatted);
+      expect(enableHeader.abs.verdict).toBe('SAFE_MODE');
+      expect(enableHeader.abs.mode).toBe('safe_mode');
 
-      // Check heartbeat reports degraded
+      // Check heartbeat reports SAFE_MODE
       const heartbeat = tools.find(t => t.name === 'abs_runtime_heartbeat')!;
-      const heartbeatResult = await heartbeat.handler({}, ctx) as any;
-      expect(heartbeatResult.healthy).toBe(false);
-      expect(heartbeatResult.message).toContain('Safe mode');
+      const heartbeatFormatted = await heartbeat.handler({}, ctx) as string;
+      const { header: hbHeader } = parseABSResponse(heartbeatFormatted);
+      expect(hbHeader.abs.verdict).toBe('SAFE_MODE');
 
       // Disable safe mode
-      const disableResult = await safeMode.handler({ enabled: false }, ctx) as any;
-      expect(disableResult.safeMode).toBe(false);
+      const disableFormatted = await safeMode.handler({ enabled: false }, ctx) as string;
+      const { header: disableHeader, body: disableBody } = parseABSResponse(disableFormatted);
+      expect(disableHeader.abs.verdict).toBe('ALLOW');
+      expect(disableBody.safeMode).toBe(false);
     });
   });
 
   describe('State Materialization', () => {
-    it('should materialize WAL to STATE.md', async () => {
+    it('should materialize WAL to STATE.md with governance header', async () => {
       const tools = runtime.getTools();
       const materialize = tools.find(t => t.name === 'abs_state_materialize')!;
 
-      const result = await materialize.handler({}, ctx) as any;
+      const formatted = await materialize.handler({}, ctx) as string;
+      const { header, body } = parseABSResponse(formatted);
       
-      expect(result.success).toBe(true);
-      expect(result.entriesApplied).toBeGreaterThanOrEqual(0);
+      // Check governance header
+      expect(header.abs.verdict).toBe('ALLOW');
+      expect(header.abs.policy).toBe('antigravity_integrity');
+      
+      // Check body
+      expect(body.success).toBe(true);
+      expect(body.entriesApplied).toBeGreaterThanOrEqual(0);
     });
   });
 });

@@ -3,6 +3,7 @@ import { ABSContext } from '../../core/context';
 import { walWrite, walVerify } from './wal';
 import { runHeartbeat, initHeartbeat, setSafeMode, isSafeMode } from './daemon';
 import { materializeState } from './materializer';
+import { absAllow, absDeny, absSafeMode } from '../../core/governance-header';
 
 export interface AntigravityRuntimeOptions {
   workspacePath?: string;
@@ -18,6 +19,7 @@ export interface AntigravityRuntimeOptions {
  * - Safe mode (kill switch)
  * 
  * All operations go through ABS policy engine.
+ * All responses include ABS Governance Header.
  */
 export class AntigravityRuntime implements RuntimePack {
   name = 'antigravity';
@@ -86,7 +88,18 @@ export class AntigravityRuntime implements RuntimePack {
           },
           required: ['entry'],
         },
-        handler: async (input, ctx) => walWrite(input as any, ctx),
+        handler: async (input, ctx) => {
+          // Check safe mode
+          if (isSafeMode()) {
+            return absSafeMode('Operations halted - safe mode active').formatted;
+          }
+          const result = await walWrite(input as any, ctx);
+          return absAllow(result, {
+            policy: 'antigravity_integrity',
+            walEntry: result.hash?.slice(0, 8),
+            traceId: ctx.correlationId,
+          }).formatted;
+        },
       },
       {
         name: 'abs_wal_verify',
@@ -95,7 +108,22 @@ export class AntigravityRuntime implements RuntimePack {
           type: 'object',
           properties: {},
         },
-        handler: async (_, ctx) => walVerify(ctx),
+        handler: async (_, ctx) => {
+          const result = await walVerify(ctx);
+          if (result.valid) {
+            return absAllow(result, {
+              policy: 'antigravity_integrity',
+              riskScore: 0,
+              traceId: ctx.correlationId,
+            }).formatted;
+          } else {
+            return absDeny('WAL integrity compromised', {
+              policy: 'antigravity_integrity',
+              riskScore: 100,
+              traceId: ctx.correlationId,
+            }).formatted;
+          }
+        },
       },
       {
         name: 'abs_runtime_heartbeat',
@@ -104,7 +132,16 @@ export class AntigravityRuntime implements RuntimePack {
           type: 'object',
           properties: {},
         },
-        handler: async (_, ctx) => runHeartbeat(ctx),
+        handler: async (_, ctx) => {
+          const result = await runHeartbeat(ctx);
+          if (isSafeMode()) {
+            return absSafeMode('Runtime in safe mode').formatted;
+          }
+          return absAllow(result, {
+            riskScore: result.healthy ? 0 : 50,
+            traceId: ctx.correlationId,
+          }).formatted;
+        },
       },
       {
         name: 'abs_runtime_safe_mode',
@@ -116,13 +153,23 @@ export class AntigravityRuntime implements RuntimePack {
           },
           required: ['enabled'],
         },
-        handler: async (input: any) => {
+        handler: async (input: any, ctx) => {
           setSafeMode(input.enabled);
-          return {
+          const newState = isSafeMode();
+          
+          if (newState) {
+            return absSafeMode('Safe mode ENABLED - all operations halted', {
+              traceId: ctx?.correlationId,
+            }).formatted;
+          }
+          
+          return absAllow({
             success: true,
-            safeMode: isSafeMode(),
-            message: input.enabled ? 'Safe mode ENABLED - operations halted' : 'Safe mode disabled',
-          };
+            safeMode: false,
+            message: 'Safe mode disabled - operations resumed',
+          }, {
+            traceId: ctx?.correlationId,
+          }).formatted;
         },
       },
       {
@@ -132,7 +179,17 @@ export class AntigravityRuntime implements RuntimePack {
           type: 'object',
           properties: {},
         },
-        handler: async (_, ctx) => materializeState(ctx),
+        handler: async (_, ctx) => {
+          if (isSafeMode()) {
+            return absSafeMode('Cannot materialize - safe mode active').formatted;
+          }
+          const result = await materializeState(ctx);
+          return absAllow(result, {
+            policy: 'antigravity_integrity',
+            walEntry: result.newContextLock?.slice(0, 8),
+            traceId: ctx.correlationId,
+          }).formatted;
+        },
       },
     ];
   }
