@@ -30,10 +30,10 @@ export default function Home() {
               <Github className="w-4 h-4" /> GitHub
             </a>
             <a
-              href="https://oconnector.tech/abs"
+              href="https://abscore.app/dashboard"
               className="bg-white text-black px-4 py-2 rounded-full hover:bg-zinc-200 transition-colors"
             >
-              Get Enterprise
+              Console
             </a>
           </div>
         </div>
@@ -282,10 +282,10 @@ export default function Home() {
                 Volume-based licensing
               </p>
               <a
-                href="https://oconnector.tech/abs"
+                href="mailto:enterprise@abscore.app"
                 className="block w-full py-3 rounded-lg bg-orange-600 hover:bg-orange-500 transition-colors font-medium text-center"
               >
-                Contact Sales
+                Book Demo
               </a>
             </div>
           </div>
