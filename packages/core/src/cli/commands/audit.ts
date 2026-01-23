@@ -46,4 +46,35 @@ export function registerAuditCommand(program: Command) {
                 process.exit(1);
             }
         });
+
+    // Shim Audit Command
+    // Usage: abs audit --tool node --args "script.js"
+    audit
+        .description('Audit Tools for Integrity Verification & Shim Interception')
+        .option('--tool <name>', 'Tool being intercepted (node, python, etc)')
+        .option('--args <string>', 'Arguments passed to the tool')
+        .action(async (options) => {
+            // If called without options, show help (default behavior usually handles this, but let's be safe)
+            if (!options.tool) {
+                // If it's just 'abs audit' without args, we might want to list audits or show help.
+                // For now, if no tool is provided, we assume it's a verify command or help request.
+                if (program.args.includes('verify')) return; // Let subcommands handle it
+                
+                // Fallback to integrity check default? No, better show help.
+                audit.help();
+                return;
+            }
+
+            // SHIM INTERCEPTION LOGIC
+            console.log(`🛡️  [ABS Audit] Intercepted: ${options.tool} ${options.args || ''}`);
+            
+            // TODO: Here we will integrate with Policy Engine to ALLOW/DENY
+            // For now, we log and ALLOW (exit 0)
+            
+            // Log to WAL (Mock)
+            // await logToWAL(options.tool, options.args, 'ALLOW');
+            
+            process.exit(0);
+        });
+
 }
