@@ -1,20 +1,20 @@
+require "language/node"
+
 class Abs < Formula
   desc "ABS Core Runtime & CLI (Autonomous Business System)"
   homepage "https://abscore.app"
   license "Apache-2.0"
   head "https://github.com/eusheriff/abs-core.git", branch: "main"
 
-  depends_on "node@18" => :build
+  depends_on "node"
 
   def install
-    # Installing dependencies
-    system "npm", "install"
+    # Install dependencies
+    system "npm", "install", *Language::Node.std_npm_install_args(libexec)
     
-    # Building the optimized binary for Apple Silicon (arm64)
-    system "npm", "run", "build:binary", "--workspace=@abs/core"
-
-    # Install the binary
-    bin.install "packages/core/dist/abs" => "abs"
+    # Link the CLI manually since we are using workspaces
+    # Pointing to the pre-compiled dist/cli/index.js
+    bin.install_symlink Dir["#{libexec}/lib/node_modules/@abs/core/packages/core/dist/cli/index.js"].first => "abs"
   end
 
   test do
