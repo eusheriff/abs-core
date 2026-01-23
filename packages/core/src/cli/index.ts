@@ -303,5 +303,13 @@ import { registerPoliciesCommand } from './commands/policies';
 registerPoliciesCommand(program);
 
 
+// -----------------------------------------------------------------------------
+// 8. MCP SERVER (Tool Boundary)
+// -----------------------------------------------------------------------------
+import { registerMcpCommand } from './commands/mcp';
+registerMcpCommand(program);
+
+
+
 
 program.parse();

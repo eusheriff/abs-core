@@ -463,6 +463,107 @@ export async function createMCPServer(db: DatabaseAdapter, config?: ProcessorCon
                 }
             }
         );
+
+        // Tool: abs_secure_exec
+        server.tool(
+            'abs_secure_exec',
+            'Execute a terminal command securely on the host (subject to governance policy).',
+            {
+                command: z.string().describe('Terminal command to execute'),
+                cwd: z.string().optional().describe('Working directory'),
+                reason: z.string().optional().describe('Reason for execution (for audit log)')
+            },
+            async (args) => {
+                const { CODE_SAFETY_POLICIES } = await import('../policies/library/code_safety');
+                const { exec } = await import('child_process');
+                const util = await import('util');
+                const execAsync = util.promisify(exec);
+                
+                // 1. Policy Check
+                const event = {
+                    event_type: 'agent.command',
+                    event_id: crypto.randomUUID(),
+                    timestamp: new Date().toISOString(),
+                    tenant_id: 'default',
+                    payload: {
+                        command: args.command,
+                        cwd: args.cwd,
+                        reason: args.reason
+                    }
+                };
+
+                const mockProposal = {
+                    proposal_id: crypto.randomUUID(),
+                    process_id: 'secure-exec-agent',
+                    current_state: 'EXECUTING',
+                    recommended_action: 'run_command',
+                    action_params: { command: args.command },
+                    explanation: { summary: args.reason || 'Command execution', rationale: '', evidence_refs: [] },
+                    confidence: 1.0,
+                    risk_level: 'medium' as const
+                };
+
+                let finalDecision = 'ALLOW';
+                let denyReason = '';
+
+                try {
+                    for (const policy of CODE_SAFETY_POLICIES) {
+                        const result = policy.evaluate(mockProposal, event);
+                        const decision = typeof result === 'string' ? result : result.decision;
+                        if (decision === 'DENY') {
+                            finalDecision = 'DENY';
+                            denyReason = typeof result === 'object' ? result.reason || policy.name : policy.name;
+                            break;
+                        }
+                    }
+
+                    // Log decision
+                    await db.run(
+                        `INSERT INTO decision_logs (decision_id, event_id, tenant_id, policy_name, decision, timestamp, payload) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                        crypto.randomUUID(), event.event_id, 'default', 'code_safety', finalDecision, event.timestamp, JSON.stringify(event.payload)
+                    );
+
+                    if (finalDecision === 'DENY') {
+                         return {
+                            isError: true,
+                            content: [{
+                                type: 'text',
+                                text: `🚫 Governance Blocked Execution: ${denyReason}`
+                            }]
+                        };
+                    }
+
+                    // 2. Execution (If Allowed)
+                    const { stdout, stderr } = await execAsync(args.command, { 
+                        cwd: args.cwd || process.cwd(),
+                        maxBuffer: 1024 * 1024 * 10 // 10MB buffer
+                    });
+
+                    return {
+                        content: [{
+                            type: 'text',
+                            text: stdout || stderr ? (stdout + (stderr ? `\n[STDERR]\n${stderr}` : '')) : '[No Output]'
+                        }]
+                    };
+
+                } catch (error: any) {
+                    // Log execution failure
+                     await db.run(
+                        `INSERT INTO decision_logs (decision_id, event_id, tenant_id, policy_name, decision, timestamp, payload) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                        crypto.randomUUID(), event.event_id, 'default', 'execution_error', 'ERROR', new Date().toISOString(), JSON.stringify({ error: String(error) })
+                    );
+
+                    return {
+                        isError: true,
+                        content: [{
+                            type: 'text',
+                            text: `❌ Execution Failed: ${error.message}`
+                        }]
+                    };
+                }
+            }
+        );
+
     } else {
         console.error('[ABS MCP] 🔒 Hiding Coding Tools (Enterprise Plan required)');
     }
