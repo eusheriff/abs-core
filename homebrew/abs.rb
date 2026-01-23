@@ -9,13 +9,24 @@ class Abs < Formula
   depends_on "node"
 
   def install
-    # Install dependencies
-    system "npm", "install", *Language::Node.std_npm_install_args(libexec)
-    
-    # Link the CLI manually since we are using workspaces
-    # Pointing to the pre-compiled dist/cli/index.js
-    bin.install_symlink Dir["#{libexec}/lib/node_modules/@abs/core/packages/core/dist/cli/index.js"].first => "abs"
+    # 1. Install dependencies (including devDeps for build)
+    system "npm", "install", *Language::Node.local_npm_install_args
+
+    # 2. Build the project (TypeScript -> JS)
+    system "npm", "run", "build"
+
+    # 3. Clean up dev dependencies to reduce size (Optional, avoiding for now to be safe)
+    # system "npm", "prune", "--production"
+
+    # 4. Copy everything to libexec (Homebrew's private directory for this formula)
+    libexec.install Dir["*"]
+
+    # 5. Symlink the CLI entrypoint
+    # Note: 'local_npm_install_args' keeps the repo structure as is.
+    # So we point to packages/core/dist/cli/index.js
+    bin.install_symlink libexec/"packages/core/dist/cli/index.js" => "abs"
   end
+
 
   test do
     system "#{bin}/abs", "--version"
