@@ -376,5 +376,19 @@
 - **Git**: Alterações enviadas para `main` (commit 8af5785).
 - **Performance**: Binário nativo otimizado para Apple Silicon (fuga de startup JIT).
 - **Troubleshooting**: Usuário alertado sobre necessidade de caminho absoluto para instalação via Brew se fora da raiz do projeto.
+- **Online**: Atualizado para usar URL Raw do GitHub, permitindo instalação sem clonar o repo.
+- **Hotfix (Install)**: Alterada estratégia de distribuição para **JS Mode** (Node.js Runtime) para evitar falha de compilação `tsc/pkg` em máquinas com recursos limitados ou sandboxes restritos.
+- **Hook Global**: Implementado "Shim" em `~/.abs/bin` para interceptar `node`, `npm`, `python3`.
+- **Audit**: Implementado comando `abs audit [--tool] [--args]` para registrar execuções interceptadas pelo shim no WAL.
+- **Node LTS**: Fórmula atualizada para usar Node 20 (LTS) e evitar erros de compilação `better-sqlite3` em runtimes instáveis.
+- **MCP Server**: Implementado servidor MCP (`abs mcp`) com a ferramenta `abs_secure_exec`, permitindo que Agentes (Claude, Cursor) executem comandos de forma segura e auditada.
+- **Security Pivot**: Substituído modelo "Remote Shell" (`secure_exec` genérico) por **Typed Tools** (`abs_npm_audit`, `abs_node_run`, `abs_python_run`) para mitigar riscos de RCE/Injection. `abs_secure_exec` mantido em modo restrito (Legacy).
+
+
+
+
+
+
+
 
 
