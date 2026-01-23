@@ -372,4 +372,9 @@
 - **Build**: Implementado script `build:binary` usando `pkg` (Alvo: `node18-macos-arm64`).
 - **Artifact**: Criada fórmula `homebrew/abs.rb`.
 - **Docs**: Atualizado README com instruções de instalação via Brew.
+- **Web**: Landing Page (`src/app/page.tsx`) atualizada com comando `brew install`.
+- **Git**: Alterações enviadas para `main` (commit 8af5785).
 - **Performance**: Binário nativo otimizado para Apple Silicon (fuga de startup JIT).
+- **Troubleshooting**: Usuário alertado sobre necessidade de caminho absoluto para instalação via Brew se fora da raiz do projeto.
+
+

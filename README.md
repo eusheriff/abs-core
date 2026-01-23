@@ -52,8 +52,9 @@ flowchart LR
 #### Via Homebrew (Recommended for Mac)
  
 ```bash
-brew install --build-from-source ./homebrew/abs.rb
+brew install --build-from-source https://raw.githubusercontent.com/eusheriff/abs-core/main/homebrew/abs.rb
 ```
+
  
 #### Via NPM
  
