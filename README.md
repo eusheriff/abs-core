@@ -48,10 +48,19 @@ flowchart LR
 ## 🚀 Getting Started
 
 ### 1. Install ABS CLI
-
+ 
+#### Via Homebrew (Recommended for Mac)
+ 
+```bash
+brew install --build-from-source ./homebrew/abs.rb
+```
+ 
+#### Via NPM
+ 
 ```bash
 npm install @oconnector/abs-sdk-typescript
 ```
+
 
 ### 2. Configure a Policy (Profile Layer)
 
@@ -92,12 +101,13 @@ When integrated via the VS Code Extension or SDK, ABS blocks dangerous actions:
 
 To maintain security while allowing personalization, ABS uses **Layer Separation** (ADR-005):
 
-| Layer | Owner | Role | Trust Level |
-|-------|-------|------|-------------|
+| **Layer** | **Owner** | **Role** | **Trust Level** |
+|-----------|-----------|----------|-----------------|
 | **Kernel** | ABS | Immutable governance engine | Absolute |
 | **Profile** | User/Org | Global preferences rules | Semi-Trusted |
 | **Workspace** | Project | Project-specific overrides | Untrusted |
 | **Input** | Agent | Runtime prompts/actions | Zero Trust |
+
 
 ---
 

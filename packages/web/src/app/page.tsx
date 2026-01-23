@@ -47,7 +47,9 @@ export default function Home() {
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
           Execution Governance <br /> for AI Agents.
         </h1>
-        ABS Core is a <b>runtime safety layer</b> with <b>Blockchain-backed Integrity</b><br />
+        ABS Core is a <b>runtime safety layer</b> with{" "}
+        <b>Blockchain-backed Integrity</b>
+        <br />
         that prevents LLMs from executing dangerous actions.
         <br className="hidden md:block" />
         Protects Business Agents <b>AND</b> Coding Assistants (Cursor, Copilot)
@@ -56,6 +58,17 @@ export default function Home() {
           <div className="flex items-center gap-0 rounded-lg bg-zinc-900 border border-zinc-800 p-1 pl-4 pr-1">
             <span className="text-zinc-400 font-mono text-sm mr-4">
               $ npm install @oconnector/abs-sdk-typescript
+            </span>
+            <button
+              className="bg-zinc-800 hover:bg-zinc-700 text-white p-2 rounded transition-colors"
+              title="Copy"
+            >
+              <Terminal className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex items-center gap-0 rounded-lg bg-zinc-900 border border-zinc-800 p-1 pl-4 pr-1">
+            <span className="text-zinc-400 font-mono text-sm mr-4">
+              $ brew install --build-from-source ./homebrew/abs.rb
             </span>
             <button
               className="bg-zinc-800 hover:bg-zinc-700 text-white p-2 rounded transition-colors"
@@ -100,7 +113,7 @@ export default function Home() {
                 View Source
               </a>
             </div>
-            
+
             <IdeSupport />
           </div>
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-8 flex flex-col items-center justify-center text-center">
@@ -125,48 +138,50 @@ export default function Home() {
               <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50" />
             </div>
             <span className="ml-2 text-xs text-zinc-500 font-mono">
-              scanner-demo.ts
+              abs-runtime-demo.ts
             </span>
           </div>
           <div className="p-6 font-mono text-sm overflow-x-auto">
             <div className="text-zinc-400">
-              import <span className="text-white">{`{ ABS }`}</span> from{" "}
-              <span className="text-green-400">'@abs/scan'</span>;
+              import <span className="text-white">{`{ guardExecutable }`}</span>{" "}
+              from{" "}
+              <span className="text-green-400">
+                '@oconnector/abs-sdk-typescript'
+              </span>
+              ;
             </div>
             <div className="h-4" />
-            <div className="text-zinc-500">// 1. Initialize local scanner</div>
+            <div className="text-zinc-500">// 1. Intercept Agent Action</div>
             <div className="text-zinc-400">
-              const abs = new <span className="text-orange-400">ABS</span>(
-              {`{ mode: 'scanner' }`});
+              const decision = await{" "}
+              <span className="text-orange-400">abs.check</span>(
+              {`{ intent: 'delete_db' }`});
             </div>
             <div className="h-4" />
             <div className="text-zinc-500">
-              // 2. Log AI interactions (Non-blocking)
+              // 2. Runtime Enforcement (Hard Fail)
             </div>
             <div className="text-purple-400">
-              await <span className="text-blue-400">abs.log</span>({`{`}
+              try <span className="text-white">{`{`}</span>
             </div>
             <div className="text-zinc-300 pl-4">
-              input:{" "}
-              <span className="text-green-400">
-                "Delete production database"
+              <span className="text-blue-400">guardExecutable</span>(decision);
+            </div>
+            <div className="text-zinc-300 pl-4">
+              <span className="text-zinc-500">// Safe to execute...</span>
+            </div>
+            <div className="text-purple-400">
+              {`}`} catch (err) <span className="text-white">{`{`}</span>
+            </div>
+            <div className="text-zinc-300 pl-4">
+              <span className="text-zinc-500">
+                // Blocked: ABSVerdictError: DENY
               </span>
-              ,
             </div>
-            <div className="text-zinc-300 pl-4">
-              output:{" "}
-              <span className="text-green-400">
-                "Executing DELETE schema..."
-              </span>
-              ,
-            </div>
-            <div className="text-zinc-300 pl-4">
-              policy: <span className="text-green-400">"strict-safety"</span>
-            </div>
-            <div className="text-purple-400">{"}"});</div>
+            <div className="text-purple-400">{`}`}</div>
             <div className="h-4" />
             <div className="text-zinc-500">
-              // Output: [ABS Scanner 🛡️] Policy Violation Detected!
+              // Output: 🛡️ Action BLOCKED by Governance Policy
             </div>
           </div>
         </div>
@@ -205,7 +220,9 @@ export default function Home() {
             </div>
             <div className="mt-auto">
               <div className="text-2xl font-bold mb-1">Free</div>
-              <p className="text-xs text-zinc-500 mb-6">Open Source (Apache 2.0)</p>
+              <p className="text-xs text-zinc-500 mb-6">
+                Open Source (Apache 2.0)
+              </p>
               <button className="w-full py-3 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition-colors font-medium">
                 View Documentation
               </button>
@@ -241,7 +258,11 @@ export default function Home() {
                 check={true}
                 highlight
               />
-              <FeatureItem text="Tamper-proof Log Integrity" check={true} highlight />
+              <FeatureItem
+                text="Tamper-proof Log Integrity"
+                check={true}
+                highlight
+              />
               <FeatureItem
                 text="Coding Agent Safeguards 🛡️"
                 check={true}

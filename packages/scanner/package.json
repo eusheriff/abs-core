@@ -19,10 +19,10 @@
     "build": "tsc",
     "prepublishOnly": "npm run build"
   },
-  "dependencies": {},
   "devDependencies": {
-    "typescript": "^5.0.0",
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.0.0",
+    "pkg": "^5.8.1",
+    "typescript": "^5.0.0"
   },
   "license": "Apache-2.0"
 }

@@ -6,14 +6,15 @@
   "license": "Apache-2.0",
   "main": "dist/index.js",
   "bin": {
-    "abs": "dist/cli/abs.js"
+    "abs": "dist/cli/index.js"
   },
   "scripts": {
     "build": "NODE_OPTIONS='--max-old-space-size=8192' tsc",
     "start": "tsx src/api/server.ts",
     "dev": "tsx watch src/api/server.ts",
     "mcp": "tsx src/mcp/server.ts",
-    "abs": "tsx src/cli/abs.ts",
+    "abs": "tsx src/cli/index.ts",
+    "build:binary": "npm run build && pkg . --targets node18-macos-arm64 --output dist/abs",
     "test": "vitest run",
     "lint": "eslint src --ext .ts",
     "deploy": "wrangler deploy",
@@ -44,6 +45,7 @@
     "@typescript-eslint/eslint-plugin": "^8.53.1",
     "@typescript-eslint/parser": "^8.53.1",
     "eslint": "^8.57.1",
+    "pkg": "^5.8.1",
     "ts-node": "^10.9.1",
     "wrangler": "^4.59.2"
   }

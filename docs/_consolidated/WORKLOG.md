@@ -361,3 +361,15 @@
 - **Artifacts**:
   - [ADR-008 Final](docs/_consolidated/decisions/ADR-008-public-decision-contract.md): Includes Forensic Identity & Trusted Time Rules.
   - [AUDIT-008](docs/_consolidated/AUDIT-008-REPORT.md): Passed with NIST AU-3 alignment.
+
+## 2026-01-23 — Diagnóstico de Infraestrutura (VPS/API)
+- **Check**: Cloudflare API (`api.abscore.app`) -> HTTP 200 OK.
+- **Check**: Oracle VPS (`163.176.247.143`) -> SSH Open (TCP 22), Ping Blocked.
+- **Status**: Operacional.
+
+## 2026-01-23 — Distribuição Homebrew (Mac Silicon)
+- **Feature**: Suporte a instalação via Homebrew (`brew`).
+- **Build**: Implementado script `build:binary` usando `pkg` (Alvo: `node18-macos-arm64`).
+- **Artifact**: Criada fórmula `homebrew/abs.rb`.
+- **Docs**: Atualizado README com instruções de instalação via Brew.
+- **Performance**: Binário nativo otimizado para Apple Silicon (fuga de startup JIT).
