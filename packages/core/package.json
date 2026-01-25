@@ -1,5 +1,4 @@
-{
-  "name": "@abs/core",
+  "name": "@oconnector/abs-core",
   "version": "2.7.0",
   "description": "ABS Core Runtime",
   "author": "Engº Rodrigo Gomes <dev@oconnector.tech>",
@@ -18,7 +17,8 @@
     "test": "vitest run",
     "lint": "eslint src --ext .ts",
     "deploy": "wrangler deploy",
-    "worker:dev": "wrangler dev"
+    "worker:dev": "wrangler dev",
+    "release": "npm publish --access public"
   },
   "dependencies": {
     "@google/generative-ai": "^0.1.3",

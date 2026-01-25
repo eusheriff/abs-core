@@ -1,5 +1,4 @@
-{
-  "name": "@abs/scan",
+  "name": "@oconnector/abs-scan",
   "version": "0.1.0",
   "description": "ABS Lightweight Scanner SDK",
   "author": "Engº Rodrigo Gomes <dev@oconnector.tech>",
@@ -17,7 +16,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "release": "npm publish --access public"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

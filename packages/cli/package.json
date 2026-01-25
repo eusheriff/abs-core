@@ -1,6 +1,6 @@
 {
-  "name": "@abs/cli",
-  "version": "0.1.0",
+  "name": "@oconnector/abs-cli",
+  "version": "0.1.2",
   "description": "ABS Unified CLI",
   "main": "dist/index.js",
   "bin": {
@@ -14,8 +14,8 @@
   "dependencies": {
     "commander": "^11.0.0",
     "chalk": "^4.1.2",
-    "@abs/core": "*",
-    "@abs/scan": "*"
+    "@oconnector/abs-core": "*",
+    "@oconnector/abs-scan": "*"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

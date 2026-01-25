@@ -59,10 +59,16 @@ brew install --build-from-source https://raw.githubusercontent.com/eusheriff/abs
 ```
 
  
-#### Via NPM
- 
+#### Via NPM (Run once)
+
 ```bash
-npm install @oconnector/abs-sdk-typescript
+npx @oconnector/abs-scan
+```
+
+Or install the CLI globally (no shims):
+
+```bash
+npm install -g @oconnector/abs-cli
 ```
 
 
