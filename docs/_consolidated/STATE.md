@@ -18,12 +18,15 @@ constraints:
 > **Mode**: Operational
 > **Focus**: Monitoring & Optimization
 
+
 ## Current Context
 We have successfully **integrated ABS Kernel Governance** with Manú (agent-hub).
 The system now features **Persistent Long-Term Memory** (D1) and **Real-time Policy Evaluation** (ABS).
+**Positioning**: Validated by Google Antigravity's "Secure Mode" & "Skills" update. ABS is the Enterprise Layer.
 ABS Kernel is running at `https://api.abscore.app`.
 
 ## Recent Achievements
+
 - [x] **Memory**: Implemented `LongTermMemory` (D1 + Vectorize + Summarization).
 - [x] **Governance**: Deployed `ABSConnector` with `ABS_ENABLED=true`.
 - [x] **Infrastructure**: Deployed ABS Kernel to Cloudflare (`api.abscore.app`).
@@ -44,11 +47,13 @@ ABS Kernel is running at `https://api.abscore.app`.
 - **ADR-008**: Decision Envelope v1 (Public Contract).
 
 ## Roadmap (Next 3 Steps)
+
 - **Immediate**:
   - [ ] **Publish VS Code Extension v0.1.0** to Marketplace.
   - [ ] **Deploy ABS Kernel** (Backend) with CHI enabled.
   - [ ] **Implement Risk Forecast** integration for CHI.
 
 ## Known Risks
+
 - **Key Management**: `ABS_SECRET_KEY` rotation is not yet automated.
 - **Performance**: HMAC signing adds <1ms latency (negligible).

@@ -8,7 +8,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "abs": "tsx src/index.js"
+    "abs": "tsx src/index.js",
+    "release": "npm publish --access public"
   },
   "dependencies": {
     "commander": "^11.0.0",

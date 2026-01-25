@@ -76,3 +76,8 @@ This skill works as a **governance layer** above other skills:
 3. **Use ESCALATE** for high-risk operations
 4. **Enable safe mode** when debugging critical issues
 5. **Verify WAL periodically** to detect tampering
+
+## Security Resources
+
+- **OWASP Top 10 LLM**: [See Knowledge Base](resources/OWASP-TOP-10.md)
+

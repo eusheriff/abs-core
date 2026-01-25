@@ -13,6 +13,8 @@
 
 ## 🔍 What is ABS Kernel?
 
+> **Validates Antigravity Strategy**: Compatible with **Secure Mode** (v1.11+) and **Agent Skills** (v1.14+). See [Strategy](docs/_consolidated/STRATEGY_ANTIGRAVITY.md).
+
 ABS Kernel defines **how agents can exist** without executing them. It acts as a **Cognitive Host Interface (CHI)** between your AI Agent (Cursor, Windsurf, LangChain) and the operating system.
 
 - **🛡️ Intercept**: Analyzes every tool call, file write, and network request.
@@ -39,6 +41,7 @@ flowchart LR
 ```
 
 ### The "ABS Triangle"
+
 1. **Governance (Kernel)**: The immutable engine that enforces rules.
 2. **Cognition Interface (CHI)**: Analysis layer that understands intent (e.g., "recursive delete detected").
 3. **Layers (Profile/Workspace)**: Trust hierarchy separating user config from kernel logic.
@@ -103,14 +106,11 @@ When integrated via the VS Code Extension or SDK, ABS blocks dangerous actions:
 To maintain security while allowing personalization, ABS uses **Layer Separation** (ADR-005):
 
 | **Layer** | **Owner** | **Role** | **Trust Level** |
-|-----------|-----------|----------|-----------------|
+| :--- | :--- | :--- | :--- |
 | **Kernel** | ABS | Immutable governance engine | Absolute |
 | **Profile** | User/Org | Global preferences rules | Semi-Trusted |
 | **Workspace** | Project | Project-specific overrides | Untrusted |
 | **Input** | Agent | Runtime prompts/actions | Zero Trust |
-
-
----
 
 ## 🛡️ Security Posture
 

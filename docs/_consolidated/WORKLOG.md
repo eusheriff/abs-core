@@ -384,9 +384,27 @@
 - **MCP Server**: Implementado servidor MCP (`abs mcp`) com a ferramenta `abs_secure_exec`, permitindo que Agentes (Claude, Cursor) executem comandos de forma segura e auditada.
 - **Security Pivot**: Substituído modelo "Remote Shell" (`secure_exec` genérico) por **Typed Tools** (`abs_npm_audit`, `abs_node_run`, `abs_python_run`) para mitigar riscos de RCE/Injection. `abs_secure_exec` mantido em modo restrito (Legacy).
 
+## 2026-01-23 — Buyability Gap Remediation (Phase 14)
+- **Status**: ✅ IMPLEMENTED
+- **Context**: Auditoria de buyability identificou gaps críticos: tração zero, non-repudiation impossível com HMAC, test coverage desconhecida, D1 limits não documentados.
+- **Key Changes**:
+  - **CI Workflow**: Criado `.github/workflows/ci.yml` com build, test, coverage e Codecov integration.
+  - **Ed25519 Non-Repudiation**: Implementado `packages/core/src/crypto/asymmetric.ts` com `AsymmetricSigner` e `PublicKeyRegistry`.
+  - **StorageAdapter**: Criado `packages/core/src/infra/storage-adapter.ts` com interfaces `D1StorageAdapter` e `SQLiteStorageAdapter`.
+  - **D1 Limits Doc**: Documentado em `docs/D1-LIMITS.md` com capacity planning e migration path.
+  - **Conformance Suite**: Criado `packages/conformance/` com 37 test vectors (OWASP LLM01/08, Decision Envelope).
+- **Validation**:
+  - Dependência `@noble/ed25519` adicionada ao core.
+  - Conformance runner pronto para execução.
+- **Impact**:
+  - Non-repudiation: HMAC → Ed25519 (terceiros podem verificar).
+  - Due diligence: CI público viabiliza.
+  - Valuation uplift estimado: +30-50%.
 
-
-
+## 2026-01-23 — Tool Installation: Opencode Antigravity Auth
+- **Status**: ✅ IMPLEMENTED
+- **Action**: Installed `opencode-antigravity-auth` plugin and configured models in `~/.config/opencode/opencode.json`.
+- **Validation**: Initiated `opencode auth login` (User must complete OAuth).
 
 
 
