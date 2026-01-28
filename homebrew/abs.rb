@@ -10,6 +10,9 @@ class Abs < Formula
   depends_on "pnpm"
 
   def install
+    # Increase memory for tsc
+    ENV["NODE_OPTIONS"] = "--max-old-space-size=4096"
+
     # Focus on the core package
     cd "packages/core" do
       # Use pnpm to bypass local npm corruption
