@@ -1,18 +1,21 @@
+{
   "name": "@oconnector/abs-core",
   "version": "2.7.0",
   "description": "ABS Core Runtime",
   "author": "Engº Rodrigo Gomes <dev@oconnector.tech>",
   "license": "Apache-2.0",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
-    "abs": "dist/cli/index.js"
+    "abs": "./dist/cli/index.js"
   },
+  "files": [
+    "dist",
+    "docs"
+  ],
   "scripts": {
-    "build": "NODE_OPTIONS='--max-old-space-size=8192' tsc",
-    "start": "tsx src/api/server.ts",
-    "dev": "tsx watch src/api/server.ts",
-    "mcp": "tsx src/mcp/server.ts",
     "abs": "tsx src/cli/index.ts",
+    "build": "rm -rf dist && tsc",
     "build:binary": "npm run build && pkg . --targets node18-macos-arm64 --output dist/abs",
     "test": "vitest run",
     "lint": "eslint src --ext .ts",
@@ -48,6 +51,8 @@
     "eslint": "^8.57.1",
     "pkg": "^5.8.1",
     "ts-node": "^10.9.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18",
     "wrangler": "^4.59.2"
   }
 }
