@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -81,7 +81,7 @@ jobs:
     if: contains(github.event.pull_request.changed_files, 'auth') || contains(github.event.pull_request.changed_files, 'policy')
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
