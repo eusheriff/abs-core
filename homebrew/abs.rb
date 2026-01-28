@@ -7,16 +7,19 @@ class Abs < Formula
   head "https://github.com/eusheriff/abs-core.git", branch: "main"
 
   depends_on "node"
+  depends_on "pnpm"
 
   def install
     # Focus on the core package
     cd "packages/core" do
-      system "npm", "install", *Language::Node.local_npm_install_args
-      system "npm", "run", "build"
+      # Use pnpm to bypass local npm corruption
+      system "pnpm", "install"
+      system "pnpm", "run", "build"
       
-      # Copy specific artifacts to libexec
+      # Copy artifacts
       libexec.install "dist"
       libexec.install "package.json"
+      # Config loader needs node_modules
       libexec.install "node_modules"
     end
 
