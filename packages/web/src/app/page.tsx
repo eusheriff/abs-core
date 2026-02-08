@@ -7,6 +7,10 @@ import {
   Check,
   X,
   ArrowRight,
+  Brain,
+  Search,
+  FileText,
+  UserCheck,
 } from "lucide-react";
 import IdeSupport from "../components/IdeSupport";
 
@@ -45,15 +49,13 @@ export default function Home() {
           v2.7.0 is now available
         </div>
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
-          Execution Governance <br /> for AI Agents.
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
+          OConnector <br /> Sentinel Cloud.
         </h1>
-        ABS Core is a <b>runtime safety layer</b> with{" "}
-        <b>Blockchain-backed Integrity</b>
-        <br />
-        that prevents LLMs from executing dangerous actions.
-        <br className="hidden md:block" />
-        Protects Business Agents <b>AND</b> Coding Assistants (Cursor, Copilot)
-        from destruction.
+        <p className="max-w-2xl mx-auto text-lg text-zinc-400 mb-12">
+          The <b>OSC Protocol</b>: A 7-Pillar Defense Ecosystem protecting<br />
+          Autonomous Agents from self-destruction.
+        </p>
         <div className="flex flex-col md:flex-row items-center justify-center gap-4">
           <div className="flex items-center gap-0 rounded-lg bg-zinc-900 border border-zinc-800 p-1 pl-4 pr-1">
             <span className="text-zinc-400 font-mono text-sm mr-4">
@@ -87,44 +89,63 @@ export default function Home() {
       </section>
 
       <section className="px-6 max-w-6xl mx-auto mb-32">
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 rounded-xl border border-zinc-800 bg-zinc-900/30 p-8 flex flex-col justify-center">
-            <h3 className="text-2xl font-bold mb-2">Gatekeeper for IDEs</h3>
-            <p className="text-zinc-400 mb-6 max-w-md">
-              Install the official extension to supervise your AI Coding Agents
-              (Cursor, Copilot) directly in the editor.
-            </p>
-            <div className="flex gap-4 mb-8">
-              <a
-                href="https://marketplace.visualstudio.com/items?itemName=oconnector.abs-vscode"
-                className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2"
-              >
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Visual_Studio_Code_1.35_icon.svg"
-                  className="w-5 h-5"
-                  alt="VS Code"
-                />
-                Install Extension
-              </a>
-              <a
-                href="https://github.com/eusheriff/abs-core"
-                className="border border-zinc-700 hover:bg-zinc-800 px-6 py-3 rounded-lg font-medium transition-colors"
-              >
-                View Source
-              </a>
-            </div>
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-bold mb-4">The Hexagon of Defense 🛡️</h2>
+          <p className="text-zinc-400">Complete governance from Intent (CHI) to Proof (Ledger).</p>
+        </div>
 
-            <IdeSupport />
-          </div>
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-8 flex flex-col items-center justify-center text-center">
-            <div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center mb-4">
-              <Zap className="w-8 h-8 text-orange-500" />
-            </div>
-            <h3 className="text-lg font-bold">Low Latency Architecture</h3>
-            <p className="text-sm text-zinc-500 mt-2">
-              Powered by Cloudflare Workers & D1 on the Edge.
-            </p>
-          </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* 1. OSC */}
+          <EcosystemCard 
+            title="OSC" 
+            subtitle="Sentinel Cloud" 
+            desc="The Fortified Territory where agents execute safely (Workers + D1)."
+            icon={<Shield className="w-5 h-5 text-zinc-400" />}
+          />
+          {/* 2. AICCP */}
+          <EcosystemCard 
+            title="AICCP" 
+            subtitle="The Protocol" 
+            desc="Static Laws & RFCs defining permissible behavior."
+            icon={<Lock className="w-5 h-5 text-zinc-400" />}
+          />
+          {/* 3. ABS */}
+          <EcosystemCard 
+            title="ABS" 
+            subtitle="Kernel Enforcer" 
+            desc="Runtime Interceptor compliant with AICCP laws."
+            icon={<Zap className="w-5 h-5 text-orange-500" />}
+            highlight
+          />
+           {/* 4. CHI */}
+           <EcosystemCard 
+            title="CHI" 
+            subtitle="Cognitive Intuition" 
+            desc="Detects malicious intent before rules apply."
+            icon={<Search className="w-5 h-5 text-zinc-400" />}
+          />
+           {/* 5. CORTEX */}
+           <EcosystemCard 
+            title="CORTEX" 
+            subtitle="Memory Unit" 
+            desc="Long-term Jurisprudence & Risk Context."
+            icon={<Brain className="w-5 h-5 text-zinc-400" />}
+          />
+           {/* 6. LEDGER */}
+           <EcosystemCard 
+            title="LEDGER" 
+            subtitle="Immutable Proof" 
+            desc="Cryptographic Hash Chain of every action."
+            icon={<FileText className="w-5 h-5 text-zinc-400" />}
+          />
+           {/* 7. GATEKEEPER */}
+           <EcosystemCard 
+            title="GATEKEEPER" 
+            subtitle="The Judge" 
+            desc="Human-in-the-Loop for ambiguous risk."
+            icon={<UserCheck className="w-5 h-5 text-zinc-400" />}
+            cols={2}
+          />
         </div>
       </section>
 
@@ -259,7 +280,7 @@ export default function Home() {
                 highlight
               />
               <FeatureItem
-                text="Tamper-proof Log Integrity"
+                text="Ledger (Immutable WAL)" # RENAMED
                 check={true}
                 highlight
               />
@@ -303,6 +324,7 @@ export default function Home() {
   );
 }
 
+
 function FeatureItem({
   text,
   check,
@@ -324,4 +346,21 @@ function FeatureItem({
       <span className={check ? "text-zinc-300" : "text-zinc-600"}>{text}</span>
     </div>
   );
+}
+
+function EcosystemCard({ title, subtitle, desc, icon, highlight, cols = 1 }: { title: string, subtitle: string, desc: string, icon: React.ReactNode, highlight?: boolean, cols?: number }) {
+    return (
+        <div className={`p-6 bg-zinc-900 block rounded-xl border ${highlight ? 'border-orange-500/30 bg-orange-500/5' : 'border-zinc-800'} ${cols === 2 ? 'md:col-span-2' : ''}`}>
+            <div className="flex items-center gap-3 mb-3">
+               <div className={`p-2 rounded-lg ${highlight ? 'bg-orange-500/10' : 'bg-zinc-800'}`}>
+                 {icon}
+               </div>
+               <div>
+                  <div className={`text-xs font-bold ${highlight ? 'text-orange-500' : 'text-zinc-500'}`}>{title}</div>
+                  <div className="font-bold text-white">{subtitle}</div>
+               </div>
+            </div>
+            <p className="text-sm text-zinc-400">{desc}</p>
+        </div>
+    )
 }
